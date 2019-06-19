@@ -6,7 +6,11 @@ export const NooBaaSystemModel: K8sKind = {
   apiVersion: 'v1beta1',
   apiGroup: 'noobaa.rook.io',
   plural: 'noobaasystems',
+<<<<<<< HEAD
   abbr: 'NB',
+=======
+  abbr: 'nb',
+>>>>>>> Initial PR for noobaa plugin package
   namespaced: true,
   kind: 'NooBaaSystem',
   id: 'noobaasystem',

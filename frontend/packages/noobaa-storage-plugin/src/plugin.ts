@@ -40,6 +40,17 @@ const plugin: Plugin<ConsumedExtensions> = [
     type: 'Dashboards/Card',
     properties: {
       tab: 'object-service',
+      position: GridPosition.LEFT,
+      loader: () =>
+        import(
+          './components/buckets-card/buckets-card' /* webpackChunkName: "object-service-buckets-card" */
+        ).then((m) => m.BucketsCard),
+    },
+  },
+  {
+    type: 'Dashboards/Card',
+    properties: {
+      tab: 'object-service',
       position: GridPosition.RIGHT,
       loader: () =>
         import(

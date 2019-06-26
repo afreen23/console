@@ -43,6 +43,17 @@ const plugin: Plugin<ConsumedExtensions> = [
       position: GridPosition.LEFT,
       loader: () =>
         import(
+          './components/details-card/details-card' /* webpackChunkName: "object-service-details-card" */
+        ).then((m) => m.DetailsCard),
+    },
+  },
+  {
+    type: 'Dashboards/Card',
+    properties: {
+      tab: 'object-service',
+      position: GridPosition.LEFT,
+      loader: () =>
+        import(
           './components/buckets-card/buckets-card' /* webpackChunkName: "object-service-buckets-card" */
         ).then((m) => m.BucketsCard),
     },

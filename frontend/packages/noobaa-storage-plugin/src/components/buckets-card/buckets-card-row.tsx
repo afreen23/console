@@ -21,16 +21,16 @@ const BucketsItems = ({ count, title, objectsCount }) => {
   );
 };
 
-const BucketsItemStatus = ({ error }) => (
+const BucketsItemStatus = ({ status }) => (
   <div className="co-buckets-card__row-status-item">
-    {_.isNil(error) ? (
+    {_.isNil(status) ? (
       <span className="co-buckets-card__row-subtitle">Unavailable</span>
     ) : (
       <React.Fragment>
         <div>
           <ArrowCircleDownIcon />
         </div>
-        <div className="co-buckets-card__row-status-item-text">{error}</div>
+        <div className="co-buckets-card__row-status-item-text">{status}</div>
       </React.Fragment>
     )}
   </div>
@@ -42,6 +42,6 @@ export const BucketsRow = ({ title, bucketsCount, objects, unhealthy, isLoading 
   ) : (
     <div className="co-buckets-card__row">
       <BucketsItems count={bucketsCount} title={title} objectsCount={objects} />
-      <BucketsItemStatus error={unhealthy} />
+      <BucketsItemStatus status={unhealthy} />
     </div>
   );

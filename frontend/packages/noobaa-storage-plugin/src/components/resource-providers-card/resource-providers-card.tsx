@@ -63,8 +63,11 @@ const ResourceProviders: React.FC<ResourceProvidersCardProps> = ({
     <DashboardCard>
       <DashboardCardHeader>
         <DashboardCardTitle>Resource Providers</DashboardCardTitle>
-        <DashboardCardHelp>help for resource provider</DashboardCardHelp>
-        {/* TODO: replace info text */}
+        <DashboardCardHelp>
+          A list of all MCG (Multi-cloud gateway) resources that are currently in use. Those
+          resources are used to store data according to the buckets policies and can be a
+          cloud-based resource or a bare metal resource.
+        </DashboardCardHelp>
       </DashboardCardHeader>
       <DashboardCardBody>
         <ResourceProviderItems

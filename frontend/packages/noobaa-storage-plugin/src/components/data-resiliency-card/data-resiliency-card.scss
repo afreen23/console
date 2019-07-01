@@ -1,0 +1,32 @@
+.ceph-data-resiliency__title {
+    text-align: center;
+    margin-bottom: 6em;
+  }
+  
+  .ceph-data-resiliency__dashboard-body {
+    height: 15.9em;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+  }
+  
+  .ceph-data-resiliency__utilization-bar {
+    text-align: left;
+  }
+  
+  .ceph-data-resiliency__icon-ok {
+    color: yellowgreen;
+  }
+  
+  .ceph-data-resiliency__icon-error {
+    color: #c9190b;
+  }
+  
+  .ceph-data-resiliency__status-title-ok {
+    margin-bottom: 3.5em;
+  }
+  
+  .ceph-data-resiliency__status-title-error {
+    margin-top: 1.5625em;
+  }

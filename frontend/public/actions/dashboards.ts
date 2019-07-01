@@ -52,7 +52,7 @@ export const watchPrometheusQuery: WatchPrometheusQueryAction = query => (dispat
   const isActive = isWatchActive(getState().dashboards, RESULTS_TYPE.PROMETHEUS, query);
   dispatch(activateWatch(RESULTS_TYPE.PROMETHEUS, query));
   if (!isActive) {
-    const prometheusBaseURL = window.SERVER_FLAGS.prometheusBaseURL;
+    const prometheusBaseURL = 'https://prometheus-k8s-openshift-monitoring.apps.shah.devcluster.openshift.com';
     if (!prometheusBaseURL) {
       dispatch(updateResult(RESULTS_TYPE.PROMETHEUS, query, {}));
     } else {

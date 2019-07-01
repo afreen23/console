@@ -11,7 +11,7 @@ import {
   DashboardItemProps,
   withDashboardResources,
 } from '@console/internal/components/dashboards-page/with-dashboard-resources';
-import { BucketsRow } from './buckets-card-row';
+import { BucketsItem } from './buckets-card-row';
 import './buckets-card.scss';
 
 enum BucketsCardQueries {
@@ -78,8 +78,8 @@ const ObjectDashboardBucketsCard: React.FC<BucketsCardProps> = ({
         <DashboardCardTitle>Buckets</DashboardCardTitle>
       </DashboardCardHeader>
       <DashboardCardBody>
-        <BucketsRow title="ObjectBucket" {...bucketProps} />
-        <BucketsRow title="ObjectBucketClaim" {...bucketClaimProps} />
+        <BucketsItem title="ObjectBucket" {...bucketProps} />
+        <BucketsItem title="ObjectBucketClaim" {...bucketClaimProps} />
       </DashboardCardBody>
     </DashboardCard>
   );

@@ -6,7 +6,7 @@ import { LoadingInline, pluralize } from '@console/internal/components/utils';
 const pluralizeWithKNotation = (i: number, singular: string, plural: string = `${singular}s`) =>
   `${i || 0}K ${i === 1 ? singular : plural}`;
 
-const BucketsItems = ({ count, title, objectsCount }) => {
+const BucketsRow = ({ count, title, objectsCount }) => {
   let oc = Number(objectsCount);
   let substring = 'Unavailable';
   if (!_.isNil(objectsCount)) {
@@ -21,27 +21,27 @@ const BucketsItems = ({ count, title, objectsCount }) => {
   );
 };
 
-const BucketsItemStatus = ({ status }) => (
+const BucketsRowStatus = ({ status }) => (
   <div className="co-buckets-card__row-status-item">
     {_.isNil(status) ? (
       <span className="co-buckets-card__row-subtitle">Unavailable</span>
-    ) : (
+    ) : status > 0 ? (
       <React.Fragment>
         <div>
           <ArrowCircleDownIcon />
         </div>
         <div className="co-buckets-card__row-status-item-text">{status}</div>
       </React.Fragment>
-    )}
+    ) : null}
   </div>
 );
 
-export const BucketsRow = ({ title, bucketsCount, objects, unhealthy, isLoading }) =>
+export const BucketsItem = ({ title, bucketsCount, objects, unhealthy, isLoading }) =>
   isLoading ? (
     <LoadingInline />
   ) : (
     <div className="co-buckets-card__row">
-      <BucketsItems count={bucketsCount} title={title} objectsCount={objects} />
-      <BucketsItemStatus status={unhealthy} />
+      <BucketsRow count={bucketsCount} title={title} objectsCount={objects} />
+      <BucketsRowStatus status={unhealthy} />
     </div>
   );

@@ -14,18 +14,17 @@ import {
   DashboardCardHeader,
   DashboardCardTitle,
 } from '@console/internal/components/dashboard/dashboard-card';
-import { FirehoseResource } from '@console/internal/components/utils';
-
-import { HealthState } from '@console/internal/components/dashboard/health-card/states';
 import {
   DashboardItemProps,
   withDashboardResources,
 } from '@console/internal/components/dashboards-page/with-dashboard-resources';
+import { FirehoseResource } from '@console/internal/components/utils';
+import { HealthState } from '@console/internal/components/dashboard/health-card/states';
 import { K8sResourceKind, referenceForModel } from '@console/internal/module/k8s';
 
+import { getPropsData, filterNooBaaAlerts } from '../../utils';
 import { HealthCardQueries } from '../../queries';
 import { NooBaaSystemModel } from '../../models';
-import { getPropsData, filterNooBaaAlerts } from '../../utils';
 
 const noobaaSystemResource: FirehoseResource = {
   kind: referenceForModel(NooBaaSystemModel),
@@ -56,12 +55,13 @@ const getObjectStorageHealthState = (
   }
   const buckets = getPropsData(bucketsResponse);
   const unhealthyBuckets = getPropsData(unhealthyBucketsResponse);
-  const pools = _.get(poolsResponse, 'data.result[0].value[1]');
-  const unhealthyPools = _.get(unhealthyPoolResponse, 'data.result[0].value[1]');
+  const pools = getPropsData(poolsResponse);
+  const unhealthyPools = getPropsData(unhealthyPoolResponse);
   const result: ObjectStorageHealth = {
     message: 'Object Storage is healthy',
     state: HealthState.OK,
   };
+  
   let value;
   if (_.isEmpty(noobaaSystemData)) {
     result.message = 'Multi cloud gateway is not running';
@@ -130,8 +130,7 @@ const HealthCard: React.FC<DashboardItemProps> = ({
     'result',
   ]);
 
-  const noobaaSystem = _.get(resources, 'noobaa');
-  const noobaaSystemData = _.get(noobaaSystem, 'data') as K8sResourceKind;
+  const noobaaSystemData = _.get(resources.noobaa, 'data', null) as K8sResourceKind;
 
   const objectServiceHealthState = getObjectStorageHealthState(
     bucketsQueryResult,

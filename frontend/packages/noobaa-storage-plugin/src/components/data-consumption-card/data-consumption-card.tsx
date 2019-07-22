@@ -40,6 +40,7 @@ import {
   metricsChartLegendDataMap,
 } from './data-consumption-card-utils';
 import './data-consumption-card.scss';
+import { queryData } from './demo';
 
 const DataConsumersValue = {
   [PROVIDERS]: 'PROVIDERS_',
@@ -71,7 +72,7 @@ const DataConsumptionCard: React.FC<DashboardItemProps> = ({
     return () => stopWatchPrometheusQuery(query);
   }, [watchPrometheus, stopWatchPrometheusQuery, metricType, sortByKpi]);
 
-  const dataConsumptionQueryResult = prometheusResults.getIn([
+  let dataConsumptionQueryResult = prometheusResults.getIn([
     DATA_CONSUMPTION_QUERIES[
       ObjectServiceDashboardQuery[
         DataConsumersValue[metricType] + DataConsumersSortByValue[sortByKpi]
@@ -84,7 +85,10 @@ const DataConsumptionCard: React.FC<DashboardItemProps> = ({
   let maxVal: number;
   let chartData = [];
   let legendData = [];
-  const result = _.get(dataConsumptionQueryResult, 'data.result', []);
+  let result = _.get(dataConsumptionQueryResult, 'data.result', []);
+  if (result.length === 0) {
+    result = _.get(queryData[metricType][sortByKpi], 'data.result', []);
+  }
   if (result.length) {
     let maxData: BarChartData | any = {
       x: '',
@@ -103,17 +107,12 @@ const DataConsumptionCard: React.FC<DashboardItemProps> = ({
   }
 
   const yTickValues = [
-    Number((Math.round(maxVal) / 10).toFixed(1)),
-    Number((Math.round(maxVal) / 5).toFixed(1)),
-    Number(((3 * Math.round(maxVal)) / 10).toFixed(1)),
-    maxVal,
-    Number(((4 * Math.round(maxVal)) / 10).toFixed(1)),
-    Number(((5 * Math.round(maxVal)) / 10).toFixed(1)),
-    Number(((6 * Math.round(maxVal)) / 10).toFixed(1)),
-    Number(((7 * Math.round(maxVal)) / 10).toFixed(1)),
-    Number(((8 * Math.round(maxVal)) / 10).toFixed(1)),
-    Number(((9 * Math.round(maxVal)) / 10).toFixed(1)),
-    Number(Number(maxVal).toFixed(1)),
+    Math.floor(maxVal / 4),
+    Math.floor(maxVal / 2),
+    Math.floor((3 * maxVal) / 4),
+    Math.floor(maxVal),
+    Math.floor((5 * maxVal) / 4),
+    Math.floor((6 * maxVal) / 4),
   ];
 
   return (
@@ -132,7 +131,7 @@ const DataConsumptionCard: React.FC<DashboardItemProps> = ({
           <div>
             <Chart
               themeColor={ChartThemeColor.purple}
-              domain={{ y: [0, maxVal] }}
+              domain={{ y: [0, 1.5 * maxVal] }}
               domainPadding={{ x: [15, 20], y: [10, 10] }}
               padding={{ top: 20, bottom: 40, left: 40, right: 17 }}
               height={280}

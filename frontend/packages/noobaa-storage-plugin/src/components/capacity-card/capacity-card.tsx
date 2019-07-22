@@ -14,6 +14,7 @@ import { Dropdown } from '@console/internal/components/utils';
 import { ObjectCapacityQueries } from '../../queries';
 import { getInstantVectorStats, PrometheusResponse } from './capacity-card-utils';
 import { CapacityCardBody } from './capacity-card-body';
+import { demodata } from './demo';
 
 export const QueryType = {
   Projects: 'PROJECT_QUERY',
@@ -46,8 +47,8 @@ const ObjectDashboardCapacityCard: React.FC<DashboardItemProps> = ({
     ObjectCapacityQueries[QueryType[capacityUsageType]],
     'result',
   ]);
-  const capacityUsageVectorStats = getInstantVectorStats(
-    capacityUsageResults,
+  const capacityUsageVectorStats =  getInstantVectorStats(
+    demodata[capacityUsageType],
     DataToQueryMap[capacityUsageType],
   );
 

@@ -48,8 +48,8 @@ export const SavingsItem: React.FC<SavingsItemProps> = React.memo(
 
     if (isLoading) {
       text = <LoadingInline />;
-    } else if (!_.isNil(savings)) {
-      const savingsPercentage = humanizePercentage((100 * Number(savings)) / Number(logicalSize));
+    } else if (!_.isNil(savings) && logicalSize) {
+      const savingsPercentage = humanizePercentage((100 * Number(savings)) / Number(logicalSize)); // @TODO: logocal size : 0 case check
       const savingsFormattted = humanizeBinaryBytesWithoutB(Number(savings));
       text = (
         <span className="nb-object-data-reduction-card__row-status-item-text">

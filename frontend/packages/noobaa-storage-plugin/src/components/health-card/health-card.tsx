@@ -42,7 +42,7 @@ const getObjectStorageHealthState = (
 ): ObjectStorageHealth => {
   if (
     !(
-      noobaaSystemData &&
+      // noobaaSystemData &&
       bucketsResponse &&
       unhealthyBucketsResponse &&
       poolsResponse &&
@@ -61,7 +61,7 @@ const getObjectStorageHealthState = (
   };
 
   let value;
-  if (_.isEmpty(noobaaSystemData)) {
+  if (_.isEmpty({})) {
     result.message = 'Multi cloud gateway is not running';
     result.state = HealthState.ERROR;
     return result;
@@ -97,13 +97,13 @@ const HealthCard: React.FC<DashboardItemProps> = ({
   stopWatchK8sResource,
   stopWatchPrometheusQuery,
   prometheusResults,
-  resources,
+  // resources,
 }) => {
   React.useEffect(() => {
-    watchK8sResource(noobaaSystemResource);
+    // watchK8sResource(noobaaSystemResource);
     Object.keys(HealthCardQueries).forEach((key) => watchPrometheus(HealthCardQueries[key]));
     return () => {
-      stopWatchK8sResource(noobaaSystemResource);
+      // stopWatchK8sResource(noobaaSystemResource);
       Object.keys(HealthCardQueries).forEach((key) =>
         stopWatchPrometheusQuery(HealthCardQueries[key]),
       );
@@ -128,14 +128,14 @@ const HealthCard: React.FC<DashboardItemProps> = ({
     'result',
   ]);
 
-  const noobaaSystemData = _.get(resources.noobaa, 'data', null) as K8sResourceKind;
+  // const noobaaSystemData = _.get(resources.noobaa, 'data', null) as K8sResourceKind;
 
   const objectServiceHealthState = getObjectStorageHealthState(
     bucketsQueryResult,
     unhealthyBucketsQueryResult,
     poolsQueryResult,
     unhealthyPoolsQueryResult,
-    noobaaSystemData,
+    // noobaaSystemData,
   );
   const alerts = filterNooBaaAlerts(getAlerts(alertsResults));
 

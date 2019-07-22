@@ -103,16 +103,16 @@ const DataConsumptionCard: React.FC<DashboardItemProps> = ({
   }
 
   const yTickValues = [
-    Number((maxVal / 10).toFixed(1)),
-    Number((maxVal / 5).toFixed(1)),
-    Number(((3 * maxVal) / 10).toFixed(1)),
+    Number((Math.round(maxVal) / 10).toFixed(1)),
+    Number((Math.round(maxVal) / 5).toFixed(1)),
+    Number(((3 * Math.round(maxVal)) / 10).toFixed(1)),
     maxVal,
-    Number(((4 * maxVal) / 10).toFixed(1)),
-    Number(((5 * maxVal) / 10).toFixed(1)),
-    Number(((6 * maxVal) / 10).toFixed(1)),
-    Number(((7 * maxVal) / 10).toFixed(1)),
-    Number(((8 * maxVal) / 10).toFixed(1)),
-    Number(((9 * maxVal) / 10).toFixed(1)),
+    Number(((4 * Math.round(maxVal)) / 10).toFixed(1)),
+    Number(((5 * Math.round(maxVal)) / 10).toFixed(1)),
+    Number(((6 * Math.round(maxVal)) / 10).toFixed(1)),
+    Number(((7 * Math.round(maxVal)) / 10).toFixed(1)),
+    Number(((8 * Math.round(maxVal)) / 10).toFixed(1)),
+    Number(((9 * Math.round(maxVal)) / 10).toFixed(1)),
     Number(Number(maxVal).toFixed(1)),
   ];
 

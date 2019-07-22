@@ -89,8 +89,8 @@ const DataResiliency: React.FC<DashboardItemProps> = ({
     'result',
   ]);
 
-  const rebuildProgress = getPropsData(rebuildProgressQueryResult);
-  const eta = getPropsData(etaQueryResult);
+  const rebuildProgress = 23.4 || getPropsData(rebuildProgressQueryResult);
+  const eta = 1244 || getPropsData(etaQueryResult);
 
   const formattedRebuildProgress = rebuildProgress
     ? Number(Number(rebuildProgress).toFixed(1))

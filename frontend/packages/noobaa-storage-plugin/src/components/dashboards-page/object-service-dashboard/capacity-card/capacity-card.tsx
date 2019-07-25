@@ -11,7 +11,7 @@ import {
   withDashboardResources,
 } from '@console/internal/components/dashboards-page/with-dashboard-resources';
 import { Dropdown } from '@console/internal/components/utils';
-import { CapacityUsageQueries } from '../constants/queries';
+import { CapacityUsageQueries } from '../queries';
 import { getInstantVectorStats, PrometheusResponse } from './capacity-card-utils';
 import { CapacityCardBody } from './capacity-card-body';
 

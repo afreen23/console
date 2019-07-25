@@ -9,7 +9,7 @@ import {
   DashboardItemProps,
   withDashboardResources,
 } from '@console/internal/components/dashboards-page/with-dashboard-resources';
-import { BucketsCardQueries } from '../constants/queries';
+import { BucketsCardQueries } from '../queries';
 import { getPropsData } from '../utils';
 import { BucketsItem, BucketsType } from './buckets-card-item';
 import './buckets-card.scss';

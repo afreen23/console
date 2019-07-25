@@ -23,8 +23,6 @@ const getInfrastructurePlatform = (infrastructure: K8sResourceKind): string =>
 const getCephVersion = (cephCluster: K8sResourceKind): string =>
   _.get(cephCluster, 'spec.cephVersion.image');
 
-const NOOBAA_SYSTEM_NAME_QUERY = 'NooBaa_system_name';
-
 const cephClusterResource: FirehoseResource = {
   kind: referenceForModel(CephClusterModel),
   namespaced: true,
@@ -53,7 +51,7 @@ export const ObjectServiceDetailsCard: React.FC<DashboardItemProps> = ({
   React.useEffect(() => {
     watchK8sResource(cephClusterResource);
     watchK8sResource(infrastructureResource);
-    watchPrometheus(NOOBAA_SYSTEM_NAME_QUERY);
+    watchPrometheus(DetailsCardQueries.NOOBAA_SYSTEM_NAME_QUERY);
     return () => {
       stopWatchK8sResource(cephClusterResource);
       stopWatchK8sResource(infrastructureResource);
@@ -66,7 +64,7 @@ export const ObjectServiceDetailsCard: React.FC<DashboardItemProps> = ({
     'result',
   ]);
 
-  const systemName = _.get(queryResult, 'data.result[0].metric.name');
+  const systemName = _.get(queryResult, 'data.result[0].metric.system_name');
 
   const infrastructure = _.get(resources, 'infrastructure');
   const infrastructureLoaded = _.get(infrastructure, 'loaded', false);

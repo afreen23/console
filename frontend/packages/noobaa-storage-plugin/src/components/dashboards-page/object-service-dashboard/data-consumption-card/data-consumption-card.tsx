@@ -44,7 +44,7 @@ const DataConsumersValue = {
 const DataConsumersSortByValue = {
   [BY_IOPS]: 'BY_IOPS',
   [BY_LOGICAL_USAGE]: 'BY_LOGICAL_USAGE',
-  [BY_PHYSICAL_VS_LOGICAL_USAGE]: 'PHYSICAL_VS_LOGICAL_USAGE',
+  [BY_PHYSICAL_VS_LOGICAL_USAGE]: 'BY_PHYSICAL_VS_LOGICAL_USAGE',
   [BY_EGRESS]: 'BY_EGRESS',
 };
 
@@ -116,7 +116,7 @@ const DataConsumptionCard: React.FC<DashboardItemProps> = ({
         />
       </DashboardCardHeader>
       <DashboardCardBody isLoading={!dataConsumptionQueryResult}>
-        {chartData.length > 0 ? (
+        {chartData.length ? (
           <div>
             <Chart
               themeColor={ChartThemeColor.purple}

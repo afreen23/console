@@ -12,19 +12,11 @@ import {
   withDashboardResources,
 } from '@console/internal/components/dashboards-page/with-dashboard-resources';
 import { PrometheusResponse } from '@console/internal/components/graphs';
+import { ResourceProviderQueries } from '../queries';
+import { getMetric, getValue } from '../utils';
 import { ResourceProvidersBody } from './resource-providers-card-body';
 import { ResourceProvidersItem, ProviderType } from './resource-providers-card-item';
 import './resource-providers-card.scss';
-
-const RESOURCE_PROVIDERS_QUERY = {
-  PROVIDERS_TYPES: ' NooBaa_cloud_types',
-  UNHEALTHY_PROVIDERS_TYPES: 'NooBaa_unhealthy_cloud_types',
-};
-
-const getProviderType = (provider: ProviderPrometheusData): string =>
-  _.get(provider, 'metric.type', null);
-const getProviderCount = (provider: ProviderPrometheusData): number =>
-  Number(_.get(provider, 'value[1]', null));
 
 const filterProviders = (allProviders: ProviderType): string[] => {
   return _.keys(allProviders).filter((provider) => allProviders[provider] > 0);
@@ -35,7 +27,7 @@ const createProvidersList = (data: PrometheusResponse): ProviderType => {
   const providersList: ProviderType = {};
   if (_.isNil(providers)) return null;
   providers.forEach((provider) => {
-    providersList[getProviderType(provider)] = getProviderCount(provider);
+    providersList[getMetric(provider, 'type')] = Number(getValue(provider));
   });
   return providersList;
 };
@@ -46,20 +38,21 @@ const ResourceProviders: React.FC<DashboardItemProps> = ({
   prometheusResults,
 }) => {
   React.useEffect(() => {
-    watchPrometheus(RESOURCE_PROVIDERS_QUERY.PROVIDERS_TYPES);
-    watchPrometheus(RESOURCE_PROVIDERS_QUERY.UNHEALTHY_PROVIDERS_TYPES);
-    return () => {
-      stopWatchPrometheusQuery(RESOURCE_PROVIDERS_QUERY.PROVIDERS_TYPES);
-      stopWatchPrometheusQuery(RESOURCE_PROVIDERS_QUERY.UNHEALTHY_PROVIDERS_TYPES);
-    };
+    Object.keys(ResourceProviderQueries).forEach((key) =>
+      watchPrometheus(ResourceProviderQueries[key]),
+    );
+    return () =>
+      Object.keys(ResourceProviderQueries).forEach((key) =>
+        stopWatchPrometheusQuery(ResourceProviderQueries[key]),
+      );
   }, [watchPrometheus, stopWatchPrometheusQuery]);
 
   const providersTypesQueryResult = prometheusResults.getIn([
-    RESOURCE_PROVIDERS_QUERY.PROVIDERS_TYPES,
+    ResourceProviderQueries.PROVIDERS_TYPES,
     'result',
   ]);
   const unhealthyProvidersTypesQueryResult = prometheusResults.getIn([
-    RESOURCE_PROVIDERS_QUERY.UNHEALTHY_PROVIDERS_TYPES,
+    ResourceProviderQueries.UNHEALTHY_PROVIDERS_TYPES,
     'result',
   ]);
 
@@ -95,11 +88,6 @@ const ResourceProviders: React.FC<DashboardItemProps> = ({
       </DashboardCardBody>
     </DashboardCard>
   );
-};
-
-type ProviderPrometheusData = {
-  metric: { [key: string]: any };
-  value?: [number, string | number];
 };
 
 export const ResourceProvidersCard = withDashboardResources(ResourceProviders);

@@ -11,7 +11,7 @@ import {
   withDashboardResources,
 } from '@console/internal/components/dashboards-page/with-dashboard-resources';
 import { Dropdown } from '@console/internal/components/utils';
-import { ObjectCapacityQueries } from '../../queries';
+import { CapacityUsageQueries } from '../constants/queries';
 import { getInstantVectorStats, PrometheusResponse } from './capacity-card-utils';
 import { CapacityCardBody } from './capacity-card-body';
 
@@ -36,14 +36,14 @@ const ObjectDashboardCapacityCard: React.FC<DashboardItemProps> = ({
   const [capacityUsageType, setCapacityUsageType] = React.useState(CapacityDropDownValues[0]);
 
   React.useEffect(() => {
-    watchPrometheus(ObjectCapacityQueries[QueryType[capacityUsageType]]);
+    watchPrometheus(CapacityUsageQueries[QueryType[capacityUsageType]]);
     return () => {
-      stopWatchPrometheusQuery(ObjectCapacityQueries[QueryType[capacityUsageType]]);
+      stopWatchPrometheusQuery(CapacityUsageQueries[QueryType[capacityUsageType]]);
     };
   }, [watchPrometheus, stopWatchPrometheusQuery, capacityUsageType]);
 
   const capacityUsageResults: PrometheusResponse = prometheusResults.getIn([
-    ObjectCapacityQueries[QueryType[capacityUsageType]],
+    CapacityUsageQueries[QueryType[capacityUsageType]],
     'result',
   ]);
   const capacityUsageVectorStats = getInstantVectorStats(

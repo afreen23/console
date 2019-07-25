@@ -13,8 +13,8 @@ import {
   DashboardItemProps,
   withDashboardResources,
 } from '@console/internal/components/dashboards-page/with-dashboard-resources';
-import { DATA_RESILIENCE_QUERIES } from '../../queries';
-import { getPropsData } from '../../utils';
+import { DataResiliencyQueries } from '../queries';
+import { getPropsData } from '../utils';
 import './data-resiliency-card.scss';
 
 const getFormattedEta = (eta: number): string => {
@@ -71,21 +71,21 @@ const DataResiliency: React.FC<DashboardItemProps> = ({
   prometheusResults,
 }) => {
   React.useEffect(() => {
-    Object.keys(DATA_RESILIENCE_QUERIES).forEach((key) =>
-      watchPrometheus(DATA_RESILIENCE_QUERIES[key]),
+    Object.keys(DataResiliencyQueries).forEach((key) =>
+      watchPrometheus(DataResiliencyQueries[key]),
     );
     return () =>
-      Object.keys(DATA_RESILIENCE_QUERIES).forEach((key) =>
-        stopWatchPrometheusQuery(DATA_RESILIENCE_QUERIES[key]),
+      Object.keys(DataResiliencyQueries).forEach((key) =>
+        stopWatchPrometheusQuery(DataResiliencyQueries[key]),
       );
   }, [watchPrometheus, stopWatchPrometheusQuery]);
 
   const rebuildProgressQueryResult = prometheusResults.getIn([
-    DATA_RESILIENCE_QUERIES.REBUILD_PROGRESS_QUERY,
+    DataResiliencyQueries.REBUILD_PROGRESS_QUERY,
     'result',
   ]);
   const etaQueryResult = prometheusResults.getIn([
-    DATA_RESILIENCE_QUERIES.REBUILD_TIME_QUERY,
+    DataResiliencyQueries.REBUILD_TIME_QUERY,
     'result',
   ]);
 

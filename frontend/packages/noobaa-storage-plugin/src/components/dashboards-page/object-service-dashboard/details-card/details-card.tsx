@@ -14,7 +14,8 @@ import {
 import { FirehoseResource } from '@console/internal/components/utils';
 import { InfrastructureModel } from '@console/internal/models';
 import { referenceForModel, K8sResourceKind } from '@console/internal/module/k8s';
-import { CephClusterModel } from '../../../../ceph-storage-plugin/src/models';
+import { CephClusterModel } from '@console/ceph-storage-plugin/src/models';
+import { DetailsCardQueries } from '../queries';
 
 const getInfrastructurePlatform = (infrastructure: K8sResourceKind): string =>
   _.get(infrastructure, 'status.platform');
@@ -56,11 +57,14 @@ export const ObjectServiceDetailsCard: React.FC<DashboardItemProps> = ({
     return () => {
       stopWatchK8sResource(cephClusterResource);
       stopWatchK8sResource(infrastructureResource);
-      stopWatchPrometheusQuery(NOOBAA_SYSTEM_NAME_QUERY);
+      stopWatchPrometheusQuery(DetailsCardQueries.NOOBAA_SYSTEM_NAME_QUERY);
     };
   }, [watchK8sResource, stopWatchK8sResource, watchPrometheus, stopWatchPrometheusQuery]);
 
-  const queryResult = prometheusResults.getIn([NOOBAA_SYSTEM_NAME_QUERY, 'result']);
+  const queryResult = prometheusResults.getIn([
+    DetailsCardQueries.NOOBAA_SYSTEM_NAME_QUERY,
+    'result',
+  ]);
 
   const systemName = _.get(queryResult, 'data.result[0].metric.name');
 

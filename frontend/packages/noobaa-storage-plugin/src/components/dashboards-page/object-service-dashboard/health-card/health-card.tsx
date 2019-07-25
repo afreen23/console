@@ -20,9 +20,9 @@ import {
 import { FirehoseResource } from '@console/internal/components/utils';
 import { HealthState } from '@console/internal/components/dashboard/health-card/states';
 import { K8sResourceKind, referenceForModel } from '@console/internal/module/k8s';
-import { getPropsData, filterNooBaaAlerts } from '../../utils';
-import { HealthCardQueries } from '../../queries';
-import { NooBaaSystemModel } from '../../models';
+import { getPropsData, filterNooBaaAlerts } from '../utils';
+import { HealthCardQueries } from '../queries';
+import { NooBaaSystemModel } from '../../../../models';
 
 const noobaaSystemResource: FirehoseResource = {
   kind: referenceForModel(NooBaaSystemModel),

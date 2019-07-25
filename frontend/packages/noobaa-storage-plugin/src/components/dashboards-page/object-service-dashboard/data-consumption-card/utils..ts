@@ -3,7 +3,7 @@ import {
   humanizeBinaryBytesWithoutB,
   humanizeDecimalBytes,
 } from '@console/internal/components/utils';
-import { getMetric, getValue, PrometheusMetricResult } from '../../utils';
+import { getMetric, getValue, PrometheusMetricResult } from '../utils';
 import {
   PROVIDERS,
   ACCOUNTS,
@@ -11,7 +11,7 @@ import {
   BY_LOGICAL_USAGE,
   BY_PHYSICAL_VS_LOGICAL_USAGE,
   BY_EGRESS,
-} from '../../constants';
+} from '../constants';
 
 /* Chart Data Handlers */
 

@@ -24,7 +24,7 @@ import {
   humanizeDecimalBytes,
   humanizeBinaryBytesWithoutB,
 } from '@console/internal/components/utils';
-import { DATA_CONSUMPTION_QUERIES, ObjectServiceDashboardQuery } from '../../constants/queries';
+import { DataConsumptionQueries } from '../queries';
 import {
   ACCOUNTS,
   BY_IOPS,
@@ -32,13 +32,9 @@ import {
   BY_PHYSICAL_VS_LOGICAL_USAGE,
   BY_EGRESS,
   PROVIDERS,
-} from '../../constants';
+} from './constants';
 import { DataConsumptionDropdown } from './data-consumption-card-dropdown';
-import {
-  BarChartData,
-  metricsChartDataMap,
-  metricsChartLegendDataMap,
-} from './data-consumption-card-utils';
+import { BarChartData, metricsChartDataMap, metricsChartLegendDataMap } from './utils.';
 import './data-consumption-card.scss';
 
 const DataConsumersValue = {
@@ -62,21 +58,13 @@ const DataConsumptionCard: React.FC<DashboardItemProps> = ({
 
   React.useEffect(() => {
     const query =
-      DATA_CONSUMPTION_QUERIES[
-        ObjectServiceDashboardQuery[
-          DataConsumersValue[metricType] + DataConsumersSortByValue[sortByKpi]
-        ]
-      ];
+      DataConsumptionQueries[DataConsumersValue[metricType] + DataConsumersSortByValue[sortByKpi]];
     watchPrometheus(query);
     return () => stopWatchPrometheusQuery(query);
   }, [watchPrometheus, stopWatchPrometheusQuery, metricType, sortByKpi]);
 
   const dataConsumptionQueryResult = prometheusResults.getIn([
-    DATA_CONSUMPTION_QUERIES[
-      ObjectServiceDashboardQuery[
-        DataConsumersValue[metricType] + DataConsumersSortByValue[sortByKpi]
-      ]
-    ],
+    DataConsumptionQueries[DataConsumersValue[metricType] + DataConsumersSortByValue[sortByKpi]],
     'result',
   ]);
 

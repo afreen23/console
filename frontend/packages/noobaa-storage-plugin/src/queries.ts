@@ -11,8 +11,8 @@ export const ObjectDataReductionQueries = {
 export enum HealthCardQueries {
   BUCKETS_COUNT = 'NooBaa_num_buckets',
   UNHEALTHY_BUCKETS = 'NooBaa_num_unhealthy_buckets',
-  POOLS_COUNT = 'Noobaa_num_pools',
-  UNHEALTHY_POOLS = 'Noobaa_num_unhealthy_pools',
+  POOLS_COUNT = 'NooBaa_num_pools',
+  UNHEALTHY_POOLS = 'NooBaa_num_unhealthy_pools',
 }
 
 export const ObjectCapacityQueries = {

@@ -116,7 +116,7 @@ export const metricsChartDataMap = {
     [BY_LOGICAL_USAGE]: (data) => accountsLogicalUsageChartData(data, 'account'),
   },
   [PROVIDERS]: {
-    [BY_IOPS]: (data) => iopsChartData(data, 'type', 'read_count', 'write_count'),
+    [BY_IOPS]: (data) => iopsChartData(data, 'type', 'read_num', 'write_num'),
     [BY_PHYSICAL_VS_LOGICAL_USAGE]: (data) => providersPhysicalVsLogicalChartData(data),
     [BY_EGRESS]: (data) => providersEgressChartData(data),
   },

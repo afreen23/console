@@ -20,7 +20,7 @@ const TYPES = {
     divisor: 1000,
   },
   binaryBytes: {
-    units: ['B', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB'],
+    units: ['B', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB'],
     space: true,
     divisor: 1024,
   },
@@ -184,6 +184,7 @@ const formatPercentage = (value, options) => {
 export const humanizeBinaryBytesWithoutB = (v, initialUnit, preferredUnit) => humanize(v, 'binaryBytesWithoutB', true, initialUnit, preferredUnit);
 export const humanizeBinaryBytes = (v, initialUnit, preferredUnit) => humanize(v, 'binaryBytes', true, initialUnit, preferredUnit);
 export const humanizeDecimalBytes = (v, initialUnit, preferredUnit) => humanize(v, 'decimalBytes', true, initialUnit, preferredUnit);
+export const humanizeDecimalBytesWithoutB = (v, initialUnit, preferredUnit) => humanize(v, 'decimalBytesWithoutB', true, initialUnit, preferredUnit);
 export const humanizeDecimalBytesPerSec = (v, initialUnit, preferredUnit) => humanize(v, 'decimalBytesPerSec', true, initialUnit, preferredUnit);
 export const humanizeNumber = (v, initialUnit, preferredUnit) => humanize(v, 'numeric', true, initialUnit, preferredUnit);
 export const humanizeSeconds = (v, initialUnit, preferredUnit) => humanize(v, 'seconds', true, initialUnit, preferredUnit);

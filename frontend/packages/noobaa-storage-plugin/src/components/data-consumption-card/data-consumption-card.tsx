@@ -20,8 +20,8 @@ import {
   withDashboardResources,
 } from '@console/internal/components/dashboards-page/with-dashboard-resources';
 import {
-  humanizeDecimalBytes,
-  humanizeBinaryBytesWithoutB,
+  humanizeBinaryBytes,
+  humanizeDecimalBytesWithoutB,
 } from '@console/internal/components/utils';
 import { GraphEmpty } from '@console/internal/components/graphs/graph-empty';
 import { DATA_CONSUMPTION_QUERIES, ObjectServiceDashboardQuery } from '../../constants/queries';
@@ -32,12 +32,14 @@ import {
   BY_PHYSICAL_VS_LOGICAL_USAGE,
   BY_EGRESS,
   PROVIDERS,
+  CHART_LABELS,
 } from '../../constants';
 import { DataConsumptionDropdown } from './data-consumption-card-dropdown';
 import {
   BarChartData,
   metricsChartDataMap,
   metricsChartLegendDataMap,
+  numberInWords,
 } from './data-consumption-card-utils';
 import './data-consumption-card.scss';
 
@@ -84,22 +86,31 @@ const DataConsumptionCard: React.FC<DashboardItemProps> = ({
   let maxVal: number;
   let chartData = [];
   let legendData = [];
+  let suffixLabel = '';
   const result = _.get(dataConsumptionQueryResult, 'data.result', []);
   if (result.length) {
     let maxData: BarChartData | any = {
       x: '',
       y: 0,
       name: '',
+      yOriginal: 0,
+      unit: '',
     };
     chartData = metricsChartDataMap[metricType][sortByKpi](result);
     legendData = metricsChartLegendDataMap[metricType][sortByKpi](chartData);
-    maxData = _.maxBy(chartData.map((data) => _.maxBy(data, 'y')), 'y');
-    maxVal = maxData.y;
-    maxUnit =
-      (sortByKpi === BY_IOPS || sortByKpi === BY_PHYSICAL_VS_LOGICAL_USAGE) &&
-      chartData.length === 2
-        ? humanizeDecimalBytes(maxVal).unit
-        : humanizeBinaryBytesWithoutB(maxVal).unit;
+    maxData = _.maxBy(chartData.map((data) => _.maxBy(data, 'yOriginal')), 'yOriginal');
+    const maxDataV = Number(maxData.yOriginal);
+    const maxDataVStr = maxDataV.toFixed(1);
+    let maxDataH = humanizeBinaryBytes(maxDataVStr);
+    suffixLabel = maxDataH.unit;
+    if (sortByKpi === BY_IOPS) {
+      suffixLabel = numberInWords(maxDataV);
+      maxDataH = humanizeDecimalBytesWithoutB(maxDataVStr);
+    }
+    // if suffixLabel is a non-empty string, show it in expected form
+    if (suffixLabel) suffixLabel = `(in ${suffixLabel})`;
+    maxVal = Number(maxDataH.value);
+    maxUnit = maxDataH.unit;
   }
 
   const yTickValues = [
@@ -130,18 +141,21 @@ const DataConsumptionCard: React.FC<DashboardItemProps> = ({
       <DashboardCardBody isLoading={!dataConsumptionQueryResult}>
         {chartData.length > 0 ? (
           <div>
+            <span className="text-secondary">
+              {CHART_LABELS[sortByKpi]} {suffixLabel}
+            </span>
             <Chart
               themeColor={ChartThemeColor.purple}
               domain={{ y: [0, maxVal] }}
               domainPadding={{ x: [15, 20], y: [10, 10] }}
-              padding={{ top: 20, bottom: 40, left: 40, right: 17 }}
+              padding={{ top: 20, bottom: 40, left: 50, right: 17 }}
               height={280}
             >
               <ChartAxis style={{ tickLabels: { padding: 5, fontSize: 10 } }} />
               <ChartAxis
                 dependentAxis
                 tickValues={yTickValues}
-                tickFormat={(t) => `${t}${maxUnit}`}
+                tickFormat={(t) => `${t} ${maxUnit}`}
                 style={{
                   tickLabels: { padding: 5, fontSize: 8, fontWeight: 500 },
                   grid: { stroke: '#4d525840' },
@@ -158,6 +172,7 @@ const DataConsumptionCard: React.FC<DashboardItemProps> = ({
               data={legendData}
               orientation="horizontal"
               height={40}
+              width={500}
               style={{ labels: { fontSize: 10 } }}
             />
           </div>

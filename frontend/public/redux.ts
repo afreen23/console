@@ -43,7 +43,7 @@ const reducers = combineReducers<RootState>({
   dashboards: dashboardsReducer,
 });
 
-const store = createStore(reducers, {}, composeEnhancers(applyMiddleware(thunk)));
+const store = createStore(reducers,  /* preloadedState, */ {}, composeEnhancers(applyMiddleware(thunk)));
 
 // eslint-disable-next-line no-undef
 if (process.env.NODE_ENV !== 'production') {

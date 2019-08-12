@@ -11,6 +11,7 @@ import {
 } from '@console/plugin-sdk';
 import { GridPosition } from '@console/internal/components/dashboard';
 import { OverviewQuery } from '@console/internal/components/dashboards-page/overview-dashboard/queries';
+import { ClusterServiceVersionModel } from '@console/internal/models';
 import * as models from './models';
 import {
   CAPACITY_USAGE_QUERIES,
@@ -18,7 +19,6 @@ import {
   STORAGE_HEALTH_QUERIES,
 } from './constants/queries';
 import { getCephHealthState } from './components/dashboard-page/storage-dashboard/health-card/utils';
-import { ClusterServiceVersionModel } from '@console/internal/models';
 
 type ConsumedExtensions =
   | ModelFeatureFlag
@@ -62,7 +62,7 @@ const plugin: Plugin<ConsumedExtensions> = [
       path: `/k8s/ns/:ns/${ClusterServiceVersionModel.plural}/:appName/${apiObjectRef}/~new`,
       loader: () =>
         import(
-          './components/ocs-install/ocs-install' /* webpackChunkName: "ceph-ocs-service" */
+          './components/ocs-install/create-ocs-service' /* webpackChunkName: "ceph-ocs-service" */
         ).then((m) => m.CreateOCSService),
     },
   },

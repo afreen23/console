@@ -41,7 +41,7 @@ export const CreateOCSServiceForm: React.FC<CreateOCSServiceFormProps> = React.m
   const [storageClass, setStorageClass] = React.useState('');
   const [createBtnDisabled, setCreateBtnDisabled] = React.useState(true);
   const [selectedNodesCnt, setSelectedNodesCnt] = React.useState(0);
-  let [selectedNodeData, setSelectedNodeData] = React.useState([]);
+  const [selectedNodeData, setSelectedNodeData] = React.useState([]);
 
   const onSelect = (event: React.MouseEvent<HTMLButtonElement>, isSelected: boolean, virtualRowIndex: number, data: Array<any>) => {
     event.preventDefault();

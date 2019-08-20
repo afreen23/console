@@ -14,6 +14,8 @@ import {
 } from '@patternfly/react-table';
 import { tableFilters } from '@console/internal/components/factory/table-filters';
 
+const ocsLabel = "cluster.ocs.openshift.io/openshift-storage";
+
 const getConvertedUnits = (value, initialUnit, preferredUnit) => {
   return (
     humanizeBinaryBytes(_.slice(value, 0, value.length - 2).join(''), initialUnit, preferredUnit)
@@ -55,19 +57,26 @@ const getColumns = () => {
 const getRows = (nodes) => {
   return nodes.map((node) => {
     const roles = getNodeRoles(node).sort();
-    const obj = { cells: [] };
+    const obj = { cells: [] , selected: false, id: node.metadata.name, labels: node.metadata.labels, taints: node.spec.taints };
     obj.cells = [
       {
         title: <ResourceLink kind="Node" name={node.metadata.name} title={node.metadata.uid} />,
+        props: { className: tableColumnClasses[1] },
       },
       {
         title: roles.join(', ') || '-',
+        props: { className: tableColumnClasses[2] },
+
       },
       {
         title: `${_.get(node.status, 'capacity.cpu') || '-'} CPU`,
+        props: { className: tableColumnClasses[3] },
+
       },
       {
         title: `${getConvertedUnits(_.get(node.status, 'allocatable.memory'), 'KiB', 'GiB')}`,
+        props: { className: tableColumnClasses[4] },
+
       },
     ];
     return obj;
@@ -102,6 +111,12 @@ const getFilteredRows = (_filters, rowFilters, objects) => {
   return filteredObjects;
 };
 
+const getPreSelectedNodes = (nodes) => {
+  nodes.forEach((node) => {
+      node.selected = _.get(node, `labels['${ocsLabel}']`) !== undefined;
+  });
+};
+
 const stateToProps = ({UI}, {
   data = [],
   filters = {},
@@ -117,22 +132,36 @@ const stateToProps = ({UI}, {
 
 const SelectableTable = (props) => {
   const columns = getColumns();
-  const myrows = getRows(props.data);
-  const [rows, setRows] = React.useState(myrows);
+  const [rows, setRows] = React.useState([]);
   const [sortBy, setSortBy] = React.useState<ISortBy>({ index: 0, direction: 'asc' });
 
   React.useEffect(() => {
-    const myrow = getRows(props.data);
-    setRows(myrow);
+    // pre-selection of nodes
+    if(props.loaded && !rows.length) {
+      const preRows = getRows(props.data);
+      getPreSelectedNodes(preRows);
+      setRows(preRows);
+    }
+    // for getting nodes
+    else {
+      const newRows = getRows(props.data);
+      rows.forEach(row => {
+         if(row.selected) {
+           const index = newRows.findIndex(r => r.id === row.id);
+           newRows[index].selected = true;
+         }
+       })
+     setRows(newRows);
+    }
   }, [props.data]);
 
   const onSort = (e, index, direction) => {
     e.preventDefault();
     const sortedRows = rows.sort((a, b) =>
-      a[index] < b[index] ? -1 : a[index] > b[index] ? 1 : 0,
+      a.id < b.id ? -1 : a.id > b.id? 1 : 0,
     );
-    setSortBy({ index, direction });
     setRows(direction === SortByDirection.asc ? sortedRows : sortedRows.reverse());
+    setSortBy({ index, direction });
   };
 
   const onSelect = (event, isSelected, rowId) => {
@@ -147,7 +176,10 @@ const SelectableTable = (props) => {
       newrows[rowId].selected = isSelected;
     }
     setRows(newrows);
+    // setIsNodesSelected(isSelected);
   };
+
+  console.log("PROPS",props);
 
   return (
     <Table onSelect={onSelect} cells={columns} rows={rows} sortBy={sortBy} onSort={onSort}>

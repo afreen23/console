@@ -66,10 +66,8 @@ export const CreateOCSServiceForm: React.FC<CreateOCSServiceFormProps> = (props)
           <p className="co-legend co-required ceph-ocs-desc__legend">
             Select at least 3 nodes you wish to use.
           </p>
-          <ListPage
-            kind={NodeModel.kind}
-            showTitle={false}
-            ListComponent={NodeList} />
+          <ListPage kind={NodeModel.kind} showTitle={false}
+            ListComponent={(props) => <NodeList {...props} abc="2"/>} />
           <p className="help-block" id="nodes-selected">
             {selectedNodesCnt} node(s) selected
           </p>

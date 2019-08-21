@@ -15,6 +15,8 @@ import { StorageClassDropdown } from '@console/internal/components/utils/storage
 import { Tooltip } from '@console/internal/components/utils/tooltip';
 import { NodeList } from './table-component';
 
+export const MyContext = React.createContext({});
+
 export const CreateOCSServiceForm: React.FC<CreateOCSServiceFormProps> = (props) => {
   const title = 'Create New OCS Service';
   const dropdownUnits = {
@@ -28,11 +30,12 @@ export const CreateOCSServiceForm: React.FC<CreateOCSServiceFormProps> = (props)
   const [storageClass, setStorageClass] = React.useState('');
   const [createBtnDisabled, setCreateBtnDisabled] = React.useState(true);
   const [selectedNodesCnt, setSelectedNodesCnt] = React.useState(0);
-  const [selectedNodeData, setSelectedNodeData] = React.useState([]);
+  const [nodes, setNodes] = React.useState([]);
 
   React.useEffect(() => {
-    selectedNodesCnt >= 3 ? setCreateBtnDisabled(false) : setCreateBtnDisabled(true);
-  }, [selectedNodesCnt]);
+    const selectedData = _.filter(nodes, 'selected');
+    selectedData.length >= 3 ? setCreateBtnDisabled(false) : setCreateBtnDisabled(true);
+  }, [nodes]);
 
   const handleRequestSizeInputChange = obj => {
     setRequestSizeUnit(obj.unit);
@@ -66,10 +69,12 @@ export const CreateOCSServiceForm: React.FC<CreateOCSServiceFormProps> = (props)
           <p className="co-legend co-required ceph-ocs-desc__legend">
             Select at least 3 nodes you wish to use.
           </p>
+          <MyContext.Provider value={{nodesHandler: setNodes}}>
           <ListPage kind={NodeModel.kind} showTitle={false}
-            ListComponent={(props) => <NodeList {...props} abc="2"/>} />
+            ListComponent={NodeList}/>
+          </MyContext.Provider>
           <p className="help-block" id="nodes-selected">
-            {selectedNodesCnt} node(s) selected
+            {nodes.length} node(s) selected
           </p>
         </div>
         <h4>OCS Service Capacity</h4>

@@ -13,6 +13,7 @@ import {
   SortByDirection,
 } from '@patternfly/react-table';
 import { tableFilters } from '@console/internal/components/factory/table-filters';
+import { MyContext } from './create-form';
 
 const ocsLabel = "cluster.ocs.openshift.io/openshift-storage";
 
@@ -130,30 +131,34 @@ const stateToProps = ({UI}, {
   };
 };
 
-const SelectableTable = (props) => {
+const SelectableTable = ({data, context, loaded}) => {
   const columns = getColumns();
   const [rows, setRows] = React.useState([]);
   const [sortBy, setSortBy] = React.useState<ISortBy>({ index: 0, direction: 'asc' });
 
-  React.useEffect(() => {
+  console.log("CONTEXT",context);
+    React.useEffect(() => {
     // pre-selection of nodes
-    if(props.loaded && !rows.length) {
-      const preRows = getRows(props.data);
+    if(loaded && !rows.length) {
+      const preRows = getRows(data);
       getPreSelectedNodes(preRows);
       setRows(preRows);
     }
     // for getting nodes
-    else {
-      const newRows = getRows(props.data);
-      rows.forEach(row => {
-         if(row.selected) {
-           const index = newRows.findIndex(r => r.id === row.id);
-           newRows[index].selected = true;
-         }
-       })
+    else  {
+      const newRows = getRows(data);
+      if(data.length) {
+        rows.forEach(row => {
+          if(row.selected) {
+            const index = newRows.findIndex(r => r.id === row.id);
+            newRows[index].selected = true;
+          }
+        })
+      }
      setRows(newRows);
     }
-  }, [props.data]);
+    context.nodesHandler(rows);
+  }, [data]);
 
   const onSort = (e, index, direction) => {
     e.preventDefault();
@@ -175,11 +180,9 @@ const SelectableTable = (props) => {
       newrows = [...rows];
       newrows[rowId].selected = isSelected;
     }
+    context.nodesHandler(newrows);
     setRows(newrows);
-    // setIsNodesSelected(isSelected);
   };
-
-  console.log("PROPS",props);
 
   return (
     <Table onSelect={onSelect} cells={columns} rows={rows} sortBy={sortBy} onSort={onSort}>
@@ -189,6 +192,14 @@ const SelectableTable = (props) => {
   );
 };
 
-const MyTable = connect(stateToProps)(SelectableTable);
+const MyTable = connect(stateToProps)((SelectableTable));
 
-export const NodeList = (props) => <MyTable {...props} />;
+export const NodeList = (props) => {
+  return <MyContext.Consumer>    
+  {(context) => {
+     return <MyTable {...props} context={context} />
+  }}
+</MyContext.Consumer>
+}
+
+

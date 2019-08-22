@@ -12,10 +12,34 @@ import {
   TableVariant,
 } from '@patternfly/react-table';
 import { tableFilters } from '@console/internal/components/factory/table-filters';
-
+import { Alert, Button, ActionGroup } from '@patternfly/react-core';
+import { ButtonBar } from '@console/internal/components/utils/button-bar';
+import { history } from '@console/internal/components/utils/router';
+import { SelectorInput } from '@console/internal/components/utils/index';
+import {
+  getNodeRoles,
+  K8sResourceKind,
+  K8sKind,
+  k8sCreate,
+  k8sPatch,
+  NodeKind,
+  referenceForModel,
+  Status,
+} from '@console/internal/module/k8s';
+import { NodeModel } from '@console/internal/models';
 import { ResourceLink, humanizeBinaryBytes } from '@console/internal/components/utils/index';
 import { getNodeRoles, K8sResourceKind, NodeKind } from '@console/internal/module/k8s';
 import { OCSContext } from './create-form';
+
+import { Tooltip } from '@console/internal/components/utils/tooltip';
+import { OCSServiceModel } from '../../models';
+import { OCSStorageClassDropdown } from './storage-class-dropdown';
+import {
+  minSelectedNode,
+  labelObj,
+  ocsRequestData,
+  taintObj,
+} from '../../constants/ocs-install';
 
 const ocsLabel = "cluster.ocs.openshift.io/openshift-storage";
 
@@ -57,7 +81,7 @@ const getColumns = () => {
   ];
 };
 
-
+// return an empty array when there is no data
 const getRows = (nodes) => {
   const c = nodes.map((node) => {
     const roles = getNodeRoles(node).sort();
@@ -129,101 +153,189 @@ const stateToProps = ({ UI }, {
   staticFilters = [{}],
   rowFilters = [] }) => {
   const allFilters = staticFilters ? Object.assign({}, filters, ...staticFilters) : filters;
-  let newData = getFilteredRows(allFilters, rowFilters, data);
+  const newData = getFilteredRows(allFilters, rowFilters, data);
   return {
     data: newData,
     unfilteredData: data,
   };
 }
 
-const SelectableTable = ({ data, context, loaded }) => {
+const SelectableTable = ({ data, loaded, ocsProps }) => {
   const columns = getColumns();
-  const [rows, setRows] = React.useState([]);
+  const [nodes, setNodes] = React.useState([]);
   const [sortBy, setSortBy] = React.useState<ISortBy>({ index: 0, direction: 'asc' });
+  const [error, setError] = React.useState('');
+  const [inProgress, setProgress] = React.useState(false);
+  const [storageClass, setStorageClass] = React.useState('');
+  const [selectedNodesCnt, setSelectedNodesCnt] = React.useState(0);
+  // const [nodes, setNodes] = React.useState([]);
 
   React.useEffect(() => {
+    const selectedNode = _.filter(nodes, 'selected').length;
+    setSelectedNodesCnt(selectedNode);
+  }, [nodes]);
+
+  React.useEffect(() => {
+    const formattedNodes = getRows(data);
     // pre-selection of nodes
-    if (loaded && !rows.length) {
-      const preRows = getRows(data);
-      getPreSelectedNodes(preRows);
-      setRows(preRows);
+    if (loaded && !nodes.length) {
+      getPreSelectedNodes(formattedNodes);
+      setNodes(formattedNodes);
     }
     // for getting nodes
-    else {
-      const newRows = getRows(data);
-      if (data.length && newRows.length) {
-        rows.forEach(row => {
-          if (row.selected) {
-            const index = newRows.findIndex(r => r.id === row.id);
-            newRows[index].selected = true;
-          }
-        })
-      }
-      setRows(newRows);
+    else if (formattedNodes.length) {
+      nodes.forEach((row) => {
+        if (row.selected) {
+          const index = formattedNodes.findIndex((r) => r.id === row.id);
+          formattedNodes[index].selected = true;
+        }
+      });
+      setNodes(formattedNodes);
     }
-    context.nodesHandler(rows);
-  }, [data]);
+  }, [data, loaded]);
 
   const onSort = (e, index, direction) => {
     e.preventDefault();
-    const sortedRows = rows.sort((a, b) =>
-      a.id < b.id ? -1 : a.id > b.id ? 1 : 0,
-    );
-    setRows(direction === SortByDirection.asc ? sortedRows : sortedRows.reverse());
+    const sortedNodes = nodes.sort((n1, n2) => (n1.id < n2.id ? -1 : n1.id > n2.id ? 1 : 0));
+    setNodes(direction === SortByDirection.asc ? sortedNodes : sortedNodes.reverse());
     setSortBy({ index, direction });
   };
 
-  const onSelect = (e_, isSelected, rowId) => {
-    let newrows;
+  const onSelect = (e, isSelected, rowId) => {
+    e.stopPropagation();
+    let newnodes;
     if (rowId === -1) {
-      newrows = rows.map((oneRow) => {
+      newnodes = nodes.map((oneRow) => {
         oneRow.selected = isSelected;
         return oneRow;
       });
     } else {
-      newrows = [...rows];
-      newrows[rowId].selected = isSelected;
+      newnodes = [...nodes];
+      newnodes[rowId].selected = isSelected;
     }
-    setRows(newrows);
-    context.nodesHandler(newrows);
+    setNodes(newnodes);
+  };
+
+  const handleStorageClass = (sc) => {
+    setStorageClass(_.get(sc, 'metadata.name'));
+  };
+
+  // labeling the selected nodes
+  const labelNodes = (selectedNode: NodeKind[]) => {
+
+    const labelPath = '/metadata/labels';
+    const labelData = selectedNode.map((node: NodeKind) => {
+      const labels = SelectorInput.arrayify(_.get(node, labelPath.split('/').slice(1)));
+      const lblVal = {...SelectorInput.objectify(labels), ...labelObj }
+      const patch = [
+        {
+          op: labels.length ? 'replace' : 'add',
+          value: lblVal,
+          path: labelPath,
+        },
+      ];
+      patch[0].value = { ...patch[0].value, ...labelObj };
+      return k8sPatch(NodeModel, node, patch);
+    })
+    return labelData;
+};
+
+  // tainting the selected nodes
+  const taintNodes = (selectedNode: NodeKind[]) => {
+    const taintData = selectedNode
+      .filter((node: NodeKind) => {
+        const roles = getNodeRoles(node);
+        // don't taint master nodes as its already tainted
+        return roles.indexOf('master') === -1;
+      })
+      .map((node) => {
+        const taints = node.spec && node.spec.taints
+          ? [...node.spec.taints, taintObj]
+          : [taintObj];
+        const patch = [
+          {
+            value: taints,
+            path: '/spec/taints',
+            op: node.spec.taints ? 'replace' : 'add',
+          },
+        ];
+        return k8sPatch(NodeModel, node, patch);
+      })
+      
+      return taintData;
+  };
+
+  const submit = (event: React.FormEvent<EventTarget>) => {
+    event.preventDefault();
+    setProgress(true);
+    setError('');
+
+    const selectedData = _.filter(nodes, 'selected');
+    const promises = [];
+
+    promises.push(...labelNodes(selectedData));
+    promises.push(...taintNodes(selectedData));
+
+    const obj = _.cloneDeep(ocsRequestData);
+    obj.spec.dataDeviceSet.storageClassName = storageClass;
+    promises.push(k8sCreate(OCSServiceModel, obj));
+
+    Promise.all(promises)
+      .then(() => {
+        history.push(
+          `/k8s/ns/${ocsProps.namespace}/clusterserviceversions/${
+            ocsProps.clusterServiceVersion.metadata.name
+          }/${referenceForModel(OCSServiceModel)}/${obj.metadata.name}`,
+        );
+        setProgress(false);
+        setError('');
+      })
+      .catch((err: Status) => {
+        setProgress(false);
+        setError(err.message);
+      });
   };
 
   return (
-    <Table
-      onSelect={onSelect}
-      cells={columns}
-      rows={rows}
-      sortBy={sortBy}
-      onSort={onSort}
-      variant={TableVariant.compact}
-    >
-      <TableHeader />
-      <TableBody />
-    </Table>
+    <>
+      <Table
+        onSelect={onSelect}
+        cells={columns}
+        rows={nodes}
+        sortBy={sortBy}
+        onSort={onSort}
+        variant={TableVariant.compact}
+      >
+        <TableHeader />
+        <TableBody />
+      </Table>
+      <p className="control-label help-block" id="nodes-selected">
+        {selectedNodesCnt} node(s) selected
+      </p>
+      <div className="form-group">
+        <Tooltip content="The Storage Class will be used to request storage from the underlying infrastructure to create the backing persistent volumes that will be used to provide the OpenShift Container Storage (OCS) service">
+          <OCSStorageClassDropdown
+            onChange={handleStorageClass}
+            id="storageclass-dropdown"
+            required={false}
+            name="storageClass"
+          />
+        </Tooltip>
+      </div>
+      <ButtonBar errorMessage={error} inProgress={inProgress}>
+        <ActionGroup className="pf-c-form">
+          <Button type="button" variant="primary" onClick={submit} isDisabled={selectedNodesCnt < minSelectedNode}>
+            Create
+          </Button>
+          <Button type="button" variant="secondary" onClick={history.goBack}>
+            Cancel
+          </Button>
+        </ActionGroup>
+      </ButtonBar>
+    </>
   );
 };
 
-const MyTable = connect(stateToProps)((SelectableTable));
+export const MyTable = connect(stateToProps)(SelectableTable);
 
-export const NodeList = (props) => {
-  return <OCSContext.Consumer>
-    {(context) => {
-      return <MyTable {...props} context={context} />
-    }}
-  </OCSContext.Consumer>
-};
-
-type NodeListProps = {
-  data: NodeKind[];
-  loaded: boolean;
-};
-
-type CustomNodeTableProps = {
-  context: ContextType;
-  data: NodeKind[];
-  loaded: boolean;
-};
-
-type ContextType = {
-  nodesHandler: (value: any[] | ((prevVar: any[]) => any[])) => void
-};
+// export const NodeList = (props) => <MyTable {...props} />;

@@ -61,24 +61,28 @@ const DataConsumptionCard: React.FC<DashboardItemProps> = ({
   const [sortByKpi, setsortByKpi] = React.useState(BY_IOPS);
 
   React.useEffect(() => {
-    const query =
+    const queriesObject =
       DATA_CONSUMPTION_QUERIES[
         ObjectServiceDashboardQuery[
           DataConsumersValue[metricType] + DataConsumersSortByValue[sortByKpi]
         ]
       ];
-    watchPrometheus(query);
-    return () => stopWatchPrometheusQuery(query);
+    const keys = Object.keys(queriesObject);
+    keys.forEach((key) => watchPrometheus(queriesObject[key]));
+    return () => keys.forEach((key) => stopWatchPrometheusQuery(queriesObject[key]));
   }, [watchPrometheus, stopWatchPrometheusQuery, metricType, sortByKpi]);
 
-  const dataConsumptionQueryResult = prometheusResults.getIn([
+  const queriesObject =
     DATA_CONSUMPTION_QUERIES[
       ObjectServiceDashboardQuery[
         DataConsumersValue[metricType] + DataConsumersSortByValue[sortByKpi]
       ]
-    ],
-    'result',
-  ]);
+    ];
+  const keys = Object.keys(queriesObject);
+  const dataConsumptionQueryResult = {};
+  keys.forEach((key) => {
+    dataConsumptionQueryResult[key] = prometheusResults.getIn([queriesObject[key], 'result']);
+  });
 
   let maxUnit: string;
   let maxVal: number;

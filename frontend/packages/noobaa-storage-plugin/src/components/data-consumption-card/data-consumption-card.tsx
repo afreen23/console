@@ -19,38 +19,18 @@ import {
   DashboardItemProps,
   withDashboardResources,
 } from '@console/internal/components/dashboards-page/with-dashboard-resources';
-import {
-  humanizeDecimalBytes,
-  humanizeBinaryBytesWithoutB,
-} from '@console/internal/components/utils';
 import { GraphEmpty } from '@console/internal/components/graphs/graph-empty';
-import { DATA_CONSUMPTION_QUERIES, ObjectServiceDashboardQuery } from '../../constants/queries';
-import {
-  ACCOUNTS,
-  BY_IOPS,
-  BY_LOGICAL_USAGE,
-  BY_PHYSICAL_VS_LOGICAL_USAGE,
-  BY_EGRESS,
-  PROVIDERS,
-} from '../../constants';
-import { DataConsumptionDropdown } from './data-consumption-card-dropdown';
+import { PrometheusResponse } from '@console/internal/components/graphs';
+import { BY_IOPS, PROVIDERS } from '../../constants';
 import {
   BarChartData,
-  metricsChartDataMap,
-  metricsChartLegendDataMap,
+  DataConsumersValue,
+  DataConsumersSortByValue,
+  getDataConsumptionChartData,
+  getQueries,
 } from './data-consumption-card-utils';
+import { DataConsumptionDropdown } from './data-consumption-card-dropdown';
 import './data-consumption-card.scss';
-
-const DataConsumersValue = {
-  [PROVIDERS]: 'PROVIDERS_',
-  [ACCOUNTS]: 'ACCOUNTS_',
-};
-const DataConsumersSortByValue = {
-  [BY_IOPS]: 'BY_IOPS',
-  [BY_LOGICAL_USAGE]: 'BY_LOGICAL_USAGE',
-  [BY_PHYSICAL_VS_LOGICAL_USAGE]: 'BY_PHYSICAL_VS_LOGICAL_USAGE',
-  [BY_EGRESS]: 'BY_EGRESS',
-};
 
 const DataConsumptionCard: React.FC<DashboardItemProps> = ({
   watchPrometheus,
@@ -61,60 +41,46 @@ const DataConsumptionCard: React.FC<DashboardItemProps> = ({
   const [sortByKpi, setsortByKpi] = React.useState(BY_IOPS);
 
   React.useEffect(() => {
-    const query =
-      DATA_CONSUMPTION_QUERIES[
-        ObjectServiceDashboardQuery[
-          DataConsumersValue[metricType] + DataConsumersSortByValue[sortByKpi]
-        ]
-      ];
-    watchPrometheus(query);
-    return () => stopWatchPrometheusQuery(query);
+    const { queries, keys } = getQueries(metricType, sortByKpi);
+    keys.forEach((key) => watchPrometheus(queries[key]));
+    return () => keys.forEach((key) => stopWatchPrometheusQuery(queries[key]));
   }, [watchPrometheus, stopWatchPrometheusQuery, metricType, sortByKpi]);
 
-  const dataConsumptionQueryResult = prometheusResults.getIn([
-    DATA_CONSUMPTION_QUERIES[
-      ObjectServiceDashboardQuery[
-        DataConsumersValue[metricType] + DataConsumersSortByValue[sortByKpi]
-      ]
-    ],
-    'result',
-  ]);
+  const { queries, keys } = getQueries(metricType, sortByKpi);
+  const result: { [key: string]: PrometheusResponse } = {};
+  keys.forEach((key) => {
+    result[key] = prometheusResults.getIn([queries[key], 'result']);
+  });
+  let maxData: BarChartData | any = {
+    x: '',
+    y: 0,
+  };
+  let maxVal;
+  let yTickValues;
 
-  let maxUnit: string;
-  let maxVal: number;
-  let chartData = [];
-  let legendData = [];
-  const result = _.get(dataConsumptionQueryResult, 'data.result', []);
-  if (result.length) {
-    let maxData: BarChartData | any = {
-      x: '',
-      y: 0,
-      name: '',
-    };
-    chartData = metricsChartDataMap[metricType][sortByKpi](result);
-    legendData = metricsChartLegendDataMap[metricType][sortByKpi](chartData);
+  const isLoading = _.values(result).some(_.isEmpty);
+
+  const metric = metricType === PROVIDERS ? 'type' : 'account';
+  const curentDropdown = DataConsumersValue[metricType] + DataConsumersSortByValue[sortByKpi];
+  const { chartData, legendData } = getDataConsumptionChartData(result, metric, curentDropdown);
+
+  if (!chartData.some(_.isEmpty)) {
     maxData = _.maxBy(chartData.map((data) => _.maxBy(data, 'y')), 'y');
     maxVal = maxData.y;
-    maxUnit =
-      (sortByKpi === BY_IOPS || sortByKpi === BY_PHYSICAL_VS_LOGICAL_USAGE) &&
-      chartData.length === 2
-        ? humanizeDecimalBytes(maxVal).unit
-        : humanizeBinaryBytesWithoutB(maxVal).unit;
+    yTickValues = [
+      Number((maxVal / 10).toFixed(1)),
+      Number((maxVal / 5).toFixed(1)),
+      Number(((3 * maxVal) / 10).toFixed(1)),
+      maxVal,
+      Number(((4 * maxVal) / 10).toFixed(1)),
+      Number(((5 * maxVal) / 10).toFixed(1)),
+      Number(((6 * maxVal) / 10).toFixed(1)),
+      Number(((7 * maxVal) / 10).toFixed(1)),
+      Number(((8 * maxVal) / 10).toFixed(1)),
+      Number(((9 * maxVal) / 10).toFixed(1)),
+      Number(Number(maxVal).toFixed(1)),
+    ];
   }
-
-  const yTickValues = [
-    Number((maxVal / 10).toFixed(1)),
-    Number((maxVal / 5).toFixed(1)),
-    Number(((3 * maxVal) / 10).toFixed(1)),
-    maxVal,
-    Number(((4 * maxVal) / 10).toFixed(1)),
-    Number(((5 * maxVal) / 10).toFixed(1)),
-    Number(((6 * maxVal) / 10).toFixed(1)),
-    Number(((7 * maxVal) / 10).toFixed(1)),
-    Number(((8 * maxVal) / 10).toFixed(1)),
-    Number(((9 * maxVal) / 10).toFixed(1)),
-    Number(Number(maxVal).toFixed(1)),
-  ];
 
   return (
     <DashboardCard>
@@ -127,8 +93,8 @@ const DataConsumptionCard: React.FC<DashboardItemProps> = ({
           setKpi={setsortByKpi}
         />
       </DashboardCardHeader>
-      <DashboardCardBody isLoading={!dataConsumptionQueryResult}>
-        {chartData.length > 0 ? (
+      <DashboardCardBody isLoading={isLoading}>
+        {!_.some(chartData, _.isEmpty) ? (
           <div>
             <Chart
               themeColor={ChartThemeColor.purple}
@@ -141,15 +107,14 @@ const DataConsumptionCard: React.FC<DashboardItemProps> = ({
               <ChartAxis
                 dependentAxis
                 tickValues={yTickValues}
-                tickFormat={(t) => `${t}${maxUnit}`}
                 style={{
                   tickLabels: { padding: 5, fontSize: 8, fontWeight: 500 },
                   grid: { stroke: '#4d525840' },
                 }}
               />
               <ChartGroup offset={11}>
-                {chartData.map((data) => (
-                  <ChartBar key={data.name} data={data} />
+                {chartData.map((data, i) => (
+                  <ChartBar key={i} data={data} /> // eslint-disable-line react/no-array-index-key
                 ))}
               </ChartGroup>
             </Chart>

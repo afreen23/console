@@ -135,9 +135,9 @@ export const metricsChartLegendDataMap = {
 };
 
 export type BarChartData = {
-  x: string;
-  y: number;
-  name: string;
+  x?: string;
+  y?: number;
+  name?: string;
 };
 
 export type GetBarChartData = (

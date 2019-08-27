@@ -7,6 +7,7 @@ import {
   ChartGroup,
   ChartLegend,
   ChartThemeColor,
+  getLegendX,
 } from '@patternfly/react-charts';
 import { ChartBarIcon } from '@patternfly/react-icons';
 import {
@@ -19,11 +20,15 @@ import {
   DashboardItemProps,
   withDashboardResources,
 } from '@console/internal/components/dashboards-page/with-dashboard-resources';
-import {
-  humanizeDecimalBytes,
-  humanizeBinaryBytesWithoutB,
-} from '@console/internal/components/utils';
+import { getInstantVectorStats } from '@console/internal/components/graphs/utils';
 import { GraphEmpty } from '@console/internal/components/graphs/graph-empty';
+import {
+  Humanize,
+  humanizeBinaryBytes,
+  humanizeDecimalBytes,
+  humanizeNumber,
+} from '@console/internal/components/utils';
+import { PrometheusResponse, DataPoint } from '@console/internal/components/graphs';
 import { DATA_CONSUMPTION_QUERIES, ObjectServiceDashboardQuery } from '../../constants/queries';
 import {
   ACCOUNTS,
@@ -40,6 +45,7 @@ import {
   metricsChartLegendDataMap,
 } from './data-consumption-card-utils';
 import './data-consumption-card.scss';
+import { getMetric, getValue } from '../../utils';
 
 const DataConsumersValue = {
   [PROVIDERS]: 'PROVIDERS_',
@@ -51,6 +57,21 @@ const DataConsumersSortByValue = {
   [BY_PHYSICAL_VS_LOGICAL_USAGE]: 'BY_PHYSICAL_VS_LOGICAL_USAGE',
   [BY_EGRESS]: 'BY_EGRESS',
 };
+export const getGraphInstantVectorStats: GetStats = (response, metric, humanize) => {
+  const result = _.get(response, 'data.result', []);
+  return result.map((r) => {
+    return r.values.map((arr) => ({
+      x: _.get(r, ['metric', metric], ''),
+      y: Number(humanize(arr[1]).value),
+    }));
+  });
+};
+
+type GetStats = (
+  response: PrometheusResponse[],
+  metric?: string,
+  humanize?: Humanize,
+) => DataPoint[];
 
 const DataConsumptionCard: React.FC<DashboardItemProps> = ({
   watchPrometheus,
@@ -68,6 +89,7 @@ const DataConsumptionCard: React.FC<DashboardItemProps> = ({
         ]
       ];
     const keys = Object.keys(queriesObject);
+    keys.pop();
     keys.forEach((key) => watchPrometheus(queriesObject[key]));
     return () => keys.forEach((key) => stopWatchPrometheusQuery(queriesObject[key]));
   }, [watchPrometheus, stopWatchPrometheusQuery, metricType, sortByKpi]);
@@ -79,32 +101,89 @@ const DataConsumptionCard: React.FC<DashboardItemProps> = ({
       ]
     ];
   const keys = Object.keys(queriesObject);
-  const dataConsumptionQueryResult = {};
-  keys.forEach((key) => {
-    dataConsumptionQueryResult[key] = prometheusResults.getIn([queriesObject[key], 'result']);
+  keys.pop();
+  const queryResult = keys.map((key) => {
+    const result = prometheusResults.getIn([queriesObject[key], 'result']);
+    return result;
   });
+
+  let newChartData = [];
+  let newLegendData = [];
+  const curentDropdown = DataConsumersValue[metricType] + DataConsumersSortByValue[sortByKpi];
+  switch (curentDropdown) {
+    case 'ACCOUNTS_BY_IOPS':
+    case 'PROVIDERS_BY_IOPS':
+      newChartData = [
+        getGraphInstantVectorStats(queryResult[0], queriesObject.type, humanizeNumber),
+        getGraphInstantVectorStats(queryResult[1], queriesObject.type, humanizeNumber),
+      ];
+      newLegendData = [
+        { name: `Total Reads ${humanizeNumber(getValue(queryResult[2])).string}` },
+        { name: `Total Writes ${humanizeNumber(getValue(queryResult[3])).string}` },
+      ];
+      break;
+    case 'ACCOUNTS_BY_LOGICAL_USAGE':
+      newChartData = [
+        getGraphInstantVectorStats(queryResult[0], queriesObject.type, humanizeBinaryBytes),
+      ];
+      newLegendData = [
+        {
+          name: `Total Logical Used Capacity ${
+            humanizeBinaryBytes(getValue(queryResult[1])).string
+          }`,
+        },
+      ];
+      break;
+    case 'PROVIDERS_BY_PHYSICAL_VS_LOGICAL_USAGE':
+      newChartData = [
+        getGraphInstantVectorStats(queryResult[0], queriesObject.type, humanizeBinaryBytes),
+        getGraphInstantVectorStats(queryResult[1], queriesObject.type, humanizeBinaryBytes),
+      ];
+      newLegendData = [
+        {
+          name: `Total Logical Used Capacity ${
+            humanizeBinaryBytes(getValue(queryResult[2])).string
+          }`,
+        },
+        {
+          name: `Total Physical Used Capacity ${
+            humanizeBinaryBytes(getValue(queryResult[3])).string
+          }`,
+        },
+      ];
+      break;
+    case 'PROVIDERS_BY_EGRESS':
+      newChartData = [
+        getGraphInstantVectorStats(queryResult[0], queriesObject.type, humanizeBinaryBytes),
+      ];
+      newLegendData = newChartData.map((dataPoint) => ({
+        name: `${dataPoint.x} ${humanizeBinaryBytes(dataPoint.y)}`,
+      }));
+      break;
+    default:
+  }
 
   let maxUnit: string;
   let maxVal: number;
   let chartData = [];
   let legendData = [];
-  const result = _.get(dataConsumptionQueryResult, 'data.result', []);
-  if (result.length) {
-    let maxData: BarChartData | any = {
-      x: '',
-      y: 0,
-      name: '',
-    };
-    chartData = metricsChartDataMap[metricType][sortByKpi](result);
-    legendData = metricsChartLegendDataMap[metricType][sortByKpi](chartData);
-    maxData = _.maxBy(chartData.map((data) => _.maxBy(data, 'y')), 'y');
-    maxVal = maxData.y;
-    maxUnit =
-      (sortByKpi === BY_IOPS || sortByKpi === BY_PHYSICAL_VS_LOGICAL_USAGE) &&
-      chartData.length === 2
-        ? humanizeDecimalBytes(maxVal).unit
-        : humanizeBinaryBytesWithoutB(maxVal).unit;
-  }
+  // const result = _.get(queryResult, 'data.result', []);
+  // if (result.length) {
+  let maxData: BarChartData | any = {
+    x: '',
+    y: 0,
+    name: '',
+  };
+  chartData = metricsChartDataMap[metricType][sortByKpi](result);
+  legendData = metricsChartLegendDataMap[metricType][sortByKpi](chartData);
+  maxData = _.maxBy(chartData.map((data) => _.maxBy(data, 'y')), 'y');
+  maxVal = maxData.y;
+  maxUnit =
+    (sortByKpi === BY_IOPS || sortByKpi === BY_PHYSICAL_VS_LOGICAL_USAGE) &&
+    chartData.length === 2
+      ? humanizeDecimalBytes(maxVal).unit
+      : humanizeBinaryBytesWithoutB(maxVal).unit;
+  // }
 
   const yTickValues = [
     Number((maxVal / 10).toFixed(1)),
@@ -131,7 +210,7 @@ const DataConsumptionCard: React.FC<DashboardItemProps> = ({
           setKpi={setsortByKpi}
         />
       </DashboardCardHeader>
-      <DashboardCardBody isLoading={!dataConsumptionQueryResult}>
+      <DashboardCardBody isLoading={!queryResult}>
         {chartData.length > 0 ? (
           <div>
             <Chart

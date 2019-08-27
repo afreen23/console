@@ -6,7 +6,7 @@ export enum ObjectServiceDashboardQuery {
   PROVIDERS_BY_EGRESS = 'PROVIDERS_BY_EGRESS',
 }
 
-export const DATA_CONSUMPTION_QUERIES = {
+export const DATA_CONSUMPTION_QUERIES: DataConsumptionQueriesType = {
   [ObjectServiceDashboardQuery.ACCOUNTS_BY_IOPS]: {
     read: 'sort(topk(6,NooBaa_accounts_usage_read_count)))',
     write: 'sort(topk(6,NooBaa_accounts_usage_write_count))',
@@ -32,4 +32,10 @@ export const DATA_CONSUMPTION_QUERIES = {
   [ObjectServiceDashboardQuery.PROVIDERS_BY_EGRESS]: {
     egress: 'NooBaa_providers_bandwidth_read_size + NooBaa_providers_bandwidth_write_size',
   },
+};
+
+export type DataConsumptionQueriesType = {
+  [key: string]: {
+    [key: string]: string;
+  };
 };

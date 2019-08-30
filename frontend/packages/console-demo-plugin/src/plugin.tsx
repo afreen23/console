@@ -1,4 +1,5 @@
 import * as React from 'react';
+import * as _ from 'lodash';
 import {
   Plugin,
   ModelDefinition,
@@ -20,6 +21,8 @@ import {
   DashboardsOverviewQuery,
   DashboardsOverviewUtilizationItem,
   DashboardsOverviewTopConsumerItem,
+  DashboardsOverviewActivity,
+  DashboardsOverviewPrometheusActivity,
 } from '@console/plugin-sdk';
 // TODO(vojtech): internal code needed by plugins should be moved to console-shared package
 import { PodModel, RouteModel, NodeModel } from '@console/internal/models';
@@ -53,7 +56,9 @@ type ConsumedExtensions =
   | DashboardsInventoryItemGroup
   | DashboardsOverviewQuery
   | DashboardsOverviewUtilizationItem
-  | DashboardsOverviewTopConsumerItem;
+  | DashboardsOverviewTopConsumerItem
+  | DashboardsOverviewActivity
+  | DashboardsOverviewPrometheusActivity;
 
 const plugin: Plugin<ConsumedExtensions> = [
   {
@@ -270,6 +275,34 @@ const plugin: Plugin<ConsumedExtensions> = [
       mutator: (data) =>
         data.map((datum) => ({ ...datum, x: (datum.x as string).replace('prometheus-', '') })),
       required: 'TEST_MODEL_FLAG',
+    },
+  },
+  {
+    type: 'Dashboards/Overview/Activity',
+    properties: {
+      k8sResource: {
+        isList: true,
+        kind: NodeModel.kind,
+        prop: 'nodes',
+      },
+      isActivity: (resource) =>
+        _.get(resource, ['metadata', 'labels', 'node-role.kubernetes.io/master']) === '',
+      getTimestamp: (resource) => new Date(resource.metadata.creationTimestamp),
+      loader: () =>
+        import('./dashboards/activity' /* webpackChunkName: "demo-activity" */).then(
+          (m) => m.DemoActivity,
+        ),
+    },
+  },
+  {
+    type: 'Dashboards/Overview/Prometheus/Activity',
+    properties: {
+      queries: ['barQuery'],
+      isActivity: () => true,
+      loader: () =>
+        import('./dashboards/activity' /* webpackChunkName: "demo-prometheus-activity" */).then(
+          (m) => m.DemoPrometheusActivity,
+        ),
     },
   },
 ];

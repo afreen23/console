@@ -1,0 +1,106 @@
+import * as React from 'react';
+import * as _ from 'lodash-es';
+
+import { DashboardCard, DashboardCardBody, DashboardCardHeader, DashboardCardLink, DashboardCardTitle } from '../../dashboard/dashboard-card';
+import { DashboardItemProps, withDashboardResources } from '../with-dashboard-resources';
+import { EventModel } from '../../../models';
+import { FirehoseResource, FirehoseResult } from '../../utils';
+import { EventKind } from '../../../module/k8s';
+import { ActivityBody, RecentEventsBody, OngoingActivityBody } from '../../dashboard/activity-card/activity-body';
+import * as plugins from '../../../plugins';
+import { uniqueResource } from './utils';
+import { PrometheusResponse } from '../../graphs';
+
+const eventsResource: FirehoseResource = {isList: true, kind: EventModel.kind, prop: 'events'};
+
+const RecentEvent = withDashboardResources(({
+  watchK8sResource,
+  stopWatchK8sResource,
+  resources,
+}: DashboardItemProps) => {
+  React.useEffect(() => {
+    watchK8sResource(eventsResource);
+    return () => {
+      stopWatchK8sResource(eventsResource);
+    };
+  }, [watchK8sResource, stopWatchK8sResource]);
+  return <RecentEventsBody events={resources.events as FirehoseResult<EventKind[]>} />;
+});
+
+const OngoingActivity = withDashboardResources(({
+  watchK8sResource,
+  stopWatchK8sResource,
+  resources,
+  watchPrometheus,
+  stopWatchPrometheusQuery,
+  prometheusResults,
+}: DashboardItemProps) => {
+  React.useEffect(() => {
+    const activities = plugins.registry.getDashboardsOverviewActivities();
+    activities.forEach((a, index) => {
+      watchK8sResource(uniqueResource(a.properties.k8sResource, index));
+    });
+    const prometheusActivities = plugins.registry.getDashboardsOverviewPrometheusActivities();
+    prometheusActivities.forEach(a => a.properties.queries.forEach(watchPrometheus));
+    return () => {
+      activities.forEach((a, index) => {
+        stopWatchK8sResource(uniqueResource(a.properties.k8sResource, index));
+      });
+      prometheusActivities.forEach(a => a.properties.queries.forEach(stopWatchPrometheusQuery));
+    };
+  }, [watchK8sResource, stopWatchK8sResource, watchPrometheus, stopWatchPrometheusQuery]);
+
+  const activities = plugins.registry.getDashboardsOverviewActivities();
+  const allActivities = _.flatten(activities.map((a, index) => {
+    const k8sResources =
+      _.get(resources, [uniqueResource(a.properties.k8sResource, index).prop, 'data'], []) as FirehoseResult['data'];
+    return k8sResources.filter(r => a.properties.isActivity ? a.properties.isActivity(r) : true).map(r => ({
+      resource: r,
+      timestamp: a.properties.getTimestamp(r),
+      loader: a.properties.loader,
+    }));
+  }));
+
+  const prometheusActivities = plugins.registry.getDashboardsOverviewPrometheusActivities();
+  const allPrometheusActivities = prometheusActivities
+    .filter(a => {
+      const queryResults = a.properties.queries.map(q => prometheusResults.getIn([q, 'data']) as PrometheusResponse);
+      return a.properties.isActivity(queryResults);
+    })
+    .map(a => {
+      const queryResults = a.properties.queries.map(q => prometheusResults.getIn([q, 'data']) as PrometheusResponse);
+      return {
+        loader: a.properties.loader,
+        results: queryResults,
+      };
+    });
+
+  const resourcesLoaded = activities.every((a, index) =>
+    _.get(resources, [uniqueResource(a.properties.k8sResource, index).prop, 'loaded'])
+  );
+  const queriesLoaded = prometheusActivities.every(a =>
+    a.properties.queries.every(q => prometheusResults.getIn([q, 'data']) || prometheusResults.getIn([q, 'loadError']))
+  );
+  return (
+    <OngoingActivityBody
+      loaded={resourcesLoaded && queriesLoaded}
+      activities={allActivities}
+      prometheusActivities={allPrometheusActivities}
+    />
+  );
+});
+
+export const ActivityCard: React.FC<{}> = React.memo(() => (
+  <DashboardCard>
+    <DashboardCardHeader>
+      <DashboardCardTitle>Activity</DashboardCardTitle>
+      <DashboardCardLink to="/k8s/all-namespaces/events">View events</DashboardCardLink>
+    </DashboardCardHeader>
+    <DashboardCardBody>
+      <ActivityBody>
+        <OngoingActivity />
+        <RecentEvent />
+      </ActivityBody>
+    </DashboardCardBody>
+  </DashboardCard>
+));

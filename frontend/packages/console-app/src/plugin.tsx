@@ -1,9 +1,12 @@
 import * as React from 'react';
 import { CogsIcon } from '@patternfly/react-icons';
-import { Plugin, Perspective } from '@console/plugin-sdk';
+import { Plugin, Perspective, DashboardsOverviewActivity } from '@console/plugin-sdk';
 import { FLAGS } from '@console/internal/const';
+import { ClusterVersionModel } from '@console/internal/models';
+import { referenceForModel } from '@console/internal/module/k8s';
+import { isClusterUpdateActivity, getClusterUpdateTimestamp } from './dashboards/activity';
 
-type ConsumedExtensions = Perspective;
+type ConsumedExtensions = Perspective | DashboardsOverviewActivity;
 
 const plugin: Plugin<ConsumedExtensions> = [
   {
@@ -17,6 +20,24 @@ const plugin: Plugin<ConsumedExtensions> = [
       getK8sLandingPageURL: () => '/dashboards',
       default: true,
       getImportRedirectURL: (project) => `/k8s/cluster/projects/${project}/workloads`,
+    },
+  },
+
+  {
+    type: 'Dashboards/Overview/Activity',
+    properties: {
+      k8sResource: {
+        isList: true,
+        prop: 'clusterVersion',
+        kind: referenceForModel(ClusterVersionModel),
+        namespaced: false,
+      },
+      isActivity: isClusterUpdateActivity,
+      getTimestamp: getClusterUpdateTimestamp,
+      loader: () =>
+        import('./dashboards/activity' /* webpackChunkName: "activity-cluster-update" */).then(
+          (m) => m.ClusterUpdateActivity,
+        ),
     },
   },
 ];

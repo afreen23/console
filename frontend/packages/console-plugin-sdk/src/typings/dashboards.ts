@@ -138,6 +138,31 @@ namespace ExtensionProperties {
     /** Function which will be used to format data from prometheus */
     humanizeValue: Humanize;
   }
+
+  export interface DashboardsOverviewActivity {
+    /** Resource to watch */
+    k8sResource: FirehoseResource;
+
+    /** Function which will determine if given resource represents the action */
+    isActivity?: (resource: K8sResourceKind) => boolean;
+
+    /** Timestamp for given action, which will be used for ordering */
+    getTimestamp: (resource: K8sResourceKind) => Date;
+
+    /** Loader for corresponding action component */
+    loader: LazyLoader<K8sActivityProps>;
+  }
+
+  export interface DashboardsOverviewPrometheusActivity {
+    /** Queries to watch */
+    queries: string[];
+
+    /** Function which will determine if given query results represent the action */
+    isActivity: (results: PrometheusResponse[]) => boolean;
+
+    /** Loader for corresponding action component */
+    loader: LazyLoader<PrometheusActivityProps>;
+  }
 }
 
 export interface DashboardsOverviewHealthURLSubsystem<R>
@@ -226,4 +251,30 @@ export const isDashboardsOverviewTopConsumerItem = (
   e: Extension<any>,
 ): e is DashboardsOverviewTopConsumerItem => e.type === 'Dashboards/Overview/TopConsumers/Item';
 
+export interface DashboardsOverviewActivity
+  extends Extension<ExtensionProperties.DashboardsOverviewActivity> {
+  type: 'Dashboards/Overview/Activity';
+}
+
+export const isDashboardsOverviewActivity = (e: Extension<any>): e is DashboardsOverviewActivity =>
+  e.type === 'Dashboards/Overview/Activity';
+
+export interface DashboardsOverviewPrometheusActivity
+  extends Extension<ExtensionProperties.DashboardsOverviewPrometheusActivity> {
+  type: 'Dashboards/Overview/Prometheus/Activity';
+}
+
+export const isDashboardsOverviewPrometheusActivity = (
+  e: Extension<any>,
+): e is DashboardsOverviewPrometheusActivity =>
+  e.type === 'Dashboards/Overview/Prometheus/Activity';
+
 export type DashboardCardSpan = 4 | 6 | 12;
+
+export type K8sActivityProps = {
+  resource: K8sResourceKind;
+};
+
+export type PrometheusActivityProps = {
+  results: PrometheusResponse[];
+};

@@ -8,6 +8,7 @@ import {
   CellMeasurerCache,
 } from 'react-virtualized';
 import { CSSTransition } from 'react-transition-group';
+import classNames from 'classnames';
 
 import { EventKind } from '../../module/k8s';
 
@@ -17,7 +18,6 @@ const timeout = {enter: 150};
 
 const measurementCache = new CellMeasurerCache({
   fixedWidth: true,
-  minHeight: 109, /* height of event with a one-line event message on desktop */
 });
 
 class SysEvent extends React.Component<SysEventProps> {
@@ -38,7 +38,7 @@ class SysEvent extends React.Component<SysEventProps> {
   }
 
   render() {
-    const { EventComponent, index, style, event} = this.props;
+    const { EventComponent, index, style, event, className} = this.props;
 
     let shouldAnimate: boolean;
     const key = event.metadata.uid;
@@ -48,7 +48,7 @@ class SysEvent extends React.Component<SysEventProps> {
       shouldAnimate = true;
     }
 
-    return <div className="co-sysevent--transition" style={style}>
+    return <div className={classNames('co-sysevent--transition', className)} style={style}>
       <CSSTransition mountOnEnter={true} appear={shouldAnimate} in exit={false} timeout={timeout} classNames="slide">
         {status => <div className={`slide-${status}`}><EventComponent event={event} /></div>}
       </CSSTransition>
@@ -56,46 +56,46 @@ class SysEvent extends React.Component<SysEventProps> {
   }
 }
 
-export class EventStreamList extends React.Component<EventStreamListProps> {
-  private rowRenderer;
-  private list: VirtualList;
-
-  constructor(props: EventStreamListProps) {
-    super(props);
-    this.rowRenderer = (events, index, style, key, parent) => (
-      <CellMeasurer
-        cache={measurementCache}
-        columnIndex={0}
-        key={key}
-        rowIndex={index}
-        parent={parent}>
-        {({ measure }) =>
-          <SysEvent event={events[index]} EventComponent={props.EventComponent} onLoad={measure} onEntered={print} key={key} style={style} index={index} />
-        }
-      </CellMeasurer>
-    );
-  }
-
-  componentDidUpdate(prevProps: EventStreamListProps) {
-    if (prevProps.events !== this.props.events) {
-      this.onResize();
-      if (this.list) {
-        this.list.recomputeRowHeights();
-      }
+export const EventStreamList: React.FC<EventStreamListProps> = ({
+  events,
+  className,
+  EventComponent,
+  scrollableElementId = 'content-scrollable',
+}) => {
+  const [list, setList] = React.useState();
+  const onResize = React.useCallback(() => measurementCache.clearAll(), []);
+  React.useEffect(() => {
+    onResize();
+    if (list) {
+      list.recomputeRowHeights();
     }
-  }
+  }, [list, events, onResize]);
+  const rowRenderer = React.useCallback(({ index, style, key, parent }) => (
+    <CellMeasurer
+      cache={measurementCache}
+      columnIndex={0}
+      key={key}
+      rowIndex={index}
+      parent={parent}>
+      {({ measure }) =>
+        <SysEvent
+          className={className}
+          event={events[index]}
+          EventComponent={EventComponent}
+          onLoad={measure}
+          onEntered={print}
+          key={key}
+          style={style}
+          index={index}
+        />
+      }
+    </CellMeasurer>
+  ), [events, className, EventComponent]);
 
-  onResize() {
-    measurementCache.clearAll();
-  }
-
-  /* Default `height` to 0 to avoid console errors from https://github.com/bvaughn/react-virtualized/issues/1158 */
-  render() {
-    const { events, scrollableElementId = 'content-scrollable'} = this.props;
-    return events.length > 0 &&
+  return events.length > 0 &&
     <WindowScroller scrollElement={document.getElementById(scrollableElementId)}>
       {({height, isScrolling, registerChild, onChildScroll, scrollTop}) =>
-        <AutoSizer disableHeight onResize={this.onResize}>
+        <AutoSizer disableHeight onResize={onResize}>
           {({width}) => <div ref={registerChild}>
             <VirtualList
               autoHeight
@@ -104,10 +104,10 @@ export class EventStreamList extends React.Component<EventStreamListProps> {
               height={height || 0}
               isScrolling={isScrolling}
               onScroll={onChildScroll}
-              ref={virtualList => this.list = virtualList}
+              ref={setList}
               rowCount={events.length}
               rowHeight={measurementCache.rowHeight}
-              rowRenderer={({index, style, key, parent}) => this.rowRenderer(events, index, style, key, parent)}
+              rowRenderer={rowRenderer}
               scrollTop={scrollTop}
               tabIndex={null}
               width={width}
@@ -115,13 +115,14 @@ export class EventStreamList extends React.Component<EventStreamListProps> {
           </div>}
         </AutoSizer>}
     </WindowScroller>;
-  }
-}
+
+};
 
 type EventStreamListProps = {
   scrollableElementId?: string;
   events: EventKind[];
   EventComponent: React.ComponentType<EventComponentProps>;
+  className?: string;
 }
 
 export type EventComponentProps = {
@@ -135,4 +136,5 @@ type SysEventProps = {
   onEntered: () => void;
   style: React.CSSProperties;
   index: number;
+  className?: string;
 }

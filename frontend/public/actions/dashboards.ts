@@ -5,6 +5,7 @@ import { coFetchJSON } from '../co-fetch';
 import { k8sBasePath } from '../module/k8s/k8s';
 import { isWatchActive, RESULTS_TYPE } from '../reducers/dashboards';
 import { RootState } from '../redux';
+import { WindowScroller } from 'react-virtualized';
 
 export enum ActionType {
   StopWatch = 'stopWatch',

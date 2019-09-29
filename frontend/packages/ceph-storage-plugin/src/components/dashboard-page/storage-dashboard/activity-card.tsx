@@ -4,7 +4,6 @@ import {
   DashboardCard,
   DashboardCardBody,
   DashboardCardHeader,
-  DashboardCardLink,
   DashboardCardTitle,
 } from '@console/internal/components/dashboard/dashboard-card';
 import {
@@ -135,7 +134,6 @@ export const ActivityCard: React.FC<{}> = React.memo(() => (
   <DashboardCard>
     <DashboardCardHeader>
       <DashboardCardTitle>Activity</DashboardCardTitle>
-      <DashboardCardLink to="/k8s/all-namespaces/events">View events</DashboardCardLink>
     </DashboardCardHeader>
     <DashboardCardBody>
       <ActivityBody>

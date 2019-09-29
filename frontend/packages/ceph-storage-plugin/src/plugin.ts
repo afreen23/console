@@ -6,6 +6,7 @@ import {
   ModelFeatureFlag,
   ModelDefinition,
   Plugin,
+  DashboardsOverviewActivity,
   DashboardsOverviewQuery,
   RoutePage,
   ClusterServiceVersionAction,
@@ -28,6 +29,7 @@ type ConsumedExtensions =
   | ModelDefinition
   | DashboardsTab
   | DashboardsCard
+  | DashboardsOverviewActivity
   | DashboardsOverviewHealthPrometheusSubsystem
   | DashboardsOverviewQuery
   | RoutePage
@@ -155,8 +157,8 @@ const plugin: Plugin<ConsumedExtensions> = [
       position: GridPosition.RIGHT,
       loader: () =>
         import(
-          './components/dashboard-page/storage-dashboard/events-card' /* webpackChunkName: "ceph-storage-events-card" */
-        ).then((m) => m.default),
+          './components/dashboard-page/storage-dashboard/activity-card' /* webpackChunkName: "ceph-storage-activity-card" */
+        ).then((m) => m.ActivityCard),
       required: CEPH_FLAG,
     },
   },
@@ -198,6 +200,74 @@ const plugin: Plugin<ConsumedExtensions> = [
       required: CEPH_FLAG,
     },
   },
+  // {
+  //   type: 'Dashboards/Overview/Activity',
+  //   properties: {
+  //     k8sResource: {
+  //       isList: true,
+  //       prop: 'clusterServiceVersion',
+  //       kind: referenceForModel(ClusterServiceVersionModel),
+  //       namespaced: false,
+  //     },
+  //     isActivity: isUpgradeOCSActivity,
+  //     getTimestamp: getClusterUpdateTimestamp,
+  //     loader: () =>
+  //       import('./dashboards/activity' /* webpackChunkName: "activity-cluster-update" */).then(
+  //         (m) => m.ClusterUpdateActivity,
+  //       ),
+  //   },
+  // },
+  // {
+  //   type: 'Dashboards/Overview/Activity',
+  //   properties: {
+  //     k8sResource: {
+  //       isList: true,
+  //       prop: 'clusterServiceVersion',
+  //       kind: referenceForModel(ClusterServiceVersionModel),
+  //       namespaced: false,
+  //     },
+  //     isActivity: isExpandClusterActivity,
+  //     getTimestamp: getExpandClusterActivity,
+  //     loader: () =>
+  //       import('./dashboards/activity' /* webpackChunkName: "activity-cluster-update" */).then(
+  //         (m) => m.ClusterUpdateActivity,
+  //       ),
+  //   },
+  // },
+  // {
+  //   type: 'Dashboards/Overview/Activity',
+  //   properties: {
+  //     k8sResource: {
+  //       isList: true,
+  //       prop: 'clusterServiceVersion',
+  //       kind: referenceForModel(ClusterServiceVersionModel),
+  //       namespaced: false,
+  //     },
+  //     isActivity: isRebuildingDataResiliencyActivity,
+  //     getTimestamp: getRebuildingDataResiliencyActivity,
+  //     loader: () =>
+  //       import('./dashboards/activity' /* webpackChunkName: "activity-cluster-update" */).then(
+  //         (m) => m.ClusterUpdateActivity,
+  //       ),
+  //   },
+  // },
+  // {
+  //   type: 'Dashboards/Overview/Activity',
+  //   properties: {
+  //     k8sResource: {
+  //       isList: true,
+  //       prop: 'clusterServiceVersion',
+  //       kind: referenceForModel(ClusterServiceVersionModel),
+  //       namespaced: false,
+  //     },
+  //     isActivity: isOCSMaintainenceActivity,
+  //     getTimestamp: getOCSMaintainenceActivity,
+  //     loader: () =>
+  //       import('./dashboards/activity' /* webpackChunkName: "activity-cluster-update" */).then(
+  //         (m) => m.ClusterUpdateActivity,
+  //       ),
+  //   },
+  // },
   {
     type: 'ClusterServiceVersion/Action',
     properties: {

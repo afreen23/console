@@ -3,6 +3,7 @@ import {
   DashboardsCard,
   DashboardsTab,
   DashboardsOverviewHealthPrometheusSubsystem,
+  DashboardsOverviewPrometheusActivity,
   ModelFeatureFlag,
   ModelDefinition,
   Plugin,
@@ -16,6 +17,7 @@ import { OverviewQuery } from '@console/internal/components/dashboards-page/over
 import { ClusterServiceVersionModel } from '@console/operator-lifecycle-manager/src/models';
 import { referenceForModel } from '@console/internal/module/k8s';
 import * as models from './models';
+import { isDataResiliencyActivity, isExpandClusterActivity, getExpandClusterTimestamp } from './components/dashboard-page/storage-dashboard/activity-card/activity';
 import {
   CAPACITY_USAGE_QUERIES,
   StorageDashboardQuery,
@@ -31,6 +33,7 @@ type ConsumedExtensions =
   | DashboardsCard
   | DashboardsOverviewActivity
   | DashboardsOverviewHealthPrometheusSubsystem
+  | DashboardsOverviewPrometheusActivity
   | DashboardsOverviewQuery
   | RoutePage
   | ClusterServiceVersionAction;
@@ -129,19 +132,6 @@ const plugin: Plugin<ConsumedExtensions> = [
     properties: {
       tab: 'persistent-storage',
       position: GridPosition.MAIN,
-      span: 6,
-      loader: () =>
-        import(
-          './components/dashboard-page/storage-dashboard/data-resiliency/data-resiliency' /* webpackChunkName: "ceph-storage-data-resiliency-card" */
-        ).then((m) => m.DataResiliencyWithResources),
-      required: CEPH_FLAG,
-    },
-  },
-  {
-    type: 'Dashboards/Card',
-    properties: {
-      tab: 'persistent-storage',
-      position: GridPosition.MAIN,
       loader: () =>
         import(
           './components/dashboard-page/storage-dashboard/top-consumers-card/top-consumers-card' /* webpackChunkName: "ceph-storage-top-consumers-card" */
@@ -157,7 +147,7 @@ const plugin: Plugin<ConsumedExtensions> = [
       position: GridPosition.RIGHT,
       loader: () =>
         import(
-          './components/dashboard-page/storage-dashboard/activity-card' /* webpackChunkName: "ceph-storage-activity-card" */
+          './components/dashboard-page/storage-dashboard/activity-card/activity-card' /* webpackChunkName: "ceph-storage-activity-card" */
         ).then((m) => m.ActivityCard),
       required: CEPH_FLAG,
     },
@@ -200,6 +190,20 @@ const plugin: Plugin<ConsumedExtensions> = [
       required: CEPH_FLAG,
     },
   },
+  {
+    type: 'Dashboards/Overview/Prometheus/Activity',
+    properties: {
+      queries: [
+        StorageDashboardQuery.CEPH_PG_CLEAN_AND_ACTIVE_QUERY,
+        StorageDashboardQuery.CEPH_PG_TOTAL_QUERY,
+      ],
+      isActivity: isDataResiliencyActivity,
+      loader: () =>
+        import(
+          './components/dashboard-page/storage-dashboard/data-resiliency/data-resiliency' /* webpackChunkName: "data-resiliency-activity" */
+        ).then((m) => m.DataResiliency),
+    },
+  },
   // {
   //   type: 'Dashboards/Overview/Activity',
   //   properties: {
@@ -217,40 +221,23 @@ const plugin: Plugin<ConsumedExtensions> = [
   //       ),
   //   },
   // },
-  // {
-  //   type: 'Dashboards/Overview/Activity',
-  //   properties: {
-  //     k8sResource: {
-  //       isList: true,
-  //       prop: 'clusterServiceVersion',
-  //       kind: referenceForModel(ClusterServiceVersionModel),
-  //       namespaced: false,
-  //     },
-  //     isActivity: isExpandClusterActivity,
-  //     getTimestamp: getExpandClusterActivity,
-  //     loader: () =>
-  //       import('./dashboards/activity' /* webpackChunkName: "activity-cluster-update" */).then(
-  //         (m) => m.ClusterUpdateActivity,
-  //       ),
-  //   },
-  // },
-  // {
-  //   type: 'Dashboards/Overview/Activity',
-  //   properties: {
-  //     k8sResource: {
-  //       isList: true,
-  //       prop: 'clusterServiceVersion',
-  //       kind: referenceForModel(ClusterServiceVersionModel),
-  //       namespaced: false,
-  //     },
-  //     isActivity: isRebuildingDataResiliencyActivity,
-  //     getTimestamp: getRebuildingDataResiliencyActivity,
-  //     loader: () =>
-  //       import('./dashboards/activity' /* webpackChunkName: "activity-cluster-update" */).then(
-  //         (m) => m.ClusterUpdateActivity,
-  //       ),
-  //   },
-  // },
+  {
+    type: 'Dashboards/Overview/Activity',
+    properties: {
+      k8sResource: {
+        isList: true,
+        prop: 'ocsService',
+        kind: referenceForModel(models.OCSServiceModel),
+        namespaced: false,
+      },
+      isActivity: isExpandClusterActivity,
+      getTimestamp: getExpandClusterTimestamp,
+      loader: () =>
+        import('./components/dashboard-page/storage-dashboard/activity-card/activity' /* webpackChunkName: "activity-cluster-update" */).then(
+          (m) => m.ExpandClusterActivity,
+        ),
+    },
+  },
   // {
   //   type: 'Dashboards/Overview/Activity',
   //   properties: {

@@ -26,7 +26,7 @@ import * as plugins from '@console/internal/plugins';
 import { uniqueResource } from '@console/internal/components/dashboards-page/overview-dashboard/utils';
 import { PrometheusResponse } from '@console/internal/components/graphs';
 import { getNamespace } from '@console/shared';
-import { CEPH_STORAGE_NAMESPACE } from '../../../constants/index';
+import { CEPH_STORAGE_NAMESPACE } from '../../../../constants/index';
 
 const eventsResource: FirehoseResource = { isList: true, kind: EventModel.kind, prop: 'events' };
 

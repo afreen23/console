@@ -1,6 +1,6 @@
 import * as React from 'react';
 import * as _ from 'lodash';
-import { Progress } from '@patternfly/react-core';
+import { Progress, ProgressSize } from '@patternfly/react-core';
 import { PrometheusResponse } from '@console/internal/components/graphs';
 import './data-resiliency.scss';
 
@@ -15,23 +15,18 @@ const DataResiliencyBuildBody: React.FC<DataResiliencyBuildBody> = ({ progressPe
       value={progressPercentage}
       title="Rebuilding in Progress"
       label={`${progressPercentage}%`}
+      size={ProgressSize.sm}
     />
   </>
 );
 
-export const DataResiliency: React.FC<DataResiliencyProps> = (props) => {
-  const [totalPGRaw, cleanAndActivePGRaw] = props.results;
+export const DataResiliency: React.FC<DataResiliencyProps> = ({ results }) => {
+  const [totalPGRaw, cleanAndActivePGRaw] = results;
   const totalPg = getCapacityStats(totalPGRaw);
   const cleanAndActivePg = getCapacityStats(cleanAndActivePGRaw);
-  let progressPercentage;
-  progressPercentage = ((Number(cleanAndActivePg) / Number(totalPg)) * 100).toFixed(1);
-  if (!Number.isFinite(Number(progressPercentage))) {
-    progressPercentage = 0;
-  }
-  return <DataResiliencyBuildBody progressPercentage={progressPercentage} />;
+  const progressPercentage = ((Number(cleanAndActivePg) / Number(totalPg)) * 100).toFixed(1);
+  return <DataResiliencyBuildBody progressPercentage={Number(progressPercentage)} />;
 };
-
-// export const DataResiliencyWithResources = withDashboardResources(DataResiliency);
 
 type DataResiliencyProps = { results: PrometheusResponse[] };
 

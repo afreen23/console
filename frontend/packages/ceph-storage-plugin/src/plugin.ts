@@ -17,7 +17,7 @@ import { OverviewQuery } from '@console/internal/components/dashboards-page/over
 import { ClusterServiceVersionModel } from '@console/operator-lifecycle-manager/src/models';
 import { referenceForModel } from '@console/internal/module/k8s';
 import * as models from './models';
-import { isDataResiliencyActivity, isExpandClusterActivity, getExpandClusterTimestamp } from './components/dashboard-page/storage-dashboard/activity-card/activity';
+import { isDataResiliencyActivity } from './components/dashboard-page/storage-dashboard/activity-card/activity';
 import {
   CAPACITY_USAGE_QUERIES,
   StorageDashboardQuery,
@@ -204,57 +204,6 @@ const plugin: Plugin<ConsumedExtensions> = [
         ).then((m) => m.DataResiliency),
     },
   },
-  // {
-  //   type: 'Dashboards/Overview/Activity',
-  //   properties: {
-  //     k8sResource: {
-  //       isList: true,
-  //       prop: 'clusterServiceVersion',
-  //       kind: referenceForModel(ClusterServiceVersionModel),
-  //       namespaced: false,
-  //     },
-  //     isActivity: isUpgradeOCSActivity,
-  //     getTimestamp: getClusterUpdateTimestamp,
-  //     loader: () =>
-  //       import('./dashboards/activity' /* webpackChunkName: "activity-cluster-update" */).then(
-  //         (m) => m.ClusterUpdateActivity,
-  //       ),
-  //   },
-  // },
-  {
-    type: 'Dashboards/Overview/Activity',
-    properties: {
-      k8sResource: {
-        isList: true,
-        prop: 'ocsService',
-        kind: referenceForModel(models.OCSServiceModel),
-        namespaced: false,
-      },
-      isActivity: isExpandClusterActivity,
-      getTimestamp: getExpandClusterTimestamp,
-      loader: () =>
-        import('./components/dashboard-page/storage-dashboard/activity-card/activity' /* webpackChunkName: "activity-cluster-update" */).then(
-          (m) => m.ExpandClusterActivity,
-        ),
-    },
-  },
-  // {
-  //   type: 'Dashboards/Overview/Activity',
-  //   properties: {
-  //     k8sResource: {
-  //       isList: true,
-  //       prop: 'clusterServiceVersion',
-  //       kind: referenceForModel(ClusterServiceVersionModel),
-  //       namespaced: false,
-  //     },
-  //     isActivity: isOCSMaintainenceActivity,
-  //     getTimestamp: getOCSMaintainenceActivity,
-  //     loader: () =>
-  //       import('./dashboards/activity' /* webpackChunkName: "activity-cluster-update" */).then(
-  //         (m) => m.ClusterUpdateActivity,
-  //       ),
-  //   },
-  // },
   {
     type: 'ClusterServiceVersion/Action',
     properties: {

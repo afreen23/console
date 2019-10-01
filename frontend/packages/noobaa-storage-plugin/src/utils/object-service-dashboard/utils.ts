@@ -13,11 +13,6 @@ export const getMetric = (result: PrometheusResponse, metric: string): string =>
 
 export const getValue = (result: PrometheusMetricResult): number => _.get(result, 'value[1]', null);
 
-export type PrometheusMetricResult = {
-  metric: { [key: string]: any };
-  value?: [number, string | number];
-};
-
 export const getOBCPhase = (obc: K8sResourceKind): string => {
   const phase: string = _.get(obc, 'status.Phase');
   return phase ? phase.charAt(0).toUpperCase() + phase.substring(1) : 'Lost';
@@ -29,4 +24,9 @@ export const isBound = (obc: K8sResourceKind): boolean => getOBCPhase(obc) === '
 export const getOBPhase = (ob: K8sResourceKind): string => {
   const phase: string = _.get(ob, 'status.phase');
   return phase ? phase.charAt(0).toUpperCase() + phase.substring(1) : 'Lost';
+};
+
+export type PrometheusMetricResult = {
+  metric: { [key: string]: any };
+  value?: [number, string | number];
 };

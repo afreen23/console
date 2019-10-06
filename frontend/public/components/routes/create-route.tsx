@@ -637,7 +637,7 @@ export const AlternateServicesGroup: React.FC<AlternateServiceEntryGroupProps> =
 
   React.useEffect(() => {
     props.onChange({ name, weight }, props.index);
-  }, [name, weight]);
+  }, [name, props, weight]);
 
   const { serviceOptions, availableServiceOptions, index } = props;
 

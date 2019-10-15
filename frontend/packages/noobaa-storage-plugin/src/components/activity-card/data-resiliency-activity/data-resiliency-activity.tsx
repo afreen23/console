@@ -3,7 +3,13 @@ import { Progress, ProgressSize } from '@patternfly/react-core';
 import { PrometheusResponse } from '@console/internal/components/graphs';
 import { formatDuration } from '@console/internal/components/utils/datetime';
 import { getGaugeValue } from '../../../utils';
+import { MAX_PROGRESS } from '../../../constants';
 import './data-resiliency-activity.scss';
+
+export const isDataResiliencyActivity = (response: PrometheusResponse): boolean => {
+  const progress = getGaugeValue(response);
+  return progress < MAX_PROGRESS;
+};
 
 const getResiliencyProgress = (response: PrometheusResponse): number => {
   const progress = getGaugeValue(response);

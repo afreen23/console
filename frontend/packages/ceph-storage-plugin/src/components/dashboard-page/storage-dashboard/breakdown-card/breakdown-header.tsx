@@ -4,11 +4,8 @@ import { ExternalLink } from '@console/internal/components/utils';
 import { getPrometheusExpressionBrowserURL } from '@console/internal/components/graphs/prometheus-graph';
 
 const HeaderPrometheusLink_ = ({ link, urls }) => (
-  <div className="ceph-capacity-breakdown-card__monitoring-header-link">
-    <ExternalLink
-      href={getPrometheusExpressionBrowserURL(urls, link)}
-      text="View more"
-    />
+  <div className="ceph-breakdown-card__header-link">
+    <ExternalLink href={getPrometheusExpressionBrowserURL(urls, link)} text="View more" />
   </div>
 );
 

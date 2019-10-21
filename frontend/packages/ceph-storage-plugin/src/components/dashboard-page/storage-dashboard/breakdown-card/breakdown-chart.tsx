@@ -1,5 +1,4 @@
 import * as React from 'react';
-import * as _ from 'lodash';
 import { Link } from 'react-router-dom';
 import {
   Chart,
@@ -14,39 +13,21 @@ import {
 import { DataPoint } from '@console/internal/components/graphs';
 import { K8sKind } from '@console/internal/module/k8s';
 import { resourcePathFromModel } from '@console/internal/components/utils';
+import { isAvailableBar, getBarRadius } from './utils';
 import './breakdown-card.scss';
 
-const getBarRadius = (index: number, length: number) => {
-  if (index === 0) {
-    return { bottom: 3 };
-  }
-  if (index === length - 1) {
-    return { top: 3 };
-  }
-  return {};
-};
-
-const getBarColor = (index: number, length: number) => {
-  if (index === length - 1) {
-    return { data: { stroke: 'white', strokeWidth: 0.7, fill: '#b8bbbe' } };
-  }
-  return { data: { stroke: 'white', strokeWidth: 0.7 } };
-};
-
 const LinkableLegend = (props) => {
-  const { model, datum } = props;
+  const { metricModel, datum } = props;
   return (
     <>
       <Link
-        to={resourcePathFromModel(model, datum.link)}
+        to={resourcePathFromModel(metricModel, datum.link)}
         target="_blank"
         className="ceph-breakdown-chart__legend-link"
       >
         <ChartLabel
           {...props}
-          labelPlacement="vertical"
           lineHeight={1.3}
-          size={3}
           style={[
             { ...datum.labels, fontSize: 8, padding: 0 },
             { fill: 'black', fontSize: 8, padding: 0 },
@@ -57,13 +38,13 @@ const LinkableLegend = (props) => {
   );
 };
 
-export const BreakdownChart: React.FC<BreakdownChartProps> = ({ data, legends, model }) => {
+export const BreakdownChart: React.FC<BreakdownChartProps> = ({ data, legends, metricModel }) => {
   const chartData = data.map((d: DataPoint, index) => (
     <ChartBar
-      style={getBarColor(index, data.length)}
+      style={{ data: { stroke: 'white', strokeWidth: 0.7 }, ...isAvailableBar(index, data.length) }}
       cornerRadius={getBarRadius(index, data.length)}
       barWidth={20}
-      padding={10}
+      padding={0}
       data={[d]}
       labelComponent={
         <ChartTooltip constrainToVisibleArea style={{ fontSize: 8 }} pointerOrientation="left" />
@@ -74,25 +55,26 @@ export const BreakdownChart: React.FC<BreakdownChartProps> = ({ data, legends, m
   return (
     <Chart
       legendPosition="bottom-left"
+      domain={{ x: [0, 0] }}
+      domainPadding={{ x: [0, 0] }}
+      maxDomain={{ x: 0 }}
       legendComponent={
         <ChartLegend
           themeColor={ChartThemeColor.purple}
           data={legends}
-          labelComponent={<LinkableLegend model={model} />}
+          standalone={false}
+          labelComponent={<LinkableLegend metricModel={metricModel} />}
           orientation="horizontal"
-          symbolSpacer={7}
-          height={30}
-          gutter={10}
-          // padding={{ top: 0, bottom: 0 }}
-          style={{ padding: { top: 0, bottom: 0, left: 0, right: 0 } }}
+          symbolSpacer={5}
+          gutter={-30}
+          style={{ labels: { padding: 0 } }}
+          padding={0}
         />
       }
       height={100}
       padding={{
         bottom: 75,
-        left: 30,
-        right: 30,
-        top: 30,
+        top: 0,
       }}
       themeColor={ChartThemeColor.multiOrdered}
     >
@@ -100,13 +82,15 @@ export const BreakdownChart: React.FC<BreakdownChartProps> = ({ data, legends, m
         style={{ axis: { stroke: 'none' }, ticks: { stroke: 'none' } }}
         tickFormat={() => ''}
       />
-      <ChartStack horizontal>{chartData}</ChartStack>
+      <ChartStack horizontal padding={{ bottom: 0 }}>
+        {chartData}
+      </ChartStack>
     </Chart>
   );
 };
 
 type BreakdownChartProps = {
   data: DataPoint[];
-  legends: any;
-  model: K8sKind;
+  legends: any[]; // TBD(afreen23): pass down normal legends
+  metricModel: K8sKind;
 };

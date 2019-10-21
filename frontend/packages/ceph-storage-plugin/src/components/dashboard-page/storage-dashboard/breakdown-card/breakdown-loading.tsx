@@ -7,7 +7,7 @@ export const BreakdownChartLoading: React.FC<{}> = () => {
     <>
       <Grid className="skeleton-box">
         <GridItem span={4} className="skeleton-activity" />
-        <GridItem span={4} className="skeleton-activity skeleton-stack-available-bar" />
+        <GridItem span={4} className="skeleton-activity skeleton-stack-no-show" />
         <GridItem span={4} className="skeleton-activity" />
         <GridItem span={12} className="skeleton-activity skeleton-stack-bar" />
         <GridItem span={2} className="skeleton-activity skeleton-stack-legend" />

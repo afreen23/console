@@ -1,6 +1,6 @@
 import * as React from 'react';
 import * as _ from 'lodash';
-import { Dropdown, humanizeBinaryBytes, humanizeBinaryBytesWithoutB } from '@console/internal/components/utils';
+import { Dropdown, humanizeBinaryBytesWithoutB } from '@console/internal/components/utils';
 import {
   DashboardItemProps,
   withDashboardResources,
@@ -9,7 +9,7 @@ import DashboardCardHeader from '@console/shared/src/components/dashboard/dashbo
 import DashboardCard from '@console/shared/src/components/dashboard/dashboard-card/DashboardCard';
 import DashboardCardTitle from '@console/shared/src/components/dashboard/dashboard-card/DashboardCardTitle';
 import DashboardCardBody from '@console/shared/src/components/dashboard/dashboard-card/DashboardCardBody';
-import { breakdownQueryMap } from '../../../../constants/queries';
+import { breakdownQueryMap, CAPACITY_BREAKDOWN_QUERIES } from '../../../../constants/queries';
 import { PROJECTS } from '../../../../constants/index';
 import { BreakdownCardBody } from '../breakdown-card/breakdown-body';
 import { HeaderPrometheusLink } from '../breakdown-card/breakdown-header';
@@ -40,11 +40,11 @@ const BreakdownCard: React.FC<DashboardItemProps> = ({
   const queriesDataLoaded = results.some((q) => q);
   const queriesLoaded = queriesDataLoaded || queriesLoadError;
   const formatValue = humanizeBinaryBytesWithoutB;
-  const totalUsed = _.get(results[0], 'data.result[0].value[1]');
+  const top5MetricsStats = getStackChartStats(results[0], metric, formatValue);
+  const metricTotal = _.get(results[1], 'data.result[0].value[1]');
   const cephTotal = _.get(results[2], 'data.result[0].value[1]');
   const cephUsed = _.get(results[3], 'data.result[0].value[1]');
-  const link = [`topk(20, ${queries[queryKeys[0]]} by (${metric}))`];
-  const top5UsedStats = getStackChartStats(results[1], metric, formatValue);
+  const link = [`topk(20, (${CAPACITY_BREAKDOWN_QUERIES[queryKeys[0]]}))`];
 
   return (
     <DashboardCard>
@@ -60,14 +60,14 @@ const BreakdownCard: React.FC<DashboardItemProps> = ({
           />
         </div>
       </DashboardCardHeader>
-      <DashboardCardBody classname='ceph-capacity-breakdown-card__body'>
+      <DashboardCardBody classname="ceph-breakdown-card__body">
         <BreakdownCardBody
           isLoading={!queriesLoaded}
-          totalUsed={totalUsed}
-          top5UsedStats={top5UsedStats}
+          metricTotal={metricTotal}
+          top5MetricsStats={top5MetricsStats}
           cephTotal={cephTotal}
           cephUsed={cephUsed}
-          model={model}
+          metricModel={model}
           formatValue={formatValue}
         />
       </DashboardCardBody>

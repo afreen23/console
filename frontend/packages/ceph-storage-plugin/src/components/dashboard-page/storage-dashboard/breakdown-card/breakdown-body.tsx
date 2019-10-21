@@ -5,52 +5,21 @@ import { K8sKind } from '@console/internal/module/k8s';
 import { TotalCapacityBody } from './breakdown-capacity';
 import { BreakdownChartLoading } from './breakdown-loading';
 import { BreakdownChart } from './breakdown-chart';
-import { getCapacityValue, StackDataPoint } from './utils';
-
-const getTotal = (stats: StackDataPoint[]) => {
-  return stats.reduce((total, dataPoint) => total + dataPoint.y, 0);
-};
-
-const addOthers = (stats: StackDataPoint[], totalUsed, formatValue) => {
-  const top5Total = getTotal(stats);
-  const others = totalUsed - top5Total;
-  const othersData = {
-    x: '',
-    y: others,
-    name: 'Others',
-    color: 'black',
-    label: formatValue(others).string,
-  };
-  return othersData;
-};
-
-const addAvailable = (stats: StackDataPoint[], total, used, totalUsed, formatValue) => {
-  const availableInBytes = Number(total) - Number(used) - 3095310657888;
-  let other: {};
-  if (stats.length === 5) {
-    other = addOthers(stats, totalUsed, formatValue);
-  }
-  const availableData = {
-    x: '',
-    y: availableInBytes,
-    label: `Available\n${formatValue(availableInBytes).string}`, // need to check if its safe
-  };
-  return other ? [...stats, other, availableData] : [...stats, availableData];
-};
+import { addAvailable, getCapacityValue, StackDataPoint } from './utils';
 
 export const BreakdownCardBody: React.FC<BreakdownBodyProps> = ({
-  top5UsedStats,
-  totalUsed,
+  top5MetricsStats,
+  metricTotal,
   cephUsed,
   cephTotal,
-  model,
+  metricModel,
   formatValue,
   isLoading,
 }) => {
   if (isLoading) {
     return <BreakdownChartLoading />;
   }
-  if (!cephUsed || !cephTotal || !totalUsed || !top5UsedStats.length) {
+  if (!cephUsed || !cephTotal || !metricTotal || !top5MetricsStats.length) {
     return (
       <EmptyState variant={EmptyStateVariant.full}>
         <Title className="graph-empty-state__title text-secondary" size="sm">
@@ -64,12 +33,12 @@ export const BreakdownCardBody: React.FC<BreakdownBodyProps> = ({
   const usedCapacity = `${formatValue(cephUsed).string} used of ${formatValue(cephTotal).string}`;
   const availableCapacity = `${available.string} available`;
 
-  const chartData = addAvailable(top5UsedStats, cephTotal, cephUsed, totalUsed, formatValue);
+  const chartData = addAvailable(top5MetricsStats, cephTotal, cephUsed, metricTotal, formatValue);
 
   const legends = chartData.map((d: StackDataPoint) => ({
     name: [d.name, d.label],
-    symbol: { size: 2 },
-    labels: { fill: d.color },
+    symbol: { size: 3, padding: 0 }, // To be removed
+    labels: { fill: d.color, padding: 0 },
     link: d.link,
   }));
 
@@ -84,11 +53,11 @@ export const BreakdownCardBody: React.FC<BreakdownBodyProps> = ({
       <GridItem span={4}>
         <TotalCapacityBody
           value={availableCapacity}
-          classname="ceph-capacity-breakdown-card__available-body text-secondary"
+          classname="ceph-breakdown-card__available-body text-secondary"
         />
       </GridItem>
       <GridItem span={12}>
-        <BreakdownChart data={chartData} legends={legends} model={model} />
+        <BreakdownChart data={chartData} legends={legends} metricModel={metricModel} />
       </GridItem>
     </Grid>
   );
@@ -96,15 +65,10 @@ export const BreakdownCardBody: React.FC<BreakdownBodyProps> = ({
 
 type BreakdownBodyProps = {
   isLoading: boolean;
-  totalUsed: string;
-  top5UsedStats: StackDataPoint[];
+  metricTotal: string;
+  top5MetricsStats: StackDataPoint[];
   cephUsed: string;
   cephTotal: string;
-  model: K8sKind;
+  metricModel: K8sKind;
   formatValue: Humanize;
 };
-
-// type LegendType = {
-//   name: string[];
-//   labels: { fill: string };
-// }[];

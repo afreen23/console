@@ -39,12 +39,12 @@ const BreakdownCard: React.FC<DashboardItemProps> = ({
   );
   const queriesDataLoaded = results.some((q) => q);
   const queriesLoaded = queriesDataLoaded || queriesLoadError;
-
+  const formatValue = humanizeBinaryBytesWithoutB;
   const totalUsed = _.get(results[0], 'data.result[0].value[1]');
   const cephTotal = _.get(results[2], 'data.result[0].value[1]');
   const cephUsed = _.get(results[3], 'data.result[0].value[1]');
   const link = [`topk(20, ${queries[queryKeys[0]]} by (${metric}))`];
-  const top5UsedStats = getStackChartStats(results[1], metric, humanizeBinaryBytesWithoutB);
+  const top5UsedStats = getStackChartStats(results[1], metric, formatValue);
 
   return (
     <DashboardCard>
@@ -60,7 +60,7 @@ const BreakdownCard: React.FC<DashboardItemProps> = ({
           />
         </div>
       </DashboardCardHeader>
-      <DashboardCardBody>
+      <DashboardCardBody classname='ceph-capacity-breakdown-card__body'>
         <BreakdownCardBody
           isLoading={!queriesLoaded}
           totalUsed={totalUsed}
@@ -68,7 +68,7 @@ const BreakdownCard: React.FC<DashboardItemProps> = ({
           cephTotal={cephTotal}
           cephUsed={cephUsed}
           model={model}
-          formatValue={humanizeBinaryBytesWithoutB}
+          formatValue={formatValue}
         />
       </DashboardCardBody>
     </DashboardCard>

@@ -24,6 +24,13 @@ const getBarRadius = (index: number, length: number) => {
   return {};
 };
 
+const getBarColor = (index: number, length: number) => {
+  if (index === length - 1) {
+    return { data: { stroke: "white", strokeWidth: 0.7, fill: "#b8bbbe" } };
+  }
+  return { data: { stroke: "white", strokeWidth: 0.7 } };
+};
+
 const LinkableLegend = (props) => {
   const { model, datum } = props;
 
@@ -42,11 +49,12 @@ const LinkableLegend = (props) => {
 export const BreakdownChart: React.FC<BreakdownChartProps> = ({ data, legends, model }) => {
   const chartData = data.map((d: DataPoint, index) => (
     <ChartBar
+      style={getBarColor(index, data.length)}
       cornerRadius={getBarRadius(index, data.length)}
       barWidth={20}
       padding={10}
       data={[d]}
-      labelComponent={<ChartTooltip constrainToVisibleArea />}
+      labelComponent={<ChartTooltip constrainToVisibleArea style={{ fontSize: 8 }} pointerOrientation={"left"} />}
     />
   ));
   return (

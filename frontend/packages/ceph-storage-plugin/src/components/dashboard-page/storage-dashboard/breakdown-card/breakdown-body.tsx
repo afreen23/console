@@ -12,15 +12,30 @@ const getTotal = (stats: DataPoint[]) => {
   return stats.reduce((total, dataPoint) => total + dataPoint.y, 0);
 };
 
-const addOthers = (stats: DataPoint[], totalUsed) => {
+const addOthers = (stats: DataPoint[], totalUsed, formatValue) => {
   const top5Total = getTotal(stats);
   const others = totalUsed - top5Total;
   const othersData = {
     x: '',
     y: others,
-    label: humanizeBinaryBytesWithoutB(others).string, // need to check if its safe
+    label: formatValue(others).string, // need to check if its safe
   };
-  return [...stats, othersData];
+  return othersData;
+};
+
+const addAvailable = (stats: DataPoint[], total, used, totalUsed, formatValue) => {
+  const availableInBytes = Number(total) - Number(used) - 3095310657888;
+  let other: {};
+  if (stats.length === 5) {
+    other = addOthers(stats, totalUsed, formatValue)
+  }
+  const availableData = {
+    x: '',
+    y: availableInBytes,
+    label: 'Available\n' + formatValue(availableInBytes).string, // need to check if its safe
+
+  };
+  return other ? [...stats, other, availableData] : [...stats, availableData];
 };
 
 export const BreakdownCardBody: React.FC<BreakdownBodyProps> = ({
@@ -44,16 +59,19 @@ export const BreakdownCardBody: React.FC<BreakdownBodyProps> = ({
       </EmptyState>
     );
   }
-  const chartData =
-    top5UsedStats.length === 5 ? addOthers(top5UsedStats, totalUsed) : top5UsedStats;
+
+  const available = getCapacityValue(cephUsed, cephTotal, formatValue);
+  const usedCapacity = `${formatValue(cephUsed).string} used of ${formatValue(cephTotal).string}`;
+  const availableCapacity = `${available.string} available`;
+
+  const chartData = addAvailable(top5UsedStats, cephTotal, cephUsed, totalUsed, formatValue);
   const legends: LegendType = chartData.map((d: DataPoint) => ({
     name: d.label,
     value: d.y,
   })) as LegendType;
 
-  const available = getCapacityValue(cephUsed, cephTotal, formatValue);
-  const usedCapacity = `${formatValue(cephUsed).string} used of ${formatValue(cephTotal).string}`;
-  const availableCapacity = `${available.string} available`;
+  legends.pop(); // Removes Legend for available
+
   return (
     <Grid>
       <GridItem span={4}>
@@ -61,7 +79,7 @@ export const BreakdownCardBody: React.FC<BreakdownBodyProps> = ({
       </GridItem>
       <GridItem span={4} />
       <GridItem span={4}>
-        <TotalCapacityBody value={availableCapacity} />
+        <TotalCapacityBody value={availableCapacity} classname='ceph-capacity-breakdown-card__available-body text-secondary' />
       </GridItem>
       <GridItem span={12}>
         <BreakdownChart data={chartData} legends={legends} model={model} />

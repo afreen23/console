@@ -3,22 +3,18 @@
 $skeleton-animation: loading-skeleton 1s ease-out .15s infinite alternate;
 $skeleton-color: #eaedf1;
 
-
-.ceph-capacity-breakdown-card__stack-chart {
-    margin-top: -55px;
-}
-
-.ceph-capacity-breakdown-card__body {
-    padding-top: 24px;
-}
-
-.ceph-capacity-breakdown-card__header{
-    display: flex;
-}
-
 .ceph-capacity-breakdown-card__monitoring-header-link {
     padding: 0.3rem;
     margin-right: 1rem;
+}
+
+.ceph-capacity-breakdown-card__available-body {
+  float: right;
+  color: $pf-color-black-400;
+}
+
+.ceph-capacity-breakdown-capacity-body {
+  font-size: 0.9rem;
 }
 
 .skeleton-activity {

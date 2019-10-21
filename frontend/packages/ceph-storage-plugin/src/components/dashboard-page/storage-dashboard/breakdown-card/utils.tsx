@@ -1,5 +1,5 @@
 import * as _ from 'lodash';
-import { Humanize, humanizeBinaryBytesWithoutB } from '@console/internal/components/utils';
+import { Humanize } from '@console/internal/components/utils';
 import { PrometheusResponse, DataPoint } from '@console/internal/components/graphs';
 
 export const getStackChartStats: GetStackStats = (response, metric, humanize) => {
@@ -23,8 +23,12 @@ type GetStackStats = (
 ) => DataPoint[];
 
 export const getCapacityValue = (cephUsed: any, cephTotal: any, formatValue: Humanize) => {
-  const totalFormatted = cephTotal || 0;
-  const usedFormatted = cephUsed || 0;
-  const available = formatValue(totalFormatted - usedFormatted || 0);
+  const totalFormatted = formatValue(cephTotal || 0);
+  const usedFormatted = formatValue(cephUsed || 0, null, totalFormatted.unit);
+  const available = formatValue(
+    totalFormatted.value - usedFormatted.value,
+    totalFormatted.unit,
+    totalFormatted.unit
+  );
   return available;
 };

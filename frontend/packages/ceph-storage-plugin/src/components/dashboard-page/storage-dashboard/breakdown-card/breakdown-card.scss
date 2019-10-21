@@ -8,6 +8,20 @@ $skeleton-color: #eaedf1;
     margin-right: 1rem;
 }
 
+.ceph-breakdown-chart__legend-link {
+  &:link {
+    text-decoration: none;
+  }
+}
+
+.ceph-capacity-breakdown-card__stack-chart {
+    margin-top: -55px;
+}
+
+.ceph-capacity-breakdown-card__body {
+    padding-top: 24px;
+}
+
 .ceph-capacity-breakdown-card__available-body {
   float: right;
   color: $pf-color-black-400;

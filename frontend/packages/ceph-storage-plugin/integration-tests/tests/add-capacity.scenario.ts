@@ -91,7 +91,6 @@ describe('Check add capacity functionality for ocs service', () => {
     expect(newPods.length - previousCnt * 3).toEqual(6);
   });
 
-
   it('No ocs pods should get restarted unexpectedly', () => {
     const isAllPodRunning = previousPods.items.every(
       (pod) => pod.status.phase === 'Running' || pod.status.phase === 'Succeeded',

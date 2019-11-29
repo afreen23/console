@@ -12,11 +12,8 @@ import {
   storageClusterRow,
 } from '../views/add-capacity.view';
 
-const namespace = 'openshift-storage';
-const kind = 'storagecluster';
-const storageCluster = JSON.parse(
-  execSync(`kubectl get -o json -n ${namespace} ${kind}`).toString(),
-);
+const NAMESPACE = 'openshift-storage';
+const KIND = 'storagecluster';
 
 let clusterJSON;
 let previousCnt;
@@ -24,51 +21,65 @@ let previousPods;
 let updatedClusterJSON;
 let updatedCnt;
 let updatedPods;
+let storageClusterList;
+let storageClusterResource;
+let resourceNotFoundError = false;
 
 describe('Check add capacity functionality for ocs service', () => {
   beforeAll(async () => {
-    // check whether the cluster is present or not, and check for its ready state
-    // if not present exit and console that no cluster is present
+    try {
+      storageClusterResource = execSync(`kubectl get -o json -n ${NAMESPACE} ${KIND}`).toString();
+      storageClusterList = JSON.parse(storageClusterResource).items;
+      if (!storageClusterList.length) resourceNotFoundError = true;
+    } catch (error) {
+      resourceNotFoundError = true;
+    }
+    if (!resourceNotFoundError) {
+      const { name } = storageClusterList[0].metadata;
+      clusterJSON = JSON.parse(
+        execSync(`kubectl get -o json -n ${NAMESPACE} ${KIND} ${name}`).toString(),
+      );
+      previousCnt = _.get(clusterJSON, 'spec.storageDeviceSets[0].count', undefined);
+      const uid = _.get(clusterJSON, 'metadata.uid', undefined).toString();
+      previousPods = JSON.parse(execSync(`kubectl get pods -n ${NAMESPACE} -o json`).toString());
 
-    const { name } = storageCluster.items[0].metadata.name;
-    clusterJSON = JSON.parse(
-      execSync(`kubectl get -o json -n ${namespace} ${kind} ${name}`).toString(),
-    );
-    previousCnt = _.get(clusterJSON, 'spec.storageDeviceSets[0].count', undefined);
-    const uid = _.get(clusterJSON, 'metadata.uid', undefined).toString();
-    previousPods = JSON.parse(execSync(`kubectl get pods -n ${namespace} -o json`).toString());
+      await browser.get(
+        `${appHost}/k8s/ns/openshift-storage/operators.coreos.com~v1alpha1~ClusterServiceVersion`,
+      );
+      await click(ocsOp);
+      await click(storageClusterView);
 
-    await browser.get(
-      `${appHost}/k8s/ns/openshift-storage/operators.coreos.com~v1alpha1~ClusterServiceVersion`,
-    );
+      await browser.wait(until.presenceOf(storageClusterRow(uid)));
+      const kebabMenu = storageClusterRow(uid).$('button[data-test-id="kebab-button"]');
 
-    await click(ocsOp);
-    await click(storageClusterView);
+      await click(kebabMenu);
+      await click(addCapacityLbl);
+      await click(addCapacityBtn);
 
-    await browser.wait(until.presenceOf(storageClusterRow(uid)));
-    const kebabMenu = storageClusterRow(uid).$('button[data-test-id="kebab-button"]');
+      updatedClusterJSON = JSON.parse(
+        execSync(`kubectl get -o json -n ${NAMESPACE} ${KIND} ${name}`).toString(),
+      );
 
-    await click(kebabMenu);
-    await click(addCapacityLbl);
-    await click(addCapacityBtn);
+      updatedCnt = _.get(updatedClusterJSON, 'spec.storageDeviceSets[0].count', undefined);
+      const statusCol = storageClusterRow(uid).$('td:nth-child(4)');
 
-    updatedClusterJSON = JSON.parse(
-      execSync(`kubectl get -o json -n ${namespace} ${kind} ${name}`).toString(),
-    );
+      // need to wait as cluster states fluctuates for some time. Waiting for 2 secs for the same
+      browser.sleep(2000);
 
-    updatedCnt = _.get(updatedClusterJSON, 'spec.storageDeviceSets[0].count', undefined);
-    const statusCol = storageClusterRow(uid).$('td:nth-child(4)');
+      await browser.wait(until.textToBePresentInElement(statusCol, 'Progressing'));
+      await browser.wait(
+        until.textToBePresentInElement(statusCol.$('span.co-icon-and-text span'), 'Ready'),
+      );
 
-    // need to wait as cluster states fluctuates for some time. Waiting for 2 secs for the same
-    browser.sleep(2000);
-
-    await browser.wait(until.textToBePresentInElement(statusCol, 'Progressing'));
-    await browser.wait(
-      until.textToBePresentInElement(statusCol.$('span.co-icon-and-text span'), 'Ready'),
-    );
-
-    updatedPods = JSON.parse(execSync(`kubectl get pod -o json -n ${namespace}`).toString());
+      updatedPods = JSON.parse(execSync(`kubectl get pod -o json -n ${NAMESPACE}`).toString());
+    }
   }, 150000);
+
+  it('StorageCluster is present for adding capacity', () => {
+    expect(storageClusterResource).toBeDefined();
+    expect(_.get(storageClusterList, '0')).toEqual(1);
+    expect(_.get(storageClusterList, 'status.phase')).toEqual('Ready');
+  });
 
   it('Newly added capacity should takes into effect at the storage level', () => {
     // by default 2Tib capacity is being added

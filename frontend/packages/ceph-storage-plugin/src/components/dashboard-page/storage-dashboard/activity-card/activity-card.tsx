@@ -6,11 +6,7 @@ import DashboardCardHeader from '@console/shared/src/components/dashboard/dashbo
 import DashboardCardTitle from '@console/shared/src/components/dashboard/dashboard-card/DashboardCardTitle';
 import { EventKind } from '@console/internal/module/k8s';
 import { FirehoseResource, FirehoseResult } from '@console/internal/components/utils';
-import {
-  EventModel,
-  PersistentVolumeClaimModel,
-  PersistentVolumeModel,
-} from '@console/internal/models';
+import { EventModel } from '@console/internal/models';
 import ActivityBody, {
   RecentEventsBody,
   OngoingActivityBody,
@@ -29,9 +25,7 @@ import './activity-card.scss';
 const eventsResource: FirehoseResource = { isList: true, kind: EventModel.kind, prop: 'events' };
 
 const ocsEventNamespaceKindFilter = (event: EventKind): boolean =>
-  getNamespace(event) === CEPH_STORAGE_NAMESPACE ||
-  _.get(event, 'involvedObject.kind') ===
-    (PersistentVolumeClaimModel.kind || PersistentVolumeModel.kind);
+  getNamespace(event) === CEPH_STORAGE_NAMESPACE;
 
 const RecentEvent = withDashboardResources(
   ({ watchK8sResource, stopWatchK8sResource, resources }: DashboardItemProps) => {

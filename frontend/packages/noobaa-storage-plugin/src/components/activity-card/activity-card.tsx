@@ -19,6 +19,7 @@ import {
 import { getResiliencyProgress } from '@console/ceph-storage-plugin/src/utils';
 import { DATA_RESILIENCE_QUERIES } from '../../queries';
 import './activity-card.scss';
+import { NooBaaObjectBucketClaimModel } from '../../models';
 
 const eventsResource: FirehoseResource = { isList: true, kind: EventModel.kind, prop: 'events' };
 
@@ -29,7 +30,11 @@ const isNoobaaEventObject = (event: EventKind): boolean => {
 
 const noobaaEventsFilter = (event: EventKind): boolean => {
   const eventKind: string = _.get(event, 'involvedObject.kind');
-  if (eventKind === PodModel.kind || eventKind === StatefulSetModel.kind) {
+  if (
+    eventKind === PodModel.kind ||
+    eventKind === StatefulSetModel.kind ||
+    eventKind === NooBaaObjectBucketClaimModel.kind
+  ) {
     return isNoobaaEventObject(event);
   }
   return false;

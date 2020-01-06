@@ -22,8 +22,8 @@ import { PersistentVolumeClaimModel } from '../models';
 
 const { common, ExpandPVC } = Kebab.factory;
 const menuActions = [
-  ExpandPVC,
   ...Kebab.getExtensionsActionsForKind(PersistentVolumeClaimModel),
+  ExpandPVC,
   ...common,
 ];
 

@@ -31,6 +31,7 @@ import {
   isProjectDashboardInventoryItem,
   isReduxReducer,
   isDashboardsOverviewInventoryItemReplacement,
+  isOCSKebabActions,
 } from './typings';
 
 /**
@@ -143,6 +144,10 @@ export class ExtensionRegistry {
 
   public getKebabActions() {
     return this.extensions.filter(isKebabActions);
+  }
+
+  public getOCSKebabActions() {
+    return this.extensions.filter(isOCSKebabActions);
   }
 
   public getDevCatalogModels() {

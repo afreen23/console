@@ -1,0 +1,12 @@
+.clone-pvc-modal__details-section {
+  margin-top: var(--pf-global--spacer--xl);
+  .clone-pvc-modal__details {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+  }
+
+  .clone-pvc-modal__pvc-details {
+    font-weight: 600;
+  }
+}

@@ -22,10 +22,11 @@ import { ButtonBar } from '@console/internal/components/utils/button-bar';
 import { history } from '@console/internal/components/utils/router';
 import {
   convertToBaseValue,
+  FieldLevelHelp,
   humanizeCpuCores,
   humanizeBinaryBytes,
   ResourceLink,
-} from '@console/internal/components/utils/index';
+} from '@console/internal/components/utils/';
 import {
   k8sCreate,
   k8sPatch,
@@ -47,9 +48,13 @@ import {
   ocsTaint,
 } from '../../constants/ocs-install';
 import './ocs-install.scss';
+import { OSDSizeDropdown } from '../../utils/osd-size-dropdown';
 import { hasLabel } from '../../../../console-shared/src/selectors/common';
 
 const ocsLabel = 'cluster.ocs.openshift.io/openshift-storage';
+
+const labelTooltip =
+  'The backing storage requested will be higher as it will factor in the requested capacity, replica factor, and fault tolerant costs associated with the requested capacity.';
 
 const getConvertedUnits = (value: string) => {
   return humanizeBinaryBytes(convertToBaseValue(value)).string || '-';
@@ -177,6 +182,7 @@ const CustomNodeTable: React.FC<CustomNodeTableProps> = ({
   ocsProps,
 }) => {
   const columns = getColumns();
+  const [osdSize, setOsdSize] = React.useState('2Ti');
   const [nodes, setNodes] = React.useState([]);
   const [unfilteredNodes, setUnfilteredNodes] = React.useState([]);
   const [error, setError] = React.useState('');
@@ -315,6 +321,7 @@ const CustomNodeTable: React.FC<CustomNodeTableProps> = ({
 
     const ocsObj = _.cloneDeep(ocsRequestData);
     ocsObj.spec.storageDeviceSets[0].dataPVCTemplate.spec.storageClassName = storageClass;
+    ocsObj.spec.storageDeviceSets[0].dataPVCTemplate.spec.resources.requests.storage = osdSize;
 
     Promise.all(promises)
       .then(() => {
@@ -393,6 +400,20 @@ const CustomNodeTable: React.FC<CustomNodeTableProps> = ({
           isInline
         />
       )}
+      <div className="ceph-ocs-install__ocs-service-capacity">
+        <p className="co-required ceph-ocs-install__ocs-service-capacity--title">
+          OCS Service Capacity
+        </p>
+        <p className="ceph-ocs-install__ocs-service-capacity--help-text">
+          Requested Capacity
+          <FieldLevelHelp>{labelTooltip}</FieldLevelHelp>
+        </p>
+        <OSDSizeDropdown
+          className="ceph-ocs-install__ocs-service-capacity--dropdown"
+          selectedKey={osdSize}
+          onChange={setOsdSize}
+        />
+      </div>
       <ButtonBar errorMessage={error} inProgress={inProgress}>
         <ActionGroup className="pf-c-form">
           <Button

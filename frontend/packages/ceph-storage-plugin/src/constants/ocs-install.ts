@@ -32,7 +32,7 @@ export const ocsRequestData: K8sResourceKind = {
             volumeMode: 'Block',
             resources: {
               requests: {
-                storage: '2Ti',
+                storage: '',
               },
             },
           },

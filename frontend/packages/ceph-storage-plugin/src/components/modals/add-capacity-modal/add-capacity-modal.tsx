@@ -3,8 +3,8 @@ import * as _ from 'lodash';
 import * as classNames from 'classnames';
 import {
   FieldLevelHelp,
-  RequestSizeInput,
   withHandlePromise,
+  humanizeBinaryBytes,
 } from '@console/internal/components/utils/index';
 import {
   createModalLauncher,
@@ -12,35 +12,60 @@ import {
   ModalSubmitFooter,
   ModalTitle,
 } from '@console/internal/components/factory';
-import { k8sPatch, K8sResourceKind } from '@console/internal/module/k8s';
+import { usePrometheusPoll } from '@console/internal/components/graphs/prometheus-poll-hook';
+import { k8sPatch } from '@console/internal/module/k8s';
+import { PrometheusEndpoint } from '@console/internal/components/graphs/helpers';
 import { OCSServiceModel } from '../../../models';
+import { OSD_CAPACITY_SIZES } from '../../../utils/osd-size-dropdown';
+import { CEPH_STORAGE_NAMESPACE } from '../../../constants';
 import './_add-capacity-modal.scss';
-import { OCSStorageClassDropdown } from '../storage-class-dropdown';
+
+const labelTooltip =
+  'The backing storage requested will be higher as it will factor in the requested capacity, replica factor, and fault tolerant costs associated with the requested capacity.';
 
 export const AddCapacityModal = withHandlePromise((props: AddCapacityModalProps) => {
   const { ocsConfig, close, cancel } = props;
-  const dropdownUnits = {
-    TiB: 'TiB',
-  };
-  const requestSizeUnit = dropdownUnits.TiB;
-  const [buttonDisabled, setButton] = React.useState(false);
-  const [requestSizeValue, setRequestSizeValue] = React.useState('2');
-  const [storageClass, setStorageClass] = React.useState('');
+  const osdSizeWithUnit = _.get(
+    ocsConfig,
+    'spec.storageDeviceSets[0].dataPVCTemplate.spec.resources.requests.storage',
+  );
+  const osdSizeWithoutUnit = OSD_CAPACITY_SIZES[osdSizeWithUnit].size;
+
+  const [requestSizeValue, setRequestSizeValue] = React.useState(osdSizeWithoutUnit);
+  const [response, loadError, loading] = usePrometheusPoll({
+    endpoint: PrometheusEndpoint.QUERY,
+    namespace: CEPH_STORAGE_NAMESPACE,
+    query: 'ceph_cluster_total_used_bytes',
+  });
   const [inProgress, setProgress] = React.useState(false);
   const [errorMessage, setError] = React.useState('');
 
   const presentCount = _.get(ocsConfig, 'spec.storageDeviceSets[0].count');
-  const storageClassTooltip =
-    'The Storage Class will be used to request storage from the underlying infrastructure to create the backing persistent volumes that will be used to provide the OpenShift Container Storage (OCS) service.';
-  const labelTooltip =
-    'The backing storage requested will be higher as it will factor in the requested capacity, replica factor, and fault tolerant costs associated with the requested capacity.';
+
+  const capacity = _.get(response, 'data.result[0].value[1]');
+  let currentCapacity: React.ReactNode;
+  if (loading) {
+    currentCapacity = (
+      <div className="skeleton-text ceph-add-capacity__current-capacity--loading" />
+    );
+  } else if (loadError || !capacity || !presentCount) {
+    currentCapacity = <div className="text-muted">Not available</div>;
+  } else {
+    currentCapacity = (
+      <div className="text-muted">
+        <strong>{`${humanizeBinaryBytes(+capacity).string} / ${presentCount *
+          osdSizeWithoutUnit}TiB`}</strong>
+      </div>
+    );
+  }
 
   const submit = (event: React.FormEvent<EventTarget>) => {
     event.preventDefault();
     setProgress(true);
     const negativeValue = Number(requestSizeValue) < 0 ? -1 : 1;
     const newValue =
-      (Number(presentCount) + Math.abs(Number(requestSizeValue)) / 2) * negativeValue;
+      (Number(presentCount) + Math.abs(Number(requestSizeValue)) / osdSizeWithoutUnit) *
+      negativeValue;
     const patch = {
       op: 'replace',
       path: `/spec/storageDeviceSets/0/count`,
@@ -55,68 +80,49 @@ export const AddCapacityModal = withHandlePromise((props: AddCapacityModalProps)
       .catch((error) => {
         setError(error);
         setProgress(false);
-        setButton(true);
         throw error;
       });
-  };
-
-  const handleRequestSizeInputChange = (capacityObj: any) => {
-    setRequestSizeValue(capacityObj.value);
-    setButton(capacityObj.value % 2 !== 0);
-  };
-
-  const handleStorageClass = (sc: K8sResourceKind) => {
-    setStorageClass(sc.metadata.name);
   };
 
   return (
     <form onSubmit={submit} className="modal-content modal-content--no-inner-scroll">
       <ModalTitle>Add Capacity</ModalTitle>
       <ModalBody>
-        Increase the capacity of <strong>{ocsConfig.metadata.name}</strong>.
-        <div className="add-capacity-modal--padding">
-          <div className="add-capacity-modal__input form-group">
-            <label className="control-label" htmlFor="request-size-input">
-              Capacity
-              <FieldLevelHelp>{labelTooltip}</FieldLevelHelp>
-              <span className="text-secondary add-capacity-modal__span">
-                <span>
-                  Provisioned:
-                  {presentCount ? ` ${presentCount * 2}TiB` : ' Unavailable'}
-                </span>
-              </span>
-            </label>
-            <RequestSizeInput
-              name="requestSize"
-              placeholder={requestSizeValue}
-              onChange={handleRequestSizeInputChange}
-              defaultRequestSizeUnit={requestSizeUnit}
-              defaultRequestSizeValue={requestSizeValue}
-              dropdownUnits={dropdownUnits}
-              step={2}
-              minValue={2}
-              inputClassName="add-capacity-modal__input--width"
-              required
-            />
-            <p
-              className={classNames('text-secondary add-capacity-modal__help-text', {
-                'add-capacity-modal__help-text-error': buttonDisabled,
-              })}
-            >
-              Please enter an even number
-            </p>
-          </div>
-          <label className="control-label">
-            Storage Class
-            <FieldLevelHelp>{storageClassTooltip}</FieldLevelHelp>
+        Adding capacity for <strong>{ocsConfig.metadata.name}</strong>, may increase your cloud
+        expenses.
+        <div className="ceph-add-capacity__modal">
+          <label className="control-label" htmlFor="requestSize">
+            Raw Capacity
+            <FieldLevelHelp>{labelTooltip}</FieldLevelHelp>
           </label>
-          <OCSStorageClassDropdown
-            onChange={handleStorageClass}
-            name="storageClass"
-            defaultClass={storageClass}
-            hideClassName="add-capacity-modal__hide"
-            required
-          />
+          <div className="ceph-add-capacity__form">
+            <input
+              className={classNames('pf-c-form-control', 'ceph-add-capacity__input')}
+              type="number"
+              step={osdSizeWithoutUnit}
+              onChange={(e) => setRequestSizeValue(e.target.value)}
+              name="requestSize"
+              required
+              value={requestSizeValue}
+              min={osdSizeWithoutUnit}
+            />
+            {requestSizeValue && (
+              <div className="ceph-add-capacity__input--info-text">
+                x 3 replicas ={' '}
+                <strong>
+                  {requestSizeValue % 1 ? (requestSizeValue * 3).toFixed(2) : requestSizeValue * 3}{' '}
+                  TiB
+                </strong>{' '}
+                {/* float precision issue hence rounding to 2 decimal places */}
+              </div>
+            )}
+          </div>
+          <div className="ceph-add-capacity__current-capacity">
+            <div className="text-secondary ceph-add-capacity__current-capacity--text">
+              <strong>Current Capacity:</strong>
+            </div>
+            {currentCapacity}
+          </div>
         </div>
       </ModalBody>
       <ModalSubmitFooter
@@ -124,7 +130,6 @@ export const AddCapacityModal = withHandlePromise((props: AddCapacityModalProps)
         errorMessage={errorMessage}
         submitText="Add"
         cancel={cancel}
-        submitDisabled={buttonDisabled}
       />
     </form>
   );

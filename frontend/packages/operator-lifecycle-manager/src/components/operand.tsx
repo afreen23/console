@@ -47,6 +47,7 @@ import { RootState } from '@console/internal/redux';
 import * as plugins from '@console/internal/plugins';
 import { ClusterServiceVersionModel } from '../models';
 import { ClusterServiceVersionKind } from '../types';
+import { isInternalObject, getInternalAPIReferences, getInternalObjects } from '../utils';
 import { StatusDescriptor } from './descriptors/status';
 import { SpecDescriptor } from './descriptors/spec';
 import { StatusCapability, Descriptor } from './descriptors/types';
@@ -251,10 +252,12 @@ const inFlightStateToProps = ({ k8s }: RootState) => ({
 export const ProvidedAPIsPage = connect(inFlightStateToProps)((props: ProvidedAPIsPageProps) => {
   const { obj } = props;
   const { owned = [] } = obj.spec.customresourcedefinitions;
+  const internalObjects = getInternalObjects(obj);
+  const internalAPIs = getInternalAPIReferences(obj);
   const firehoseResources = owned.reduce((resources, desc) => {
     const reference = referenceForProvidedAPI(desc);
     const model = modelFor(reference);
-    return model
+    return model && !internalAPIs.some((api) => api === reference)
       ? [
           ...resources,
           {
@@ -279,7 +282,13 @@ export const ProvidedAPIsPage = connect(inFlightStateToProps)((props: ProvidedAP
   const createProps =
     owned.length > 1
       ? {
-          items: owned.reduce((acc, crd) => ({ ...acc, [crd.name]: crd.displayName }), {}),
+          items: owned.reduce(
+            (acc, crd) =>
+              !isInternalObject(internalObjects, crd.name)
+                ? { ...acc, [crd.name]: crd.displayName }
+                : acc,
+            {},
+          ),
           createLink,
         }
       : { to: owned.length === 1 ? createLink(owned[0].name) : null };

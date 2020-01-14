@@ -1,22 +1,9 @@
-import * as _ from 'lodash-es';
-import * as React from 'react';
-import * as classNames from 'classnames';
 import * as FocusTrap from 'focus-trap-react';
-import { connect } from 'react-redux';
-import { KEY_CODES, Tooltip } from '@patternfly/react-core';
-import { EllipsisVIcon, AngleRightIcon } from '@patternfly/react-icons';
-import Popper from '@console/shared/src/components/popper/Popper';
-import {
-  annotationsModal,
-  configureReplicaCountModal,
-  taintsModal,
-  tolerationsModal,
-  labelsModal,
-  podSelectorModal,
-  deleteModal,
-  expandPVCModal,
-} from '../modals';
-import { asAccessReview, checkAccess, history, resourceObjPath, useAccessReview } from './index';
+import * as React from 'react';
+import * as _ from 'lodash-es';
+import * as classNames from 'classnames';
+import * as plugins from '../../plugins';
+
 import {
   AccessReviewResourceAttributes,
   K8sKind,
@@ -24,9 +11,26 @@ import {
   K8sResourceKindReference,
   referenceForModel,
 } from '../../module/k8s';
-import { impersonateStateToProps } from '../../reducers/ui';
+import { AngleRightIcon, EllipsisVIcon } from '@patternfly/react-icons';
+import { KEY_CODES, Tooltip } from '@patternfly/react-core';
+import {
+  annotationsModal,
+  configureReplicaCountModal,
+  deleteModal,
+  expandPVCModal,
+  labelsModal,
+  podSelectorModal,
+  restorePVCModal,
+  snapshotModal,
+  taintsModal,
+  tolerationsModal
+} from '../modals';
+import { asAccessReview, checkAccess, history, resourceObjPath, useAccessReview } from './index';
+
+import Popper from '@console/shared/src/components/popper/Popper';
+import { connect } from 'react-redux';
 import { connectToModel } from '../../kinds';
-import * as plugins from '../../plugins';
+import { impersonateStateToProps } from '../../reducers/ui';
 
 export const kebabOptionsToMenu = (options: KebabOption[]): KebabMenuOption[] => {
   const subs: { [key: string]: KebabSubMenu } = {};
@@ -198,8 +202,8 @@ export const KebabItem: React.FC<KebabItemProps> = (props) => {
       {item}
     </Tooltip>
   ) : (
-    item
-  );
+      item
+    );
 };
 
 type KebabMenuItemsProps = {
@@ -215,25 +219,25 @@ export const KebabMenuItems: React.FC<KebabMenuItemsProps> = ({
   onClick,
   focusItem,
 }) => (
-  <ul
-    className={classNames('pf-c-dropdown__menu pf-m-align-right', className)}
-    data-test-id="action-items"
-  >
-    {_.map(options, (o) => (
-      <li key={o.label}>
-        {isKebabSubMenu(o) ? (
-          <KebabSubMenu option={o} onClick={onClick} />
-        ) : (
-          <KebabItem
-            option={o}
-            onClick={onClick}
-            autoFocus={focusItem ? o === focusItem : undefined}
-          />
-        )}
-      </li>
-    ))}
-  </ul>
-);
+    <ul
+      className={classNames('pf-c-dropdown__menu pf-m-align-right', className)}
+      data-test-id="action-items"
+    >
+      {_.map(options, (o) => (
+        <li key={o.label}>
+          {isKebabSubMenu(o) ? (
+            <KebabSubMenu option={o} onClick={onClick} />
+          ) : (
+              <KebabItem
+                option={o}
+                onClick={onClick}
+                autoFocus={focusItem ? o === focusItem : undefined}
+              />
+            )}
+        </li>
+      ))}
+    </ul>
+  );
 
 export const KebabItems: React.FC<KebabItemsProps> = ({ options, ...props }) => {
   const menuOptions = kebabOptionsToMenu(options);
@@ -324,6 +328,24 @@ const kebabFactory: KebabFactory = {
     label: 'Expand PVC',
     callback: () =>
       expandPVCModal({
+        kind,
+        resource: obj,
+      }),
+    accessReview: asAccessReview(kind, obj, 'patch'),
+  }),
+  SnapShot: (kind, obj) => ({
+    label: 'Create Snapshot',
+    callback: () =>
+      snapshotModal({
+        kind,
+        resource: obj,
+      }),
+    accessReview: asAccessReview(kind, obj, 'patch'),
+  }),
+  Restore: (kind, obj) => ({
+    label: 'Restore',
+    callback: () =>
+      restorePVCModal({
         kind,
         resource: obj,
       }),

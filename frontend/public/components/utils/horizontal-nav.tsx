@@ -1,13 +1,15 @@
-import * as _ from 'lodash-es';
 import * as React from 'react';
+import * as _ from 'lodash-es';
 import * as classNames from 'classnames';
-import { History, Location } from 'history';
-import { Route, Switch, Link, withRouter, match, matchPath } from 'react-router-dom';
 
 import { EmptyBox, StatusBox } from '.';
-import { PodsPage } from '../pod';
+import { History, Location } from 'history';
+import { Link, Route, Switch, match, matchPath, withRouter } from 'react-router-dom';
+
 import { AsyncComponent } from './async';
 import { K8sResourceKind } from '../../module/k8s';
+import { PodsPage } from '../pod';
+import { SnapshotListPage } from '../pvc-snapshot';
 
 const editYamlComponent = (props) => (
   <AsyncComponent loader={() => import('../edit-yaml').then((c) => c.EditYAML)} obj={props.obj} />
@@ -21,7 +23,9 @@ export const viewYamlComponent = (props) => (
 );
 
 class PodsComponent extends React.PureComponent<PodsComponentProps> {
+
   render() {
+    console.log('lol');
     const {
       metadata: { namespace },
       spec: { selector },
@@ -34,7 +38,30 @@ class PodsComponent extends React.PureComponent<PodsComponentProps> {
     // Otherwise it might seem like you click "Create Pod" to add replicas instead
     // of scaling the owner.
     return (
-      <PodsPage showTitle={false} namespace={namespace} selector={selector} canCreate={false} />
+      <PodsPage showTitle={false} namespace={namespace} seleccsi-cephfsplugin-provisionertor={selector} canCreate={false} />
+    );
+  }
+}
+
+class SnapshotComponent extends React.PureComponent<SnapshotComponentProps> {
+
+  render() {
+    console.log('loll');
+    console.log(this.props.obj);
+    const {
+      metadata: { namespace, name },
+      //spec: { selector },
+    } = this.props.obj;
+    if (_.isEmpty(name)) {
+      return <EmptyBox label="Snapshots" />;
+    }
+    return (
+      <SnapshotListPage
+        showTitle={false}
+        namespace={namespace}
+        selector={name}
+        canCreate={true}
+      />
     );
   }
 }
@@ -128,6 +155,11 @@ export const navFactory: NavFactory = {
     name: 'History',
     component,
   }),
+  snapshot: (component) => ({
+    href: 'volumesnapshots',
+    name: 'Volume Snapshots',
+    component: component || SnapshotComponent,
+  })
 };
 
 export const NavBar = withRouter<NavBarProps>(({ pages, basePath }) => {
@@ -228,6 +260,10 @@ export const HorizontalNav: React.FC<HorizontalNavProps> = React.memo((props) =>
 }, _.isEqual);
 
 export type PodsComponentProps = {
+  obj: K8sResourceKind;
+};
+
+export type SnapshotComponentProps = {
   obj: K8sResourceKind;
 };
 

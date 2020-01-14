@@ -109,3 +109,13 @@ export const removeUserModal = (props) =>
   import('./remove-user-modal' /* webpackChunkName: "remove-user-modal" */).then((m) =>
     m.removeUserModal(props),
   );
+
+export const snapshotModal = (props) =>
+  import('./snapshot-modal' /* webpackChunkName: "clone-pvc-modal" */).then((m) =>
+    m.snapshotModal(props),
+  );
+
+export const restorePVCModal = (props) =>
+  import('./restore-pvc-modal' /* webpackChunkName: "clone-pvc-modal" */).then((m) =>
+    m.restorePVCModal(props),
+  );

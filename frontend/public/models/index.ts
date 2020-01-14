@@ -496,6 +496,17 @@ export const PersistentVolumeClaimModel: K8sKind = {
   labelPlural: 'Persistent Volume Claims',
 };
 
+export const VolumeSnapshotModel: K8sKind = {
+  label: 'Volume Snapshot',
+  apiVersion: 'v1',
+  plural: 'volumeSnapshots',
+  abbr: 'S',
+  namespaced: true,
+  kind: 'VolumeSnapshot',
+  id: 'volumeSnapshot',
+  labelPlural: 'Volume Snapshots',
+};
+
 export const PetsetModel: K8sKind = {
   apiVersion: 'v1',
   label: 'Petset',

@@ -1,6 +1,5 @@
 import * as React from 'react';
 import * as _ from 'lodash-es';
-import { sortable } from '@patternfly/react-table';
 import * as classNames from 'classnames';
 
 import { Status, FLAGS } from '@console/shared';
@@ -9,21 +8,30 @@ import { Conditions } from './conditions';
 import { DetailsPage, ListPage, Table, TableRow, TableData } from './factory';
 import {
   Kebab,
-  navFactory,
   ResourceKebab,
-  SectionHeading,
   ResourceLink,
   ResourceSummary,
+  SectionHeading,
   Selector,
+  navFactory,
 } from './utils';
-import { ResourceEventStream } from './events';
-import { PersistentVolumeClaimModel } from '../models';
+import { PersistentVolumeClaimModel, SnapshotPVCModel } from '../models';
 
-const { common, ExpandPVC } = Kebab.factory;
+import { Conditions } from './conditions';
+import { FLAGS } from '../const';
+import { ResourceEventStream } from './events';
+import { SnapshotListPage } from './pvc-snapshot';
+import { Status } from '@console/shared';
+import { connectToFlags } from '../reducers/features';
+import { sortable } from '@patternfly/react-table';
+
+const { common, ExpandPVC, SnapShot, Restore } = Kebab.factory;
 const menuActions = [
   ExpandPVC,
   ...Kebab.getExtensionsActionsForKind(PersistentVolumeClaimModel),
   ...common,
+  SnapShot,
+  Restore
 ];
 
 const PVCStatus = ({ pvc }) => <Status status={pvc.status.phase} />;
@@ -108,8 +116,8 @@ const PVCTableRow = ({ obj, index, key, style }) => {
             title={obj.spec.volumeName}
           />
         ) : (
-          <div className="text-muted">No Persistent Volume</div>
-        )}
+            <div className="text-muted">No Persistent Volume</div>
+          )}
       </TableData>
       <TableData className={tableColumnClasses[4]}>
         {_.get(obj, 'status.capacity.storage', '-')}
@@ -169,8 +177,8 @@ const Details_ = ({ flags, obj: pvc }) => {
                 {storageClassName ? (
                   <ResourceLink kind="StorageClass" name={storageClassName} />
                 ) : (
-                  '-'
-                )}
+                    '-'
+                  )}
               </dd>
               {volumeName && canListPV && (
                 <>
@@ -192,6 +200,15 @@ const Details_ = ({ flags, obj: pvc }) => {
   );
 };
 
+const SnapshotTab: React.FC<ReplicaSetsTabProps> = ({ obj }) => {
+
+  return (
+    <SnapshotListPage
+      // fieldSelector={`involvedObject.uid=${uid},involvedObject.name=${name},involvedObject.kind=${'VolumeSnapshot'}`}
+      pvcObj={obj}
+    />
+  );
+};
 const Details = connectToFlags(FLAGS.CAN_LIST_PV)(Details_);
 
 const allPhases = ['Pending', 'Bound', 'Lost'];
@@ -220,6 +237,7 @@ export const PersistentVolumeClaimsPage = (props) => {
   const createProps = {
     to: `/k8s/ns/${props.namespace || 'default'}/persistentvolumeclaims/~new/form`,
   };
+  console.log(props);
   return (
     <ListPage
       {...props}
@@ -231,6 +249,7 @@ export const PersistentVolumeClaimsPage = (props) => {
     />
   );
 };
+
 export const PersistentVolumeClaimsDetailsPage = (props) => (
   <DetailsPage
     {...props}
@@ -239,6 +258,7 @@ export const PersistentVolumeClaimsDetailsPage = (props) => (
       navFactory.details(Details),
       navFactory.editYaml(),
       navFactory.events(ResourceEventStream),
+      navFactory.snapshot(SnapshotTab),
     ]}
   />
 );

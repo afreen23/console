@@ -1,12 +1,11 @@
-import { Map as ImmutableMap } from 'immutable';
+import * as plugins from '../plugins';
 
-import { ReportReference, ReportGenerationQueryReference } from './chargeback';
-import { referenceForModel, GroupVersionKind } from '../module/k8s';
 import {
   AlertmanagerModel,
   BuildConfigModel,
   BuildModel,
   ClusterOperatorModel,
+  ClusterResourceQuotaModel,
   ClusterRoleModel,
   ClusterServiceBrokerModel,
   ClusterServiceClassModel,
@@ -15,7 +14,6 @@ import {
   ConfigMapModel,
   ContainerModel,
   CronJobModel,
-  ClusterResourceQuotaModel,
   CustomResourceDefinitionModel,
   DaemonSetModel,
   DeploymentConfigModel,
@@ -59,9 +57,12 @@ import {
   StorageClassModel,
   TemplateInstanceModel,
   UserModel,
+  VolumeSnapshotModel,
 } from '../models';
+import { GroupVersionKind, referenceForModel } from '../module/k8s';
+import { ReportGenerationQueryReference, ReportReference } from './chargeback';
 
-import * as plugins from '../plugins';
+import { Map as ImmutableMap } from 'immutable';
 
 const addResourcePage = (
   map: ImmutableMap<ResourceMapKey, ResourceMapValue>,
@@ -276,6 +277,11 @@ export const baseDetailsPages = ImmutableMap<ResourceMapKey, ResourceMapValue>()
   .set(referenceForModel(PersistentVolumeClaimModel), () =>
     import('./persistent-volume-claim' /* webpackChunkName: "persistent-volume-claim" */).then(
       (m) => m.PersistentVolumeClaimsDetailsPage,
+    ),
+  )
+  .set(referenceForModel(VolumeSnapshotModel), () =>
+    import('./pvc-snapshot' /* webpackChunkName: "snapshot" */).then(
+      (m) => m.SnapshotListDetailsPage,
     ),
   )
   .set(ReportReference, () =>
@@ -504,6 +510,11 @@ export const baseListPages = ImmutableMap<ResourceMapKey, ResourceMapValue>()
   .set(referenceForModel(PersistentVolumeClaimModel), () =>
     import('./persistent-volume-claim' /* webpackChunkName: "persistent-volume-claim" */).then(
       (m) => m.PersistentVolumeClaimsPage,
+    ),
+  )
+  .set(referenceForModel(VolumeSnapshotModel), () =>
+    import('./pvc-snapshot' /* webpackChunkName: "snapshot" */).then(
+      (m) => m.SnapshotListPage,
     ),
   )
   .set(ReportReference, () =>

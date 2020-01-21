@@ -1,5 +1,5 @@
-import * as _ from 'lodash';
 import { PrometheusResponse } from '@console/internal/components/graphs';
+import * as _ from 'lodash';
 
 export const getResiliencyProgress = (results: PrometheusResponse): number => {
   /**

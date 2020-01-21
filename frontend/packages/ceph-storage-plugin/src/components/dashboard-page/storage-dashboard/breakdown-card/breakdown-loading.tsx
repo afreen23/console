@@ -1,5 +1,5 @@
-import * as React from 'react';
 import { Grid, GridItem } from '@patternfly/react-core';
+import * as React from 'react';
 import './breakdown-card.scss';
 
 export const BreakdownChartLoading: React.FC = () => (

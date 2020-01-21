@@ -1,7 +1,3 @@
-import * as React from 'react';
-import * as _ from 'lodash';
-import * as classNames from 'classnames';
-import { connect } from 'react-redux';
 import {
   Table,
   TableHeader,
@@ -40,6 +36,10 @@ import {
 } from '@console/internal/module/k8s';
 import { NodeModel, InfrastructureModel, StorageClassModel } from '@console/internal/models';
 import { isDefaultClass } from '@console/internal/components/storage-class';
+import { connect } from 'react-redux';
+import * as classNames from 'classnames';
+import * as _ from 'lodash';
+import * as React from 'react';
 import { OCSServiceModel } from '../../models';
 import {
   infraProvisionerMap,

@@ -1,6 +1,6 @@
-import * as _ from 'lodash';
 import { HealthState } from '@console/shared/src/components/dashboard/status-card/states';
 import { PrometheusHealthHandler } from '@console/plugin-sdk';
+import * as _ from 'lodash';
 import { getResiliencyProgress } from '../../../../utils';
 
 const CephHealthStatus = [

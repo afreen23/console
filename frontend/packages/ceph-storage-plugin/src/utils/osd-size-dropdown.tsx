@@ -1,5 +1,5 @@
-import * as React from 'react';
 import { Dropdown } from '@console/internal/components/utils';
+import * as React from 'react';
 
 export const OSD_CAPACITY_SIZES = {
   '512Gi': {

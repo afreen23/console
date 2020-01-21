@@ -1,7 +1,7 @@
-import { browser, ExpectedConditions as until, $ } from 'protractor';
 import * as crudView from '@console/internal-integration-tests/views/crud.view';
 import * as sideNavView from '@console/internal-integration-tests/views/sidenav.view';
 import { click } from '@console/shared/src/test-utils/utils';
+import { browser, ExpectedConditions as until, $ } from 'protractor';
 import { CAPACITY_UNIT, CAPACITY_VALUE, OCS_OP, STORAGE_CLUSTER_TAB_CNT } from '../utils/consts';
 import { namespaceDropdown, openshiftStorageItem } from './installFlow.view';
 

@@ -1,8 +1,8 @@
-import * as _ from 'lodash';
 import { Alert } from '@console/internal/components/monitoring';
 import { K8sResourceKind } from '@console/internal/module/k8s';
 import { FirehoseResult } from '@console/internal/components/utils';
 import { cephStorageProvisioners } from '@console/shared/src/utils';
+import * as _ from 'lodash';
 import { OCS_OPERATOR } from '../constants';
 
 const cephStorageLabel = 'cluster.ocs.openshift.io/openshift-storage';

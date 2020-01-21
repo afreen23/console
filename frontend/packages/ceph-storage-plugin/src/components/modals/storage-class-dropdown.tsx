@@ -1,10 +1,10 @@
-import * as React from 'react';
-import * as _ from 'lodash';
 import { Firehose } from '@console/internal/components/utils';
 import { InfrastructureModel } from '@console/internal/models';
 import { K8sResourceKind, StorageClassResourceKind, k8sGet } from '@console/internal/module/k8s';
 import { StorageClassDropdownInner } from '@console/internal/components/utils/storage-class-dropdown';
 import { getInfrastructurePlatform } from '@console/shared';
+import * as _ from 'lodash';
+import * as React from 'react';
 import { infraProvisionerMap } from '../../constants/ocs-install';
 
 export const OCSStorageClassDropdown: React.FC<OCSStorageClassDropdownProps> = (props) => (

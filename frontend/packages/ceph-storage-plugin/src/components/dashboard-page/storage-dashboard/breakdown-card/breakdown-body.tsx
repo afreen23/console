@@ -1,7 +1,7 @@
-import * as React from 'react';
 import { EmptyState, EmptyStateVariant, Grid, GridItem, Title } from '@patternfly/react-core';
 import { Humanize } from '@console/internal/components/utils';
 import { K8sKind } from '@console/internal/module/k8s';
+import * as React from 'react';
 import { addAvailable, getCapacityValue, StackDataPoint } from './utils';
 import { BreakdownChart } from './breakdown-chart';
 import { BreakdownChartLoading } from './breakdown-loading';

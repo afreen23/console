@@ -1,9 +1,9 @@
-import * as React from 'react';
 import { Alert } from '@patternfly/react-core';
 import { K8sResourceKind, K8sKind } from '@console/internal/module/k8s';
 import { ListPage } from '@console/internal/components/factory';
 import { NodeModel } from '@console/internal/models';
 import { ClusterServiceVersionKind } from '@console/operator-lifecycle-manager/src/types';
+import * as React from 'react';
 import { NodeList } from './node-list';
 
 import './ocs-install.scss';

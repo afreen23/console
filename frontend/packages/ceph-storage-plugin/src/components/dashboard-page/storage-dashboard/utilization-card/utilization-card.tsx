@@ -1,5 +1,3 @@
-import * as React from 'react';
-import * as _ from 'lodash';
 import DashboardCard from '@console/shared/src/components/dashboard/dashboard-card/DashboardCard';
 import DashboardCardBody from '@console/shared/src/components/dashboard/dashboard-card/DashboardCardBody';
 import DashboardCardHeader from '@console/shared/src/components/dashboard/dashboard-card/DashboardCardHeader';
@@ -25,6 +23,8 @@ import {
 import { ByteDataTypes } from '@console/shared/src/graph-helper/data-utils';
 import ConsumerPopover from '@console/shared/src/components/dashboard/utilization-card/TopConsumerPopover';
 import { getPrometheusQueryResponse } from '@console/internal/actions/dashboards';
+import * as _ from 'lodash';
+import * as React from 'react';
 import {
   StorageDashboardQuery,
   UTILIZATION_QUERY,

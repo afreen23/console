@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { Gallery, GalleryItem } from '@patternfly/react-core';
 import { ALERTS_KEY } from '@console/internal/actions/dashboards';
 import AlertsBody from '@console/shared/src/components/dashboard/status-card/AlertsBody';
@@ -16,6 +15,7 @@ import {
   withDashboardResources,
   DashboardItemProps,
 } from '@console/internal/components/dashboard/with-dashboard-resources';
+import * as React from 'react';
 import {
   DATA_RESILIENCY_QUERY,
   STORAGE_HEALTH_QUERIES,

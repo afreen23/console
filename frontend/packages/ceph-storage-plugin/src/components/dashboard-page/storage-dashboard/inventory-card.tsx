@@ -1,5 +1,3 @@
-import * as React from 'react';
-import * as _ from 'lodash';
 import DashboardCard from '@console/shared/src/components/dashboard/dashboard-card/DashboardCard';
 import DashboardCardBody from '@console/shared/src/components/dashboard/dashboard-card/DashboardCardBody';
 import DashboardCardHeader from '@console/shared/src/components/dashboard/dashboard-card/DashboardCardHeader';
@@ -22,6 +20,8 @@ import {
   StorageClassModel,
 } from '@console/internal/models';
 import { ResourceInventoryItem } from '@console/shared/src/components/dashboard/inventory-card/InventoryItem';
+import * as _ from 'lodash';
+import * as React from 'react';
 import { getCephNodes, getCephPVs, getCephPVCs, getCephSC } from '../../../selectors';
 
 const k8sResources: FirehoseResource[] = [

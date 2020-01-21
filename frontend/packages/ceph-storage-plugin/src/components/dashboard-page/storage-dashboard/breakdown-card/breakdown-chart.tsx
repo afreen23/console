@@ -1,5 +1,3 @@
-import * as React from 'react';
-import { Link } from 'react-router-dom';
 import {
   Chart,
   ChartAxis,
@@ -15,6 +13,8 @@ import { DataPoint } from '@console/internal/components/graphs';
 import { K8sKind, referenceForModel } from '@console/internal/module/k8s';
 import { resourcePathFromModel } from '@console/internal/components/utils';
 import { CEPH_STORAGE_NAMESPACE } from '@console/ceph-storage-plugin/src/constants';
+import { Link } from 'react-router-dom';
+import * as React from 'react';
 import { getBarRadius, StackDataPoint } from './utils';
 import { OTHER, CLUSTERWIDE, BUCKETCLASSKIND } from './consts';
 import './breakdown-card.scss';
@@ -27,7 +27,10 @@ const LinkableLegend: React.FC<LinkableLegendProps> = React.memo((props: Linkabl
       <ChartLabel
         {...props}
         lineHeight={1.2}
-        style={[{ ...datum.labels, fontSize: 9 }, { fill: 'black', fontSize: 8 }]}
+        style={[
+          { ...datum.labels, fontSize: 9 },
+          { fill: 'black', fontSize: 8 },
+        ]}
       />
     </Tooltip>
   );

@@ -1,6 +1,3 @@
-import * as React from 'react';
-import * as _ from 'lodash';
-import { match } from 'react-router';
 import {
   K8sResourceKind,
   K8sKind,
@@ -10,6 +7,9 @@ import {
 import { BreadCrumbs } from '@console/internal/components/utils/index';
 import { ClusterServiceVersionModel } from '@console/operator-lifecycle-manager/src/models';
 import { ClusterServiceVersionKind } from '@console/operator-lifecycle-manager/src/types';
+import { match } from 'react-router';
+import * as _ from 'lodash';
+import * as React from 'react';
 import { OCSServiceModel } from '../../models';
 import { CreateOCSServiceForm } from './create-form';
 

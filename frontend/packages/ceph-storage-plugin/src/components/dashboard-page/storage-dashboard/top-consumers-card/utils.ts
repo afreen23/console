@@ -1,6 +1,6 @@
-import * as _ from 'lodash';
 import { humanizeBinaryBytes } from '@console/internal/components/utils';
 import { PrometheusResponse, DataPoint } from '@console/internal/components/graphs';
+import * as _ from 'lodash';
 
 export const getMetricType: GetMetricType = (resource, metricType) =>
   _.get(resource, ['metric', metricType], '');

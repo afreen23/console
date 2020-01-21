@@ -1,6 +1,6 @@
 import { execSync } from 'child_process';
-import { browser } from 'protractor';
 import * as crudView from '@console/internal-integration-tests/views/crud.view';
+import { browser } from 'protractor';
 import {
   MINUTE,
   NS,

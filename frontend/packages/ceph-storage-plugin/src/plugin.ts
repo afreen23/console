@@ -1,4 +1,3 @@
-import * as _ from 'lodash';
 import {
   DashboardsCard,
   DashboardsTab,
@@ -14,6 +13,7 @@ import { GridPosition } from '@console/shared/src/components/dashboard/Dashboard
 import { OverviewQuery } from '@console/internal/components/dashboard/dashboards-page/overview-dashboard/queries';
 import { ClusterServiceVersionModel } from '@console/operator-lifecycle-manager/src/models';
 import { referenceForModel } from '@console/internal/module/k8s';
+import * as _ from 'lodash';
 import * as models from './models';
 import {
   CAPACITY_USAGE_QUERIES,

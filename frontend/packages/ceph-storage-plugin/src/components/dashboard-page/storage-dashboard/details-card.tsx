@@ -1,5 +1,3 @@
-import * as React from 'react';
-import * as _ from 'lodash';
 import { getInfrastructurePlatform } from '@console/shared';
 import DashboardCard from '@console/shared/src/components/dashboard/dashboard-card/DashboardCard';
 import DashboardCardBody from '@console/shared/src/components/dashboard/dashboard-card/DashboardCardBody';
@@ -18,6 +16,8 @@ import { K8sResourceKind } from '@console/internal/module/k8s/index';
 import { getName } from '@console/shared/src/selectors/common';
 import { referenceForModel } from '@console/internal/module/k8s/k8s';
 import { useK8sGet } from '@console/internal/components/utils/k8s-get-hook';
+import * as _ from 'lodash';
+import * as React from 'react';
 import { CephClusterModel } from '../../../models';
 import { getOCSVersion } from '../../../selectors';
 

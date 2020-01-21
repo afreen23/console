@@ -1,5 +1,3 @@
-import * as React from 'react';
-import * as _ from 'lodash';
 import {
   Chart,
   ChartAxis,
@@ -14,6 +12,8 @@ import { DataPoint, PrometheusResponse } from '@console/internal/components/grap
 import { humanizeBinaryBytes, LoadingInline } from '@console/internal/components/utils';
 import { twentyFourHourTime } from '@console/internal/components/utils/datetime';
 import { GraphEmpty } from '@console/internal/components/graphs/graph-empty';
+import * as _ from 'lodash';
+import * as React from 'react';
 import { getGraphVectorStats, getMetricType, sortResources } from './utils';
 
 const chartPropsValue = {

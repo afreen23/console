@@ -1,6 +1,3 @@
-import * as React from 'react';
-import * as _ from 'lodash';
-import * as classNames from 'classnames';
 import {
   FieldLevelHelp,
   withHandlePromise,
@@ -15,6 +12,10 @@ import {
 import { usePrometheusPoll } from '@console/internal/components/graphs/prometheus-poll-hook';
 import { k8sPatch } from '@console/internal/module/k8s';
 import { PrometheusEndpoint } from '@console/internal/components/graphs/helpers';
+import { getName } from '@console/shared';
+import * as classNames from 'classnames';
+import * as _ from 'lodash';
+import * as React from 'react';
 import { OCSServiceModel } from '../../../models';
 import { OSD_CAPACITY_SIZES } from '../../../utils/osd-size-dropdown';
 import { CEPH_STORAGE_NAMESPACE } from '../../../constants';
@@ -22,6 +23,8 @@ import './_add-capacity-modal.scss';
 
 const labelTooltip =
   'The backing storage requested will be higher as it will factor in the requested capacity, replica factor, and fault tolerant costs associated with the requested capacity.';
+
+const getProvisionedCapacity = (value: number) => (value % 1 ? (value * 3).toFixed(2) : value * 3);
 
 export const AddCapacityModal = withHandlePromise((props: AddCapacityModalProps) => {
   const { ocsConfig, close, cancel } = props;
@@ -54,7 +57,7 @@ export const AddCapacityModal = withHandlePromise((props: AddCapacityModalProps)
     currentCapacity = (
       <div className="text-muted">
         <strong>{`${humanizeBinaryBytes(+capacity).string} / ${presentCount *
-          osdSizeWithoutUnit}TiB`}</strong>
+          osdSizeWithoutUnit} TiB`}</strong>
       </div>
     );
   }
@@ -83,13 +86,11 @@ export const AddCapacityModal = withHandlePromise((props: AddCapacityModalProps)
         throw error;
       });
   };
-
   return (
     <form onSubmit={submit} className="modal-content modal-content--no-inner-scroll">
       <ModalTitle>Add Capacity</ModalTitle>
       <ModalBody>
-        Adding capacity for <strong>{ocsConfig.metadata.name}</strong>, may increase your cloud
-        expenses.
+        Adding capacity for <strong>{getName(ocsConfig)}</strong>, may increase your cloud expenses.
         <div className="ceph-add-capacity__modal">
           <label className="control-label" htmlFor="requestSize">
             Raw Capacity
@@ -108,12 +109,7 @@ export const AddCapacityModal = withHandlePromise((props: AddCapacityModalProps)
             />
             {requestSizeValue && (
               <div className="ceph-add-capacity__input--info-text">
-                x 3 replicas ={' '}
-                <strong>
-                  {requestSizeValue % 1 ? (requestSizeValue * 3).toFixed(2) : requestSizeValue * 3}{' '}
-                  TiB
-                </strong>{' '}
-                {/* float precision issue hence rounding to 2 decimal places */}
+                x 3 replicas = <strong>{getProvisionedCapacity(requestSizeValue)} TiB</strong>
               </div>
             )}
           </div>

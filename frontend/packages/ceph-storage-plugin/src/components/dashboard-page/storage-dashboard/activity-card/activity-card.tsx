@@ -1,5 +1,3 @@
-import * as React from 'react';
-import * as _ from 'lodash';
 import DashboardCard from '@console/shared/src/components/dashboard/dashboard-card/DashboardCard';
 import DashboardCardBody from '@console/shared/src/components/dashboard/dashboard-card/DashboardCardBody';
 import DashboardCardHeader from '@console/shared/src/components/dashboard/dashboard-card/DashboardCardHeader';
@@ -21,6 +19,8 @@ import {
   DashboardItemProps,
   withDashboardResources,
 } from '@console/internal/components/dashboard/with-dashboard-resources';
+import * as _ from 'lodash';
+import * as React from 'react';
 import { CEPH_STORAGE_NAMESPACE } from '../../../../constants/index';
 import { DATA_RESILIENCY_QUERY, StorageDashboardQuery } from '../../../../constants/queries';
 import { getResiliencyProgress } from '../../../../utils';

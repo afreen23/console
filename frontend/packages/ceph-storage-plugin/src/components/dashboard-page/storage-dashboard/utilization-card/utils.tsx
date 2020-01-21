@@ -1,4 +1,3 @@
-import * as _ from 'lodash';
 import { DataPoint } from '@console/internal/components/graphs';
 import {
   Humanize,
@@ -6,6 +5,7 @@ import {
   humanizeSeconds,
   secondsToNanoSeconds,
 } from '@console/internal/components/utils';
+import * as _ from 'lodash';
 
 export const humanizeIOPS: Humanize = (value) => {
   const humanizedNumber = humanizeNumber(value);

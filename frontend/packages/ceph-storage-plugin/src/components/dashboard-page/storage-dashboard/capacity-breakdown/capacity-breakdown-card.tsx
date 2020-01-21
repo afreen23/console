@@ -1,5 +1,3 @@
-import * as React from 'react';
-import * as _ from 'lodash';
 import { Dropdown, humanizeBinaryBytes } from '@console/internal/components/utils';
 import {
   DashboardItemProps,
@@ -10,6 +8,8 @@ import DashboardCard from '@console/shared/src/components/dashboard/dashboard-ca
 import DashboardCardTitle from '@console/shared/src/components/dashboard/dashboard-card/DashboardCardTitle';
 import DashboardCardBody from '@console/shared/src/components/dashboard/dashboard-card/DashboardCardBody';
 import { getInstantVectorStats } from '@console/internal/components/graphs/utils';
+import * as _ from 'lodash';
+import * as React from 'react';
 import { breakdownQueryMap, CAPACITY_BREAKDOWN_QUERIES } from '../../../../constants/queries';
 import { PROJECTS } from '../../../../constants/index';
 import { BreakdownCardBody } from '../breakdown-card/breakdown-body';

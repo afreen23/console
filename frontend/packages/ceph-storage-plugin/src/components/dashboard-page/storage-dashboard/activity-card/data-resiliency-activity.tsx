@@ -1,6 +1,6 @@
-import * as React from 'react';
 import { Progress, ProgressSize } from '@patternfly/react-core';
 import { PrometheusResponse } from '@console/internal/components/graphs';
+import * as React from 'react';
 import { getResiliencyProgress } from '../../../../utils';
 
 export const DataResiliency: React.FC<DataResiliencyProps> = ({ results }) => {

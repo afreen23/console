@@ -1,10 +1,10 @@
 import { execSync } from 'child_process';
-import * as _ from 'lodash';
-import { browser, ExpectedConditions as until } from 'protractor';
 import { click } from '@console/shared/src/test-utils/utils';
 import { isNodeReady } from '@console/shared/src/selectors/node';
 import { PodKind } from '@console/internal/module/k8s';
 import { getName } from '@console/shared/src/selectors/common';
+import { browser, ExpectedConditions as until } from 'protractor';
+import * as _ from 'lodash';
 import {
   confirmButton,
   clickKebabAction,

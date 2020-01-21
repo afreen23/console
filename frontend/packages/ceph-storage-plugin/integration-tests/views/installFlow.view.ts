@@ -1,8 +1,8 @@
-import { $, ExpectedConditions as until, browser, $$ } from 'protractor';
 import * as crudView from '@console/internal-integration-tests/views/crud.view';
 import * as sideNavView from '@console/internal-integration-tests/views/sidenav.view';
 import { click } from '@console/shared/src/test-utils/utils';
 import { appHost } from '@console/internal-integration-tests/protractor.conf';
+import { $, ExpectedConditions as until, browser, $$ } from 'protractor';
 import { MINUTE, NS, OCS_OP, SECOND, OCS_OPERATOR_NAME } from '../utils/consts';
 import { waitFor, refreshIfNotVisible } from '../utils/helpers';
 

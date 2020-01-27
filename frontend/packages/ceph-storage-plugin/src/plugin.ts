@@ -18,9 +18,9 @@ import * as models from './models';
 import {
   CAPACITY_USAGE_QUERIES,
   StorageDashboardQuery,
-  STORAGE_HEALTH_QUERIES,
+  // STORAGE_HEALTH_QUERIES,
 } from './constants/queries';
-import { getCephHealthState } from './components/dashboard-page/storage-dashboard/status-card/utils';
+// import { getCephHealthState } from './components/dashboard-page/storage-dashboard/status-card/utils';
 
 type ConsumedExtensions =
   | ModelFeatureFlag
@@ -144,15 +144,15 @@ const plugin: Plugin<ConsumedExtensions> = [
       required: CEPH_FLAG,
     },
   },
-  {
-    type: 'Dashboards/Overview/Health/Prometheus',
-    properties: {
-      title: 'Storage',
-      queries: [STORAGE_HEALTH_QUERIES[StorageDashboardQuery.CEPH_STATUS_QUERY]],
-      healthHandler: getCephHealthState,
-      required: CEPH_FLAG,
-    },
-  },
+  // {
+  //   type: 'Dashboards/Overview/Health/UR',
+  //   properties: {
+  //     title: 'Storage',
+  //     queries: [STORAGE_HEALTH_QUERIES[StorageDashboardQuery.CEPH_STATUS_QUERY]],
+  //     healthHandler: getCephHealthState,
+  //     required: CEPH_FLAG,
+  //   },
+  // },
   {
     type: 'Dashboards/Overview/Utilization/Item',
     properties: {

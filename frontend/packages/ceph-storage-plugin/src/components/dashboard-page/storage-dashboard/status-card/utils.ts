@@ -2,33 +2,27 @@ import * as _ from 'lodash';
 import { HealthState } from '@console/shared/src/components/dashboard/status-card/states';
 import { PrometheusHealthHandler } from '@console/plugin-sdk';
 import { getResiliencyProgress } from '../../../../utils';
+import { K8sResourceKind } from '@console/internal/module/k8s';
 
-const CephHealthStatus = [
-  {
-    state: HealthState.OK,
-  },
-  {
-    state: HealthState.WARNING,
-  },
-  {
-    state: HealthState.ERROR,
-  },
-  {
-    state: HealthState.UNKNOWN,
-  },
-];
+const CephHealthStatus = {
+  HEALTH_OK: HealthState.OK,
+  HEALTH_WARN: HealthState.WARNING,
+  HEALTH_ERR: HealthState.ERROR,
+};
 
-export const getCephHealthState: PrometheusHealthHandler = (responses = [], errors = []) => {
-  if (errors[0]) {
-    return CephHealthStatus[3];
+export const getCephHealthState: GetCephHealthState = (response, loaded) => {
+  if (loaded && !response) {
+    return HealthState.UNKNOWN;
   }
-  if (!responses[0]) {
+  if (!loaded) {
     return { state: HealthState.LOADING };
   }
 
-  const value = _.get(responses[0], 'data.result[0].value[1]');
-  return CephHealthStatus[value] || CephHealthStatus[3];
+  const value = response?.spec?.status?.ceph.health;
+  return CephHealthStatus[value] || HealthState.UNKNOWN;
 };
+
+type GetCephHealthState = (response: K8sResourceKind, loaded: boolean) => HealthState;
 
 export const getDataResiliencyState: PrometheusHealthHandler = (responses = [], errors = []) => {
   const progress: number = getResiliencyProgress(responses[0]);

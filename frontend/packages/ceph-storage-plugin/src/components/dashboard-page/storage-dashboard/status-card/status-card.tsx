@@ -16,15 +16,18 @@ import {
   withDashboardResources,
   DashboardItemProps,
 } from '@console/internal/components/dashboard/with-dashboard-resources';
-import {
-  DATA_RESILIENCY_QUERY,
-  STORAGE_HEALTH_QUERIES,
-  StorageDashboardQuery,
-} from '../../../../constants/queries';
+import { FirehoseResource } from '@console/internal/components/utils';
+import { DATA_RESILIENCY_QUERY, StorageDashboardQuery } from '../../../../constants/queries';
 import { filterCephAlerts } from '../../../../selectors';
 import { getCephHealthState, getDataResiliencyState } from './utils';
+import { CephClusterModel } from '../../../../models';
 
-const cephStatusQuery = STORAGE_HEALTH_QUERIES[StorageDashboardQuery.CEPH_STATUS_QUERY];
+const cephClusterResource: FirehoseResource = {
+  isList: true,
+  kind: CephClusterModel.kind,
+  prop: 'cephCluster',
+};
+
 const resiliencyProgressQuery = DATA_RESILIENCY_QUERY[StorageDashboardQuery.RESILIENCY_PROGRESS];
 
 const CephAlerts = withDashboardResources(({ watchAlerts, stopWatchAlerts, alertsResults }) => {
@@ -54,28 +57,32 @@ const CephAlerts = withDashboardResources(({ watchAlerts, stopWatchAlerts, alert
 
 export const StatusCard: React.FC<DashboardItemProps> = ({
   watchPrometheus,
+  watchK8sResource,
+  stopWatchK8sResource,
   stopWatchPrometheusQuery,
   prometheusResults,
+  resources,
 }) => {
   React.useEffect(() => {
-    watchPrometheus(cephStatusQuery);
+    watchK8sResource(cephClusterResource);
     watchPrometheus(resiliencyProgressQuery);
 
     return () => {
-      stopWatchPrometheusQuery(cephStatusQuery);
+      stopWatchK8sResource(cephClusterResource);
       stopWatchPrometheusQuery(resiliencyProgressQuery);
     };
-  }, [watchPrometheus, stopWatchPrometheusQuery]);
+  }, [watchPrometheus, stopWatchPrometheusQuery, watchK8sResource, stopWatchK8sResource]);
 
-  const cephStatus = prometheusResults.getIn([cephStatusQuery, 'data']) as PrometheusResponse;
-  const cephStatusError = prometheusResults.getIn([cephStatusQuery, 'loadError']);
+  const cephResource = resources?.cephCluster;
+  const cephLoaded = cephResource?.loaded;
+  const cephStatus = cephResource?.data?.[0];
   const resiliencyProgress = prometheusResults.getIn([
     resiliencyProgressQuery,
     'data',
   ]) as PrometheusResponse;
   const resiliencyProgressError = prometheusResults.getIn([resiliencyProgressQuery, 'loadError']);
 
-  const cephHealthState = getCephHealthState([cephStatus], [cephStatusError]);
+  const cephHealthState = getCephHealthState(cephStatus, cephLoaded);
   const dataResiliencyState = getDataResiliencyState(
     [resiliencyProgress],
     [resiliencyProgressError],
@@ -90,7 +97,7 @@ export const StatusCard: React.FC<DashboardItemProps> = ({
         <HealthBody>
           <Gallery className="co-overview-status__health" gutter="md">
             <GalleryItem>
-              <HealthItem title="OCS Cluster" state={cephHealthState.state} />
+              <HealthItem title="OCS Cluster" state={cephHealthState} />
             </GalleryItem>
             <GalleryItem>
               <HealthItem title="Data Resiliency" state={dataResiliencyState.state} />

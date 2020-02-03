@@ -112,8 +112,8 @@ export const ClonePVCModal = withHandlePromise((props: ClonePVCModalProps) => {
                         {resource.spec.storageClassName}
                       </>
                     ) : (
-                        'None'
-                      )}
+                      'None'
+                    )}
                   </p>
                 </div>
               </div>

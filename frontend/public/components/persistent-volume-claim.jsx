@@ -116,8 +116,8 @@ const PVCTableRow = ({ obj, index, key, style }) => {
             title={obj.spec.volumeName}
           />
         ) : (
-            <div className="text-muted">No Persistent Volume</div>
-          )}
+          <div className="text-muted">No Persistent Volume</div>
+        )}
       </TableData>
       <TableData className={tableColumnClasses[4]}>
         {_.get(obj, 'status.capacity.storage', '-')}
@@ -181,8 +181,8 @@ const Details_ = ({ flags, obj: pvc }) => {
                 {storageClassName ? (
                   <ResourceLink kind="StorageClass" name={storageClassName} />
                 ) : (
-                    '-'
-                  )}
+                  '-'
+                )}
               </dd>
               {volumeName && canListPV && (
                 <>

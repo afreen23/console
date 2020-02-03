@@ -18,10 +18,10 @@ export const ClonePVC = (kind: K8sKind, resource: K8sResourceKind): KebabOption 
         verb: 'create',
       },
     };
-  };
+  }
   return {
     label: null,
     callback: () => null,
-    accessReview: {}
+    accessReview: {},
   };
 };

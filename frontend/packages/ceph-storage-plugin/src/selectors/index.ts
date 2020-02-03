@@ -19,6 +19,16 @@ export const getCephPVs = (pvsData: K8sResourceKind[] = []): K8sResourceKind[] =
     );
   });
 
+export const isCephStorageProvisioner = (obj) => {
+  return cephStorageProvisioners.some((provisioner: string) =>
+    _.get(
+      obj,
+      'metadata.annotations["volume.beta.kubernetes.io/storage-provisioner"]',
+      '',
+    ).includes(provisioner),
+  );
+};
+
 const getPVStorageClass = (pv: K8sResourceKind) => _.get(pv, 'spec.storageClassName');
 const getStorageClassName = (pvc: K8sResourceKind) =>
   _.get(pvc, ['metadata', 'annotations', 'volume.beta.kubernetes.io/storage-class']) ||

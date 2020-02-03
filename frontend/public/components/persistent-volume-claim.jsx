@@ -21,14 +21,12 @@ import { PersistentVolumeClaimModel } from '../models';
 
 const { common, ExpandPVC } = Kebab.factory;
 const menuActions = [
-  ...Kebab.getExtensionsActionsForKind(PersistentVolumeClaimModel),
+  // ...Kebab.getExtensionsActionsForKind(PersistentVolumeClaimModel),
   ExpandPVC,
   ...common,
 ];
 
-const PVCStatus = ({ pvc }) => (
-  <Status status={pvc.metadata.deletionTimestamp ? 'Terminating' : pvc.status.phase} />
-);
+const PVCStatus = ({ pvc }) => <Status status={pvc.status.phase} />;
 
 const tableColumnClasses = [
   classNames('col-lg-2', 'col-md-2', 'col-sm-4', 'col-xs-6'),
@@ -110,14 +108,14 @@ const PVCTableRow = ({ obj, index, key, style }) => {
             title={obj.spec.volumeName}
           />
         ) : (
-          <div className="text-muted">No Persistent Volume</div>
-        )}
+            <div className="text-muted">No Persistent Volume</div>
+          )}
       </TableData>
       <TableData className={tableColumnClasses[4]}>
         {_.get(obj, 'status.capacity.storage', '-')}
       </TableData>
       <TableData className={tableColumnClasses[5]}>
-        <ResourceKebab actions={menuActions} kind={kind} resource={obj} />
+        <ResourceKebab actions={[menuActions]} kind={kind} resource={obj} />
       </TableData>
     </TableRow>
   );
@@ -171,8 +169,8 @@ const Details_ = ({ flags, obj: pvc }) => {
                 {storageClassName ? (
                   <ResourceLink kind="StorageClass" name={storageClassName} />
                 ) : (
-                  '-'
-                )}
+                    '-'
+                  )}
               </dd>
               {volumeName && canListPV && (
                 <>
@@ -233,14 +231,22 @@ export const PersistentVolumeClaimsPage = (props) => {
     />
   );
 };
-export const PersistentVolumeClaimsDetailsPage = (props) => (
-  <DetailsPage
-    {...props}
-    menuActions={menuActions}
-    pages={[
-      navFactory.details(Details),
-      navFactory.editYaml(),
-      navFactory.events(ResourceEventStream),
-    ]}
-  />
-);
+
+// (resourceKind, obj) => [
+//   ...Kebab.getExtensionsActionsForKind(obj),
+//   ...menuActions,
+// ]
+
+export const PersistentVolumeClaimsDetailsPage = (props) => {
+  return (
+    <DetailsPage
+      {...props}
+      menuActions={menuActions}
+      pages={[
+        navFactory.details(Details),
+        navFactory.editYaml(),
+        navFactory.events(ResourceEventStream),
+      ]}
+    />
+  );
+};

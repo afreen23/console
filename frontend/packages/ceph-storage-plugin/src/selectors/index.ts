@@ -10,14 +10,24 @@ export const cephStorageLabel = 'cluster.ocs.openshift.io/openshift-storage';
 export const filterCephAlerts = (alerts: Alert[]): Alert[] =>
   alerts.filter((alert) => _.get(alert, 'annotations.storage_type') === 'ceph');
 
+export const getPVProvisionerName = (obj) => {
+  return cephStorageProvisioners.some((provisioner: string) =>
+    _.get(obj, 'metadata.annotations["pv.kubernetes.io/provisioned-by"]', '').includes(provisioner),
+  );
+};
+
+export const isCephStorageProvisioner = (obj) => {
+  return cephStorageProvisioners.some((provisioner: string) =>
+    _.get(
+      obj,
+      'metadata.annotations["volume.beta.kubernetes.io/storage-provisioner"]',
+      '',
+    ).includes(provisioner),
+  );
+};
+
 export const getCephPVs = (pvsData: K8sResourceKind[] = []): K8sResourceKind[] =>
-  pvsData.filter((pv) => {
-    return cephStorageProvisioners.some((provisioner: string) =>
-      _.get(pv, 'metadata.annotations["pv.kubernetes.io/provisioned-by"]', '').includes(
-        provisioner,
-      ),
-    );
-  });
+  pvsData.filter(getPVProvisionerName);
 
 const getPVStorageClass = (pv: K8sResourceKind) => _.get(pv, 'spec.storageClassName');
 const getStorageClassName = (pvc: K8sResourceKind) =>

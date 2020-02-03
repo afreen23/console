@@ -18,6 +18,8 @@ import {
 } from './utils';
 import { ResourceEventStream } from './events';
 import { PersistentVolumeClaimModel } from '../models';
+import { isCephStorageProvisioner } from '@console/ceph-storage-plugin/src/selectors';
+import { ClonePVC } from '@console/ceph-storage-plugin/src/utils/clone-workflow';
 
 const { common, ExpandPVC } = Kebab.factory;
 const menuActions = [
@@ -25,10 +27,14 @@ const menuActions = [
   ExpandPVC,
   ...common,
 ];
+const ocsMenuActions = [
+  ClonePVC,
+  ...Kebab.getExtensionsActionsForKind(PersistentVolumeClaimModel),
+  ExpandPVC,
+  ...common,
+];
 
-const PVCStatus = ({ pvc }) => (
-  <Status status={pvc.metadata.deletionTimestamp ? 'Terminating' : pvc.status.phase} />
-);
+const PVCStatus = ({ pvc }) => <Status status={pvc.status.phase} />;
 
 const tableColumnClasses = [
   classNames('col-lg-2', 'col-md-2', 'col-sm-4', 'col-xs-6'),
@@ -110,14 +116,18 @@ const PVCTableRow = ({ obj, index, key, style }) => {
             title={obj.spec.volumeName}
           />
         ) : (
-          <div className="text-muted">No Persistent Volume</div>
-        )}
+            <div className="text-muted">No Persistent Volume</div>
+          )}
       </TableData>
       <TableData className={tableColumnClasses[4]}>
         {_.get(obj, 'status.capacity.storage', '-')}
       </TableData>
       <TableData className={tableColumnClasses[5]}>
-        <ResourceKebab actions={menuActions} kind={kind} resource={obj} />
+        <ResourceKebab
+          actions={isCephStorageProvisioner(obj) ? ocsMenuActions : menuActions}
+          kind={kind}
+          resource={obj}
+        />
       </TableData>
     </TableRow>
   );
@@ -171,8 +181,8 @@ const Details_ = ({ flags, obj: pvc }) => {
                 {storageClassName ? (
                   <ResourceLink kind="StorageClass" name={storageClassName} />
                 ) : (
-                  '-'
-                )}
+                    '-'
+                  )}
               </dd>
               {volumeName && canListPV && (
                 <>
@@ -233,14 +243,23 @@ export const PersistentVolumeClaimsPage = (props) => {
     />
   );
 };
-export const PersistentVolumeClaimsDetailsPage = (props) => (
-  <DetailsPage
-    {...props}
-    menuActions={menuActions}
-    pages={[
-      navFactory.details(Details),
-      navFactory.editYaml(),
-      navFactory.events(ResourceEventStream),
-    ]}
-  />
-);
+
+export const PersistentVolumeClaimsDetailsPage = (props) => {
+  return (
+    <DetailsPage
+      {...props}
+      menuActions={[
+        (resourcekind, obj) =>
+          isCephStorageProvisioner(obj)
+            ? ClonePVC(resourcekind, obj)
+            : menuActions[0](resourcekind, obj),
+        ...menuActions.slice(1),
+      ]}
+      pages={[
+        navFactory.details(Details),
+        navFactory.editYaml(),
+        navFactory.events(ResourceEventStream),
+      ]}
+    />
+  );
+};

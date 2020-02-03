@@ -32,7 +32,7 @@ const accessModeLabels = Object.freeze({
   ReadOnlyMany: 'Read Only (ROX)',
 });
 
-const ClonePVCModal = withHandlePromise((props: ClonePVCModalProps) => {
+export const ClonePVCModal = withHandlePromise((props: ClonePVCModalProps) => {
   const { close, cancel, resource, handlePromise, errorMessage, inProgress } = props;
   const pvcName: string = resource.metadata.name;
   const [clonePVCName, setClonePVCName] = React.useState(`${pvcName}-clone`);
@@ -112,8 +112,8 @@ const ClonePVCModal = withHandlePromise((props: ClonePVCModalProps) => {
                         {resource.spec.storageClassName}
                       </>
                     ) : (
-                      'None'
-                    )}
+                        'None'
+                      )}
                   </p>
                 </div>
               </div>

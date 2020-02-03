@@ -18,17 +18,9 @@ import {
 } from './utils';
 import { ResourceEventStream } from './events';
 import { PersistentVolumeClaimModel } from '../models';
-import { isCephStorageProvisioner } from '@console/ceph-storage-plugin/src/selectors';
-import { ClonePVC } from '@console/ceph-storage-plugin/src/utils/clone-workflow';
 
 const { common, ExpandPVC } = Kebab.factory;
 const menuActions = [
-  ...Kebab.getExtensionsActionsForKind(PersistentVolumeClaimModel),
-  ExpandPVC,
-  ...common,
-];
-const ocsMenuActions = [
-  ClonePVC,
   ...Kebab.getExtensionsActionsForKind(PersistentVolumeClaimModel),
   ExpandPVC,
   ...common,
@@ -116,15 +108,18 @@ const PVCTableRow = ({ obj, index, key, style }) => {
             title={obj.spec.volumeName}
           />
         ) : (
-          <div className="text-muted">No Persistent Volume</div>
-        )}
+            <div className="text-muted">No Persistent Volume</div>
+          )}
       </TableData>
       <TableData className={tableColumnClasses[4]}>
         {_.get(obj, 'status.capacity.storage', '-')}
       </TableData>
       <TableData className={tableColumnClasses[5]}>
         <ResourceKebab
-          actions={isCephStorageProvisioner(obj) ? ocsMenuActions : menuActions}
+          actions={(resourceKind, resource) => [
+            ...Kebab.getExtensionsActionsForKind(resourceKind, resource),
+            ...menuActions,
+          ]}
           kind={kind}
           resource={obj}
         />
@@ -181,8 +176,8 @@ const Details_ = ({ flags, obj: pvc }) => {
                 {storageClassName ? (
                   <ResourceLink kind="StorageClass" name={storageClassName} />
                 ) : (
-                  '-'
-                )}
+                    '-'
+                  )}
               </dd>
               {volumeName && canListPV && (
                 <>
@@ -248,12 +243,9 @@ export const PersistentVolumeClaimsDetailsPage = (props) => {
   return (
     <DetailsPage
       {...props}
-      menuActions={[
-        (resourcekind, obj) =>
-          isCephStorageProvisioner(obj)
-            ? ClonePVC(resourcekind, obj)
-            : menuActions[0](resourcekind, obj),
-        ...menuActions.slice(1),
+      menuActions={(resourceKind, obj) => [
+        ...Kebab.getExtensionsActionsForKind(resourceKind, obj),
+        ...menuActions,
       ]}
       pages={[
         navFactory.details(Details),

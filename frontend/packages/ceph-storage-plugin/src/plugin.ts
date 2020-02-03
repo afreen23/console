@@ -25,7 +25,6 @@ import { ClusterServiceVersionModel } from '@console/operator-lifecycle-manager/
 import { GridPosition } from '@console/shared/src/components/dashboard/DashboardGrid';
 import { OverviewQuery } from '@console/internal/components/dashboard/dashboards-page/cluster-dashboard/queries';
 import { getCephHealthState } from './components/dashboard-page/storage-dashboard/status-card/utils';
-import { getKebabActionsForKind } from './utils/kebab-actions';
 import { referenceForModel } from '@console/internal/module/k8s';
 
 type ConsumedExtensions =
@@ -279,12 +278,6 @@ const plugin: Plugin<ConsumedExtensions> = [
           './components/dashboard-page/storage-dashboard/activity-card/activity-card' /* webpackChunkName: "ceph-storage-activity-card" */
         ).then((m) => m.ActivityCard),
       required: OCS_INDEPENDENT_FLAG,
-    },
-  },
-  {
-    type: 'KebabActions',
-    properties: {
-      getKebabActionsForKind,
     },
   },
 ];

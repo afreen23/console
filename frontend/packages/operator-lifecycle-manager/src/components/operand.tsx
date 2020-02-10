@@ -53,6 +53,7 @@ import { SpecDescriptor } from './descriptors/spec';
 import { StatusCapability, Descriptor } from './descriptors/types';
 import { Resources } from './k8s-resource';
 import { referenceForProvidedAPI, OperandLink } from './index';
+import { OCSServiceModel } from '@console/ceph-storage-plugin/src/models';
 
 const csvName = () =>
   window.location.pathname
@@ -81,8 +82,8 @@ const getActions = (selectedObj: any) => {
       const reference = referenceFor(obj);
       const href = kind.namespaced
         ? `/k8s/ns/${obj.metadata.namespace}/${
-            ClusterServiceVersionModel.plural
-          }/${csvName()}/${reference}/${obj.metadata.name}/yaml`
+        ClusterServiceVersionModel.plural
+        }/${csvName()}/${reference}/${obj.metadata.name}/yaml`
         : `/k8s/cluster/${reference}/${obj.metadata.name}/yaml`;
       return {
         label: `Edit ${kind.label}`,
@@ -103,10 +104,16 @@ const getActions = (selectedObj: any) => {
         deleteModal({
           kind,
           resource: obj,
+          message:
+            kind.label === OCSServiceModel.label ? (
+              <strong>So you want to delete the entire OCS Service &gt;_&lt; !!! </strong>
+            ) : (
+                ''
+              ),
           namespace: obj.metadata.namespace,
           redirectTo: `/k8s/ns/${obj.metadata.namespace}/${
             ClusterServiceVersionModel.plural
-          }/${csvName()}/${referenceFor(obj)}`,
+            }/${csvName()}/${referenceFor(obj)}`,
         }),
       accessReview: {
         group: kind.apiGroup,
@@ -322,13 +329,13 @@ export const ProvidedAPIsPage = connect(inFlightStateToProps)((props: ProvidedAP
     const model = modelFor(reference);
     return model && !internalAPIs.some((api) => api === reference)
       ? [
-          ...resources,
-          {
-            kind: referenceForProvidedAPI(desc),
-            namespaced: model.namespaced,
-            prop: desc.kind,
-          },
-        ]
+        ...resources,
+        {
+          kind: referenceForProvidedAPI(desc),
+          namespaced: model.namespaced,
+          prop: desc.kind,
+        },
+      ]
       : resources;
   }, []);
 
@@ -340,20 +347,20 @@ export const ProvidedAPIsPage = connect(inFlightStateToProps)((props: ProvidedAP
   );
   const createLink = (name: string) =>
     `/k8s/ns/${obj.metadata.namespace}/${ClusterServiceVersionModel.plural}/${
-      obj.metadata.name
+    obj.metadata.name
     }/${referenceForProvidedAPI(_.find(owned, { name }))}/~new`;
   const createProps =
     owned.length > 1
       ? {
-          items: owned.reduce(
-            (acc, crd) =>
-              !isInternalObject(internalObjects, crd.name)
-                ? { ...acc, [crd.name]: crd.displayName }
-                : acc,
-            {},
-          ),
-          createLink,
-        }
+        items: owned.reduce(
+          (acc, crd) =>
+            !isInternalObject(internalObjects, crd.name)
+              ? { ...acc, [crd.name]: crd.displayName }
+              : acc,
+          {},
+        ),
+        createLink,
+      }
       : { to: owned.length === 1 ? createLink(owned[0].name) : null };
 
   const owners = (ownerRefs: OwnerReference[], items: K8sResourceKind[]) =>
@@ -395,8 +402,8 @@ export const ProvidedAPIsPage = connect(inFlightStateToProps)((props: ProvidedAP
       rowFilters={firehoseResources.length > 1 ? rowFilters : null}
     />
   ) : (
-    <StatusBox loaded EmptyMsg={EmptyMsg} />
-  );
+      <StatusBox loaded EmptyMsg={EmptyMsg} />
+    );
 });
 
 export const ProvidedAPIPage = connectToModel((props: ProvidedAPIPageProps) => {
@@ -406,12 +413,12 @@ export const ProvidedAPIPage = connectToModel((props: ProvidedAPIPageProps) => {
     return kindsInFlight ? (
       <LoadingBox />
     ) : (
-      <ErrorPage404
-        message={`The server doesn't have a resource type ${kindForReference(
-          kind,
-        )}. Try refreshing the page if it was recently added.`}
-      />
-    );
+        <ErrorPage404
+          message={`The server doesn't have a resource type ${kindForReference(
+            kind,
+          )}. Try refreshing the page if it was recently added.`}
+        />
+      );
   }
 
   const to = kindObj.namespaced
@@ -473,7 +480,7 @@ export const OperandDetails = connectToModel((props: OperandDetailsProps) => {
   const header = (
     <h2 className="co-section-heading">{`${
       thisDefinition ? thisDefinition.displayName : kind
-    } Overview`}</h2>
+      } Overview`}</h2>
   );
 
   const primaryDescriptor = primaryDescriptors.map((statusDescriptor: Descriptor) => {
@@ -522,7 +529,7 @@ export const OperandDetails = connectToModel((props: OperandDetailsProps) => {
         ))}
 
         {statusDescriptors
-          .filter(function(descriptor) {
+          .filter(function (descriptor) {
             return !isMainDescriptor(descriptor) && descriptor.displayName !== 'Status';
           })
           .map((statusDescriptor: Descriptor) => {
@@ -551,14 +558,14 @@ export const OperandDetails = connectToModel((props: OperandDetailsProps) => {
           {details}
         </div>
       ) : (
-        <>
-          <div className="co-m-pane__body">
-            {header}
-            {primaryDescriptor}
-          </div>
-          <div className="co-m-pane__body">{details}</div>
-        </>
-      )}
+          <>
+            <div className="co-m-pane__body">
+              {header}
+              {primaryDescriptor}
+            </div>
+            <div className="co-m-pane__body">{details}</div>
+          </>
+        )}
       {conditions && (
         <div className="co-m-pane__body">
           <SectionHeading text="Conditions" />

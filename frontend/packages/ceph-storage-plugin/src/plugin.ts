@@ -330,6 +330,7 @@ const plugin: Plugin<ConsumedExtensions> = [
     type: 'KebabActions',
     properties: {
       getKebabActionsForKind,
+      required: OCS_VERSION_4_4_FLAG,
     },
   },
 ];

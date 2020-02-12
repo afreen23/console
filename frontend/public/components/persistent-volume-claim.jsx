@@ -17,6 +17,7 @@ import {
 } from './utils';
 import { ResourceEventStream } from './events';
 import { PersistentVolumeClaimModel } from '../models';
+import { useExtensions, KebabActionFactory, isKebabActionFactory } from '@console/plugin-sdk';
 
 const { common, ExpandPVC } = Kebab.factory;
 const menuActions = [ExpandPVC, ...common];
@@ -77,7 +78,8 @@ PVCTableHeader.displayName = 'PVCTableHeader';
 const kind = 'PersistentVolumeClaim';
 
 const PVCTableRow = ({ obj, index, key, style }) => {
-  const extensionsActions = Kebab.getExtensionsActionsForKind(PersistentVolumeClaimModel, obj);
+  const actionFactoryExtensions = useExtensions<KebabActionFactory>(isKebabActionFactory);
+  // const extensionsActions = Kebab.getExtensionsActionsForKind(PersistentVolumeClaimModel, obj);
   return (
     <TableRow id={obj.metadata.uid} index={index} trKey={key} style={style}>
       <TableData className={tableColumnClasses[0]}>
@@ -106,8 +108,8 @@ const PVCTableRow = ({ obj, index, key, style }) => {
             title={obj.spec.volumeName}
           />
         ) : (
-          <div className="text-muted">No Persistent Volume</div>
-        )}
+            <div className="text-muted">No Persistent Volume</div>
+          )}
       </TableData>
       <TableData className={tableColumnClasses[4]}>
         {_.get(obj, 'status.capacity.storage', '-')}
@@ -171,8 +173,8 @@ const Details_ = ({ flags, obj: pvc }) => {
                 {storageClassName ? (
                   <ResourceLink kind="StorageClass" name={storageClassName} />
                 ) : (
-                  '-'
-                )}
+                    '-'
+                  )}
               </dd>
               {volumeName && canListPV && (
                 <>

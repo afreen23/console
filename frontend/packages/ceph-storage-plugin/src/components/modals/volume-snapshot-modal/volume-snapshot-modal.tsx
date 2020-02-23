@@ -1,14 +1,22 @@
 import * as React from 'react';
 
+import { cronLink, numberOfSnapshot, snapshotTypes } from './volume-snapshot';
 import {
   Dropdown,
+  ExternalLink,
   Firehose,
   FirehoseResourcesResult,
   HandlePromiseProps,
   withHandlePromise,
 } from '@console/internal/components/utils';
 import { Form, FormGroup, TextInput } from '@patternfly/react-core';
-import { K8sResourceKind, K8sResourceKindReference, k8sCreate } from '@console/internal/module/k8s';
+import {
+  K8sResourceKind,
+  K8sResourceKindReference,
+  apiVersionForModel,
+  k8sCreate,
+  k8sPatch,
+} from '@console/internal/module/k8s';
 import {
   ModalBody,
   ModalComponentProps,
@@ -16,10 +24,11 @@ import {
   ModalTitle,
   createModalLauncher,
 } from '@console/internal/components/factory';
+import { SnapshotScheduleModel, VolumeSnapshotModel } from '../../../models';
 import { getName, getNamespace } from '@console/shared';
 
 import { PersistentVolumeClaimModel } from '@console/internal/models';
-import { VolumeSnapshotModel } from '../../../models';
+import './_volume-snapshot-modal.scss';
 
 export type VolumeSnapshotModalProps = {
   pvcData?: FirehoseResourcesResult;
@@ -29,35 +38,199 @@ export type VolumeSnapshotModalProps = {
 export const VolumeSnapshotModal = withHandlePromise((props: VolumeSnapshotModalProps) => {
   const { close, cancel, pvcData, errorMessage, inProgress, handlePromise } = props;
   const resource = pvcData.data as K8sResourceKind;
-  const [snapshotName, setSnapshotName] = React.useState(
-    `${getName(resource) || 'pvc'}-snapshot-1`,
-  );
-  const snapshotTypes = {
-    single: 'Single Snapshot',
+  const [snapshotCount, setSnapshotCount] = React.useState(3); // For all schedules
+  const [snapshotWeek, setSnapshotWeek] = React.useState(0); // For Weekly schedule
+  const [snapshotTime, setSnapshotTime] = React.useState('00:01'); // For weekly and monthly
+  const [snapshotMonth, setSnapshotMonth] = React.useState(1); // For monthly schedule
+  const [snapshotName, setSnapshotName] = React.useState();
+  const [scheduleLabel, setScheduleLabel] = React.useState();
+  const [scheduleType, setScheduleType] = React.useState(snapshotTypes.Single);
+
+  const makeLabel = (): string => {
+    const arr = snapshotTime.split(':');
+    const newLabel = `${arr?.[1]} ${arr?.[0]} `;
+    if (scheduleType === snapshotTypes.Monthly) {
+      return `${newLabel + snapshotMonth} * *`;
+    }
+    if (scheduleType === snapshotTypes.Weekly) {
+      return `${newLabel}* * ${snapshotWeek}`;
+    }
+    return newLabel;
   };
+
+  const WeeklyElements: React.FC = () => (
+    <FormGroup
+      className="ceph-volume-snapshot-modal--input"
+      fieldId="snapshot-modal__day"
+      label="Day of week"
+    >
+      <TextInput
+        type="number"
+        aria-label="snapshot-modal-day"
+        value={snapshotWeek}
+        onChange={(value) => setSnapshotWeek(Number(value))}
+        className="ceph-volume-snapshot-modal--label"
+      />
+    </FormGroup>
+  );
+
+  const MonthlyElements: React.FC = () => (
+    <FormGroup
+      className="ceph-volume-snapshot-modal--input"
+      fieldId="snapshot-modal__month"
+      label="Day of month"
+    >
+      <TextInput
+        type="number"
+        name="snapshot-modal__month"
+        aria-label="snapshot-modal-month"
+        value={snapshotMonth}
+        onChange={(value) => setSnapshotMonth(Number(value))}
+        className="ceph-volume-snapshot-modal--label"
+      />
+    </FormGroup>
+  );
+
+  const CronElements: React.FC = () => (
+    <FormGroup
+      className="ceph-volume-snapshot-modal--input"
+      fieldId="snapshot-modal__schedule"
+      helperText="* Scheduled for cluster local time"
+      isRequired
+    >
+      <label className="pf-c-form__label" htmlFor="snapshot-modal__schedule">
+        <span className="pf-c-form__label-text">Label</span>
+        <ExternalLink
+          additionalClassName="ceph-volume-snapshot-modal--link"
+          href={cronLink}
+          text="Whats this?"
+        />
+      </label>
+      <TextInput
+        type="text"
+        name="snapshot-modal__schedule"
+        aria-label="snapshot-modal-schedule"
+        value={scheduleLabel}
+        onChange={(value) => setScheduleLabel(value)}
+        className="ceph-volume-snapshot-modal--label"
+        placeholder="* * 5 * *"
+      />
+    </FormGroup>
+  );
+
+  const OtherElements: React.FC = () => (
+    <div className="ceph-volume-snapshot-modal--inline">
+      {scheduleType === snapshotTypes.Monthly ? <MonthlyElements /> : <WeeklyElements />}
+      <FormGroup
+        className="ceph-volume-snapshot-modal--input"
+        fieldId="snapshot-modal__time-week"
+        label="Time"
+      >
+        <TextInput
+          type="time"
+          name="snapshot-modal__time-week"
+          aria-label="snapshot-modal-time-week"
+          value={snapshotTime}
+          onChange={setSnapshotTime}
+          className="ceph-volume-snapshot-modal--label"
+        />
+      </FormGroup>
+    </div>
+  );
+
+  const ScheduleElements: React.FC = () => (
+    <Form>
+      {scheduleType === snapshotTypes.CronJob ? <CronElements /> : <OtherElements />}
+      <FormGroup
+        className="ceph-volume-snapshot-modal--input__group"
+        label="Keep"
+        fieldId="snapshot-modal__count"
+        helperText="*Older snapshots will be deleted automatically"
+        isRequired
+      >
+        <div className="ceph-volume-snapshot-modal--input__keep">
+          <Dropdown
+            items={numberOfSnapshot}
+            selectedKey={snapshotCount}
+            onChange={(value) => setSnapshotCount(Number(value))}
+            className="ceph-volume-snapshot-modal--count"
+          />
+          <span className="ceph-volume-snapshot-modal--span_keep">last snapshots</span>
+        </div>
+      </FormGroup>
+    </Form>
+  );
 
   const submit = (event: React.FormEvent<EventTarget>) => {
     event.preventDefault();
     const ns = getNamespace(resource);
     const pvcName = getName(resource);
-    const snapshotTemplate: K8sResourceKind = {
-      apiVersion: VolumeSnapshotModel.apiVersion,
-      kind: VolumeSnapshotModel.kind,
-      metadata: {
-        name: snapshotName,
-        namespace: ns,
-      },
-      spec: {
-        source: {
-          persistentVolumeClaimName: pvcName,
+    if (scheduleType === snapshotTypes.Single) {
+      const snapshotTemplate: K8sResourceKind = {
+        apiVersion: VolumeSnapshotModel.apiVersion,
+        kind: VolumeSnapshotModel.kind,
+        metadata: {
+          name: snapshotName,
+          namespace: ns,
         },
-      },
-    };
-    handlePromise(k8sCreate(VolumeSnapshotModel, snapshotTemplate))
-      .then(close)
-      .catch((error) => {
-        throw error;
-      });
+        spec: {
+          source: {
+            persistentVolumeClaimName: pvcName,
+          },
+        },
+      };
+      handlePromise(k8sCreate(VolumeSnapshotModel, snapshotTemplate))
+        .then(close)
+        .catch((error) => {
+          // eslint-disable-next-line no-console
+          console.error(error);
+        });
+    } else {
+      const pvcLabel = Math.random()
+        .toString(36) // To generate a random string with [a-z] and [0-9]
+        .slice(2); // To get the part of string which is started from position 2
+      const scheduleTemplate: K8sResourceKind = {
+        apiVersion: apiVersionForModel(SnapshotScheduleModel),
+        kind: SnapshotScheduleModel.kind,
+        metadata: {
+          name: snapshotName,
+          namespace: ns,
+        },
+        spec: {
+          claimSelector: {
+            matchLabels: {
+              thislabel: `schedule-${pvcLabel}`,
+            },
+          },
+          disabled: false,
+          retention: {
+            maxCount: Number(snapshotCount),
+          },
+          schedule: scheduleType === snapshotTypes.CronJob ? scheduleLabel : makeLabel(),
+        },
+      };
+      const patch = [
+        {
+          op: 'add',
+          path: '/metadata/labels/thislabel',
+          value: `schedule-${pvcLabel}`,
+        },
+      ];
+
+      handlePromise(k8sPatch(PersistentVolumeClaimModel, resource, patch)) // eslint-disable-line promise/no-nesting
+        .then(() => {
+          handlePromise(k8sCreate(SnapshotScheduleModel, scheduleTemplate)) // eslint-disable-line promise/no-nesting
+            .then(close)
+            .catch((error) => {
+              // eslint-disable-next-line no-console
+              console.log(error);
+            });
+        })
+        .catch((error) => {
+          // eslint-disable-next-line no-console
+          console.log(error);
+        });
+    }
   };
 
   return (
@@ -66,22 +239,35 @@ export const VolumeSnapshotModal = withHandlePromise((props: VolumeSnapshotModal
         <ModalTitle>Create Snapshot</ModalTitle>
         <ModalBody>
           <p>Creating snapshot for {getName(resource)}</p>
-          <FormGroup label="Name" isRequired fieldId="snapshot-name">
+          <FormGroup
+            className="ceph-volume-snapshot-modal--input"
+            label="Name"
+            isRequired
+            fieldId="snapshot-name"
+          >
             <TextInput
-              isRequired
               type="text"
               name="snapshot-name"
               aria-label="snapshot-name"
               value={snapshotName}
               onChange={setSnapshotName}
+              placeholder={`${getName(resource) || 'pvc'}-snapshot`}
             />
           </FormGroup>
-          <FormGroup label="Schedule" fieldId="snapshot-modal__schedule">
+          <FormGroup
+            className="ceph-volume-snapshot-modal--input"
+            label="Schedule"
+            fieldId="snapshot-modal__schedule-type"
+          >
             <Dropdown
               dropDownClassName="dropdown--full-width"
               items={snapshotTypes}
-              selectedKey={snapshotTypes.single}
+              selectedKey={scheduleType}
+              onChange={(value) => setScheduleType(snapshotTypes[value])}
             />
+            <div className="co-form-subsection">
+              {scheduleType === snapshotTypes.Single ? null : <ScheduleElements />}
+            </div>
           </FormGroup>
         </ModalBody>
         <ModalSubmitFooter

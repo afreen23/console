@@ -1,0 +1,25 @@
+.ceph-volume-snapshot-modal--input {
+    margin-top: var(--pf-global--spacer--md);
+    display: grid;
+  }
+  
+.ceph-volume-snapshot-modal--label {
+    width: fit-content;
+}
+
+.ceph-volume-snapshot-modal--link {
+    padding-left: 70px;
+}
+
+.ceph-volume-snapshot-modal--count {
+    width: fit-content;
+}
+
+.ceph-volume-snapshot-modal--input_keep {
+    display: inline-flex;
+}
+
+.ceph-volume-snapshot-modal--span_keep {
+    font-size: var(--pf-global--FontSize--md);
+    padding: 5px;
+}

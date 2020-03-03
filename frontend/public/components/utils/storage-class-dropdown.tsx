@@ -10,7 +10,7 @@ import { isDefaultClass } from '../storage-class';
 export class StorageClassDropdownInner extends React.Component<
   StorageClassDropdownInnerProps,
   StorageClassDropdownInnerState
-> {
+  > {
   readonly state: StorageClassDropdownInnerState = {
     items: {},
     name: this.props.name,
@@ -80,11 +80,13 @@ export class StorageClassDropdownInner extends React.Component<
     }
 
     if (!this.props.loaded || !selectedKey) {
+      console.log('no storage class');
       state.title = <span className="text-muted">Select storage class</span>;
     }
 
     const selectedItem = unorderedItems[selectedKey || state.defaultClass];
     if (selectedItem) {
+      console.log('Selected Item', selectedItem);
       state.title = this.getTitle(selectedItem);
     }
 
@@ -98,6 +100,7 @@ export class StorageClassDropdownInner extends React.Component<
 
   componentDidUpdate() {
     const { defaultClass, selectedKey } = this.state;
+    console.log('DEfault CLass is set', defaultClass);
     if (!selectedKey && defaultClass) {
       this.onChange(defaultClass);
     }
@@ -113,11 +116,12 @@ export class StorageClassDropdownInner extends React.Component<
     return storageClass.kindLabel ? (
       <ResourceName kind="StorageClass" name={storageClass.name} />
     ) : (
-      <span>{storageClass.name}</span>
-    );
+        <span>{storageClass.name}</span>
+      );
   };
 
   onChange = (key) => {
+    console.log('On change working');
     const storageClass = _.get(this.state, ['items', key], {});
     this.setState(
       {
@@ -137,8 +141,8 @@ export class StorageClassDropdownInner extends React.Component<
         (items[key] = key ? (
           <StorageClassDropdownEntry {...props} />
         ) : (
-          <StorageClassDropdownNoStorageClassOption {...props} />
-        )),
+            <StorageClassDropdownNoStorageClassOption {...props} />
+          )),
     );
 
     const { selectedKey, defaultClass } = this.state;

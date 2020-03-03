@@ -184,6 +184,7 @@ const CustomNodeTable: React.FC<CustomNodeTableProps> = ({
   const [nodesWarningMsg, setNodesWarningMsg] = React.useState('');
   const [storageClass, setStorageClass] = React.useState(null);
 
+  console.log('STORAGE CLASS', storageClass);
   // pre-selection of nodes
   if (loaded && !unfilteredNodes.length) {
     const formattedNodes: formattedNodeType[] = getRows(unfilteredData);
@@ -321,7 +322,7 @@ const CustomNodeTable: React.FC<CustomNodeTableProps> = ({
       .then(() => {
         history.push(
           `/k8s/ns/${ocsProps.namespace}/clusterserviceversions/${
-            ocsProps.clusterServiceVersion.metadata.name
+          ocsProps.clusterServiceVersion.metadata.name
           }/${referenceForModel(OCSServiceModel)}/${ocsObj.metadata.name}`,
         );
       })
@@ -365,7 +366,7 @@ const CustomNodeTable: React.FC<CustomNodeTableProps> = ({
         />
       )}
       <div className="ceph-ocs-install__ocs-service-capacity--dropdown">
-        <OCSStorageClassDropdown onChange={setStorageClass} />
+        <OCSStorageClassDropdown onChange={setStorageClass} defaultClass={storageClass} />
       </div>
       <div className="ceph-ocs-install__ocs-service-capacity">
         <label className="control-label" htmlFor="ocs-service-stoargeclass">

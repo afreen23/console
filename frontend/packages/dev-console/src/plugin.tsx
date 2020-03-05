@@ -4,7 +4,11 @@ import {
   Plugin,
   ModelDefinition,
   ModelFeatureFlag,
+<<<<<<< HEAD
   ResourceActionProvider,
+=======
+  KebabActionFactory,
+>>>>>>> Migrate KebabActions extension
   HrefNavItem,
   ResourceNSNavItem,
   ResourceClusterNavItem,
@@ -23,7 +27,11 @@ import { CodeIcon } from '@patternfly/react-icons';
 import { FLAGS } from '@console/shared/src/constants';
 import { referenceForModel } from '@console/internal/module/k8s';
 import * as models from './models';
+<<<<<<< HEAD
 import { getResourceActions } from './utils/resource-actions';
+=======
+import { getKebabActions } from './utils/kebab-actions';
+>>>>>>> Migrate KebabActions extension
 import {
   tknPipelineAndPipelineRunsResources,
   getPipelinesAndPipelineRunsForResource,
@@ -71,7 +79,11 @@ type ConsumedExtensions =
   | Perspective
   | RoutePage
   | ReduxReducer
+<<<<<<< HEAD
   | ResourceActionProvider
+=======
+  | KebabActionFactory
+>>>>>>> Migrate KebabActions extension
   | OverviewResourceTab
   | OverviewCRD
   | YAMLTemplate
@@ -701,9 +713,15 @@ const plugin: Plugin<ConsumedExtensions> = [
     },
   },
   {
+<<<<<<< HEAD
     type: 'Resource/Actions',
     properties: {
       getResourceActions,
+=======
+    type: 'KebabActionFactory',
+    properties: {
+      getKebabActions,
+>>>>>>> Migrate KebabActions extension
     },
   },
   {

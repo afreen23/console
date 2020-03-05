@@ -11,6 +11,7 @@ import {
   Split,
 } from '@patternfly/react-core';
 import { Status } from '@console/shared';
+import { useExtensions, KebabActionFactory, isKebabActionFactory } from '@console/plugin-sdk';
 import {
   useExtensions,
   ResourceActionProvider,
@@ -23,7 +24,11 @@ import {
   resourcePath,
   FirehoseResult,
   KebabOption,
+<<<<<<< HEAD
   extendKebabOptions,
+=======
+  mergePluginKebabOptions,
+>>>>>>> Migrate KebabActions extension
 } from './index';
 import { connectToModel } from '../../kinds';
 import {
@@ -109,7 +114,11 @@ export const PageHeading = connectToModel((props: PageHeadingProps) => {
     (hasButtonActions || hasMenuActions) && hasData && !_.get(data, 'metadata.deletionTimestamp');
   const resourceStatus = hasData && getResourceStatus ? getResourceStatus(data) : null;
   const showHeading = props.icon || kind || resourceTitle || resourceStatus || badge || showActions;
+<<<<<<< HEAD
   const actionExtensions = useExtensions<ResourceActionProvider>(isResourceActionProvider);
+=======
+  const actionExtensions = useExtensions<KebabActionFactory>(isKebabActionFactory);
+>>>>>>> Migrate KebabActions extension
 
   let menuOptions = _.isFunction(menuActions)
     ? menuActions(kindObj, data, extraResources, customData)
@@ -118,7 +127,11 @@ export const PageHeading = connectToModel((props: PageHeadingProps) => {
       );
 
   if (extendMenuActions) {
+<<<<<<< HEAD
     menuOptions = extendKebabOptions(menuOptions, actionExtensions, kindObj, data);
+=======
+    menuOptions = mergePluginKebabOptions(menuOptions, actionExtensions, kindObj, data);
+>>>>>>> Migrate KebabActions extension
   }
 
   return (
@@ -212,10 +225,17 @@ export const ResourceOverviewHeading: React.SFC<ResourceOverviewHeadingProps> = 
   resource,
 }) => {
   const isDeleting = !!resource.metadata.deletionTimestamp;
+<<<<<<< HEAD
   const actionExtensions = useExtensions<ResourceActionProvider>(isResourceActionProvider);
 
   let options = actions.map((a) => a(kindObj, resource));
   options = extendKebabOptions(options, actionExtensions, kindObj, resource);
+=======
+  const actionExtensions = useExtensions<KebabActionFactory>(isKebabActionFactory);
+
+  let options = actions.map((a) => a(kindObj, resource));
+  options = mergePluginKebabOptions(options, actionExtensions, kindObj, resource);
+>>>>>>> Migrate KebabActions extension
 
   return (
     <div className="overview__sidebar-pane-head resource-overview__heading">

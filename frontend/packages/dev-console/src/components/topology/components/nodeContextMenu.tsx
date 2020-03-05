@@ -8,6 +8,7 @@ import {
   kebabOptionsToMenu,
   isKebabSubMenu,
 } from '@console/internal/components/utils';
+<<<<<<< HEAD:frontend/packages/dev-console/src/components/topology/components/nodeContextMenu.tsx
 import { ResourceActionProvider } from '@console/plugin-sdk';
 import { workloadActions } from '../actions/workloadActions';
 import { groupActions } from '../actions/groupActions';
@@ -16,6 +17,15 @@ import { graphActions } from '../actions/graphActions';
 import { TopologyApplicationObject } from '../topology-types';
 import { regroupActions } from '../actions/regroupActions';
 import { helmReleaseActions } from '../actions/helmReleaseActions';
+=======
+import { KebabActionFactory } from '@console/plugin-sdk';
+import { workloadActions } from './actions/workloadActions';
+import { groupActions } from './actions/groupActions';
+import { nodeActions } from './actions/nodeActions';
+import { graphActions } from './actions/graphActions';
+import { TopologyApplicationObject } from './topology-types';
+import { regroupActions } from './actions/regroupActions';
+>>>>>>> Migrate KebabActions extension:frontend/packages/dev-console/src/components/topology/nodeContextMenu.tsx
 
 const onKebabOptionClick = (option: KebabOption) => {
   if (option.callback) {
@@ -68,10 +78,16 @@ export const regroupContextMenu = (element: Node) =>
 export const regroupGroupContextMenu = (element: Node) =>
   createMenuItems(kebabOptionsToMenu(regroupActions(element, true)));
 
+<<<<<<< HEAD:frontend/packages/dev-console/src/components/topology/components/nodeContextMenu.tsx
 export const helmReleaseContextMenu = (element: Node) =>
   createMenuItems(kebabOptionsToMenu(helmReleaseActions(element)));
 
 type NodeContextMenuOptions = {
   connectorSource?: Node;
   actionExtensions?: ResourceActionProvider[];
+=======
+type NodeContextMenuOptions = {
+  connectorSource?: Node;
+  actionExtensions?: KebabActionFactory[];
+>>>>>>> Migrate KebabActions extension:frontend/packages/dev-console/src/components/topology/nodeContextMenu.tsx
 };

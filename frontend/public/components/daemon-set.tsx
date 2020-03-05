@@ -22,7 +22,11 @@ import {
 import { ResourceEventStream } from './events';
 import { VolumesTable } from './volumes-table';
 
+<<<<<<< HEAD
 export const menuActions = [Kebab.factory.AddStorage, ...Kebab.factory.common];
+=======
+export const menuActions: KebabAction[] = [Kebab.factory.AddStorage, ...Kebab.factory.common];
+>>>>>>> Migrate KebabActions extension
 
 const kind = 'DaemonSet';
 

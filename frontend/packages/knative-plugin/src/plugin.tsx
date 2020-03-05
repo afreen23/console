@@ -10,7 +10,11 @@ import {
   ResourceDetailsPage,
   RoutePage,
   GlobalConfig,
+<<<<<<< HEAD
   ResourceActionProvider,
+=======
+  KebabActionFactory,
+>>>>>>> Migrate KebabActions extension
   YAMLTemplate,
 } from '@console/plugin-sdk';
 import { NamespaceRedirect } from '@console/internal/components/utils/namespace-redirect';
@@ -54,8 +58,12 @@ import {
   eventSourceResourcesKafka,
   eventSourceResourcesSinkBinding,
 } from './utils/get-knative-resources';
+<<<<<<< HEAD
 import { getResourceActions } from './utils/resource-actions';
 import { fetchEventSourcesCrd } from './utils/fetch-dynamic-eventsources-utils';
+=======
+import { getKebabActions } from './utils/kebab-actions';
+>>>>>>> Migrate KebabActions extension
 
 type ConsumedExtensions =
   | ResourceNSNavItem
@@ -65,8 +73,12 @@ type ConsumedExtensions =
   | OverviewResourceTab
   | OverviewCRD
   | ResourceListPage
+<<<<<<< HEAD
   | RoutePage
   | ResourceActionProvider
+=======
+  | KebabActionFactory
+>>>>>>> Migrate KebabActions extension
   | YAMLTemplate
   | ResourceDetailsPage
   | AddAction;
@@ -396,6 +408,7 @@ const plugin: Plugin<ConsumedExtensions> = [
     },
   },
   {
+<<<<<<< HEAD
     type: 'Resource/Actions',
     properties: {
       getResourceActions,
@@ -412,6 +425,11 @@ const plugin: Plugin<ConsumedExtensions> = [
       label: 'Event Source',
       description: 'Create an event source and sink it to Knative service',
       iconClass: 'pficon-help',
+=======
+    type: 'KebabActionFactory',
+    properties: {
+      getKebabActions,
+>>>>>>> Migrate KebabActions extension
     },
   },
 ];

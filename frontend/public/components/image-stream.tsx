@@ -7,6 +7,7 @@ import { AlertVariant, Button, Popover } from '@patternfly/react-core';
 import { QuestionCircleIcon } from '@patternfly/react-icons';
 
 import { K8sResourceKind, K8sResourceKindReference } from '../module/k8s';
+<<<<<<< HEAD
 import { DetailsPage, ListPage, Table, TableRow, TableData, RowFunction } from './factory';
 import { CopyToClipboard } from './utils/copy-to-clipboard';
 import { ExpandableAlert } from './utils/alerts';
@@ -18,6 +19,22 @@ import { navFactory } from './utils/horizontal-nav';
 import { ResourceLink } from './utils/resource-link';
 import { ResourceSummary } from './utils/details-page';
 import { Timestamp } from './utils/timestamp';
+=======
+import { DetailsPage, ListPage, Table, TableRow, TableData } from './factory';
+import {
+  CopyToClipboard,
+  ExpandableAlert,
+  ExternalLink,
+  Kebab,
+  SectionHeading,
+  LabelList,
+  navFactory,
+  ResourceKebab,
+  ResourceLink,
+  ResourceSummary,
+  Timestamp,
+} from './utils';
+>>>>>>> Migrate KebabActions extension
 import { ImageStreamTimeline } from './image-stream-timeline';
 import { fromNow } from './utils/datetime';
 import { YellowExclamationTriangleIcon } from '@console/shared';

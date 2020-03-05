@@ -3,7 +3,11 @@ import {
   Plugin,
   ModelDefinition,
   ModelFeatureFlag,
+<<<<<<< HEAD
   ResourceActionProvider,
+=======
+  KebabActionFactory,
+>>>>>>> Migrate KebabActions extension
   ResourceListPage,
   DashboardsOverviewHealthURLSubsystem,
   DashboardsOverviewHealthResourceSubsystem,
@@ -15,8 +19,12 @@ import { ClusterServiceVersionModel } from '@console/operator-lifecycle-manager'
 import { ImageManifestVulnModel } from './models';
 import { SecurityLabellerFlag } from './const';
 import { securityHealthHandler } from './components/summary';
+<<<<<<< HEAD
 import { getResourceActions } from './resource-actions';
 import { WatchImageVuln } from './types';
+=======
+import { getKebabActions } from './kebab-actions';
+>>>>>>> Migrate KebabActions extension
 
 type ConsumedExtensions =
   | ModelDefinition
@@ -26,7 +34,11 @@ type ConsumedExtensions =
   | DashboardsOverviewHealthURLSubsystem
   | DashboardsOverviewHealthResourceSubsystem<WatchImageVuln>
   | RoutePage
+<<<<<<< HEAD
   | ResourceActionProvider
+=======
+  | KebabActionFactory
+>>>>>>> Migrate KebabActions extension
   | ResourceNSNavItem;
 
 const plugin: Plugin<ConsumedExtensions> = [
@@ -114,9 +126,15 @@ const plugin: Plugin<ConsumedExtensions> = [
     },
   },
   {
+<<<<<<< HEAD
     type: 'Resource/Actions',
     properties: {
       getResourceActions,
+=======
+    type: 'KebabActionFactory',
+    properties: {
+      getKebabActions,
+>>>>>>> Migrate KebabActions extension
     },
   },
   {

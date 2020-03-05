@@ -1,11 +1,20 @@
 import * as k8sModels from '@console/internal/module/k8s';
 import { ServiceModel, PodModel } from '@console/internal/models';
 import { mockPod } from '@console/shared/src/utils/__mocks__/pod-utils-test-data';
+<<<<<<< HEAD:frontend/packages/container-security/src/__tests__/resource-actions.spec.ts
 import { getResourceActions } from '../resource-actions';
 import { ImageManifestVulnModel } from '../models';
 
 describe('getResourceActions', () => {
   const pod: k8sModels.K8sResourceKind = {
+=======
+import { K8sResourceKind } from '@console/internal/module/k8s';
+import { getKebabActions } from '../kebab-actions';
+import { ImageManifestVulnModel } from '../models';
+
+describe('getKebabActions', () => {
+  const pod: K8sResourceKind = {
+>>>>>>> Migrate KebabActions extension:frontend/packages/container-security/src/__tests__/kebab-actions.spec.ts
     ...mockPod,
     status: {
       phase: 'Running',
@@ -25,8 +34,12 @@ describe('getResourceActions', () => {
   };
 
   it('returns `ViewImageVulnerabilities` kebab action if given `PodModel`', () => {
+<<<<<<< HEAD:frontend/packages/container-security/src/__tests__/resource-actions.spec.ts
     spyOn(k8sModels, 'modelFor').and.returnValue(PodModel);
     const actions = getResourceActions(PodModel);
+=======
+    const actions = getKebabActions(PodModel);
+>>>>>>> Migrate KebabActions extension:frontend/packages/container-security/src/__tests__/kebab-actions.spec.ts
 
     expect(actions.length).toEqual(1);
     expect(actions[0](PodModel, pod).label).toEqual('View Image Vulnerabilities');
@@ -42,7 +55,11 @@ describe('getResourceActions', () => {
   });
 
   it('returns no actions if not given `PodModel`', () => {
+<<<<<<< HEAD:frontend/packages/container-security/src/__tests__/resource-actions.spec.ts
     spyOn(k8sModels, 'modelFor').and.returnValue(ServiceModel);
     expect(getResourceActions(ServiceModel).length).toEqual(0);
+=======
+    expect(getKebabActions(ServiceModel).length).toEqual(0);
+>>>>>>> Migrate KebabActions extension:frontend/packages/container-security/src/__tests__/kebab-actions.spec.ts
   });
 });

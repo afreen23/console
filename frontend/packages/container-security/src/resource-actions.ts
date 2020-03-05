@@ -2,7 +2,11 @@ import { K8sKind, PodKind } from '@console/internal/module/k8s';
 import { referenceForModel } from '@console/internal/module/k8s/k8s';
 import { KebabOption } from '@console/internal/components/utils/kebab';
 import { PodModel } from '@console/internal/models';
+<<<<<<< HEAD:frontend/packages/container-security/src/resource-actions.ts
 import { GetResourceActions } from '@console/plugin-sdk';
+=======
+import { GetKebabActions } from '@console/plugin-sdk';
+>>>>>>> Migrate KebabActions extension:frontend/packages/container-security/src/kebab-actions.ts
 import { ImageManifestVulnModel } from './models';
 
 const listPathFor = (namespace: string, imageID: string) =>
@@ -29,7 +33,11 @@ const ViewImageVulnerabilities = (model: K8sKind, obj: PodKind): KebabOption => 
   };
 };
 
+<<<<<<< HEAD:frontend/packages/container-security/src/resource-actions.ts
 export const getResourceActions: GetResourceActions = (model) => {
+=======
+export const getKebabActions: GetKebabActions = (model) => {
+>>>>>>> Migrate KebabActions extension:frontend/packages/container-security/src/kebab-actions.ts
   return model && (referenceForModel(model) === referenceForModel(PodModel) || model.kind === 'Pod')
     ? [ViewImageVulnerabilities]
     : [];

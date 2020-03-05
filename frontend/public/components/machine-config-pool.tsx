@@ -43,6 +43,10 @@ const pauseAction: KebabAction = (kind, obj) => ({
 });
 
 const machineConfigPoolReference = referenceForModel(MachineConfigPoolModel);
+<<<<<<< HEAD
+=======
+const nodeReference = referenceForModel(NodeModel);
+>>>>>>> Migrate KebabActions extension
 const machineConfigPoolMenuActions = [pauseAction, ...Kebab.factory.common];
 
 const getConditionStatus = (

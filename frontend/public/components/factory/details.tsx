@@ -33,6 +33,7 @@ export const DetailsPage = withFallback<DetailsPageProps>(({ pages = [], ...prop
 
   const resourcePageExtensions = useExtensions<ResourceTabPage>(isResourceTabPage);
 
+<<<<<<< HEAD
   const pluginPages = React.useMemo(
     () =>
       resourcePageExtensions
@@ -50,6 +51,30 @@ export const DetailsPage = withFallback<DetailsPageProps>(({ pages = [], ...prop
   );
 
   let allPages = [...pages, ...pluginPages];
+=======
+  let allPages = [
+    ...pages,
+    ...resourcePageExtensions
+      .filter(
+        (p) =>
+          referenceForModel(p.properties.model) ===
+          (props.kindObj ? referenceFor(props.kindObj) : props.kind),
+      )
+      .map((p) => ({
+        href: p.properties.href,
+        name: p.properties.name,
+        component: () => (
+          <AsyncComponent
+            loader={p.properties.loader}
+            namespace={props.namespace}
+            name={props.name}
+            kind={props.kind}
+            match={props.match}
+          />
+        ),
+      })),
+  ];
+>>>>>>> Migrate KebabActions extension
   allPages = allPages.length ? allPages : null;
 
   return (

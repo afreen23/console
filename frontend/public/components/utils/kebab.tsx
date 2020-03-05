@@ -7,11 +7,15 @@ import { KEY_CODES, Tooltip } from '@patternfly/react-core';
 import { EllipsisVIcon, AngleRightIcon } from '@patternfly/react-icons';
 import Popper from '@console/shared/src/components/popper/Popper';
 import { arrayInsert } from '@console/shared/src/utils/array-utils';
+<<<<<<< HEAD
 import {
   useExtensions,
   ResourceActionProvider,
   isResourceActionProvider,
 } from '@console/plugin-sdk';
+=======
+import { useExtensions, KebabActionFactory, isKebabActionFactory } from '@console/plugin-sdk';
+>>>>>>> Migrate KebabActions extension
 import {
   annotationsModal,
   configureReplicaCountModal,
@@ -344,14 +348,24 @@ kebabFactory.common = [
   kebabFactory.Delete,
 ];
 
+<<<<<<< HEAD
 export const extendKebabOptions = (
   options: KebabOption[],
   extensions: ResourceActionProvider[],
+=======
+export const mergePluginKebabOptions = (
+  options: KebabOption[],
+  extensions: KebabActionFactory[],
+>>>>>>> Migrate KebabActions extension
   kind: K8sKind,
   obj: K8sResourceKind,
 ): KebabOption[] =>
   extensions.reduce((mergedOptions, e) => {
+<<<<<<< HEAD
     const newActions = e.properties.getResourceActions(kind, obj);
+=======
+    const newActions = e.properties.getKebabActions(kind, obj);
+>>>>>>> Migrate KebabActions extension
     const newOptions = newActions.map((a) => a(kind, obj));
     const mergeBefore = e.properties.mergeBefore || 'Edit Labels';
     const index = mergedOptions.findIndex((o) => o.label === mergeBefore);
@@ -363,7 +377,11 @@ export const extendKebabOptions = (
 
 export const ResourceKebab = connectToModel((props: ResourceKebabProps) => {
   const { actions, kindObj, resource, isDisabled } = props;
+<<<<<<< HEAD
   const actionExtensions = useExtensions<ResourceActionProvider>(isResourceActionProvider);
+=======
+  const actionExtensions = useExtensions<KebabActionFactory>(isKebabActionFactory);
+>>>>>>> Migrate KebabActions extension
 
   if (!kindObj) {
     return null;
@@ -373,7 +391,11 @@ export const ResourceKebab = connectToModel((props: ResourceKebabProps) => {
     actions.map((a) => a(kindObj, resource)),
     'hidden',
   );
+<<<<<<< HEAD
   options = extendKebabOptions(options, actionExtensions, kindObj, resource);
+=======
+  options = mergePluginKebabOptions(options, actionExtensions, kindObj, resource);
+>>>>>>> Migrate KebabActions extension
 
   return (
     <Kebab

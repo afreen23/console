@@ -16,9 +16,12 @@ import {
   LoadingInline,
 } from './utils';
 import { VolumesTable } from './volumes-table';
+<<<<<<< HEAD
 import { StatefulSetModel } from '../models';
 import PodRingSet from '@console/shared/src/components/pod/PodRingSet';
 import { PodRingController } from '@console/shared';
+=======
+>>>>>>> Migrate KebabActions extension
 
 const { AddStorage } = Kebab.factory;
 export const menuActions = [AddStorage, ...Kebab.factory.common];

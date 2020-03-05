@@ -1,5 +1,6 @@
 import * as React from 'react';
 import * as classNames from 'classnames';
+<<<<<<< HEAD
 import { Kebab, ResourceLink, extendKebabOptions } from '@console/internal/components/utils';
 import { sortable } from '@patternfly/react-table';
 import { DASH, getName, getUID, getNamespace, SecondaryStatus } from '@console/shared';
@@ -15,6 +16,13 @@ import {
   RowFunction,
   RowFunctionArgs,
 } from '@console/internal/components/factory';
+=======
+import { Kebab, ResourceLink, mergePluginKebabOptions } from '@console/internal/components/utils';
+import { sortable } from '@patternfly/react-table';
+import { DASH, getName, getUID, getNamespace, SecondaryStatus } from '@console/shared';
+import { useExtensions, KebabActionFactory, isKebabActionFactory } from '@console/plugin-sdk';
+import { TableRow, TableData, Table } from '@console/internal/components/factory';
+>>>>>>> Migrate KebabActions extension
 import { referenceForModel } from '@console/internal/module/k8s';
 import NodeRoles from '@console/app/src/components/nodes/NodeRoles';
 import { useFlag } from '@console/shared/src/hooks/flag';
@@ -86,11 +94,19 @@ const BareMetalNodesTableRow: React.FC<RowFunctionArgs<BareMetalNodeBundle>> = (
   const address = getHostBMCAddress(host);
   const uid = getUID(node);
 
+<<<<<<< HEAD
   const actionExtensions = useExtensions<ResourceActionProvider>(isResourceActionProvider);
   let options = menuActions.map((action) =>
     action(NodeModel, node, null, { nodeMaintenance, hasNodeMaintenanceCapability }),
   );
   options = extendKebabOptions(options, actionExtensions, NodeModel, node);
+=======
+  const actionExtensions = useExtensions<KebabActionFactory>(isKebabActionFactory);
+  let options = menuActions.map((action) =>
+    action(NodeModel, node, null, { nodeMaintenance, hasNodeMaintenanceCapability }),
+  );
+  options = mergePluginKebabOptions(options, actionExtensions, NodeModel, node);
+>>>>>>> Migrate KebabActions extension
 
   return (
     <TableRow id={uid} index={index} trKey={key} style={style}>

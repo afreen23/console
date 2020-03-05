@@ -5,7 +5,11 @@ import {
   ModifyApplication,
   EditApplication,
 } from '@console/dev-console/src/actions/modify-application';
+<<<<<<< HEAD:frontend/packages/knative-plugin/src/utils/resource-actions.ts
 import { GetResourceActions } from '@console/plugin-sdk';
+=======
+import { GetKebabActions } from '@console/plugin-sdk';
+>>>>>>> Migrate KebabActions extension:frontend/packages/knative-plugin/src/utils/kebab-actions.ts
 import { setTrafficDistribution } from '../actions/traffic-splitting';
 import { setSinkSource } from '../actions/sink-source';
 import {
@@ -28,7 +32,11 @@ const eventSourceModelrefs = [
 ];
 const modifyApplicationRefs = [...eventSourceModelrefs, referenceForModel(ServiceModel)];
 
+<<<<<<< HEAD:frontend/packages/knative-plugin/src/utils/resource-actions.ts
 export const getResourceActions: GetResourceActions = (resourceKind) => {
+=======
+export const getKebabActions: GetKebabActions = (resourceKind) => {
+>>>>>>> Migrate KebabActions extension:frontend/packages/knative-plugin/src/utils/kebab-actions.ts
   const menuActions: KebabAction[] = [];
   if (resourceKind) {
     if (_.includes(modifyApplicationRefs, referenceForModel(resourceKind))) {

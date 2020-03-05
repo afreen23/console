@@ -41,8 +41,12 @@ const ModifyJobParallelism: KebabAction = (kind: K8sKind, obj: JobKind) => ({
     verb: 'patch',
   },
 });
+<<<<<<< HEAD
 
 const menuActions = [ModifyJobParallelism, ...Kebab.factory.common];
+=======
+const menuActions: KebabAction[] = [ModifyJobParallelism, ...Kebab.factory.common];
+>>>>>>> Migrate KebabActions extension
 
 const kind = 'Job';
 

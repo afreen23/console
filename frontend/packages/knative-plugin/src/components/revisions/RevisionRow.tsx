@@ -60,7 +60,11 @@ const RevisionRow: React.FC<RevisionRowProps> = ({ obj, index, key, style }) => 
         {(readyCondition && readyCondition.message) || '-'}
       </TableData>
       <TableData className={tableColumnClasses[7]}>
-        <ResourceKebab actions={Kebab.factory.common} kind={revisionReference} resource={obj} />
+        <ResourceKebab
+          actions={[...Kebab.factory.common]}
+          kind={revisionReference}
+          resource={obj}
+        />
       </TableData>
     </TableRow>
   );

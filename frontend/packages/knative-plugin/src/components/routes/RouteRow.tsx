@@ -72,7 +72,7 @@ const RouteRow: React.FC<RouteRowProps> = ({ obj, index, key, style }) => (
         : '-'}
     </TableData>
     <TableData className={tableColumnClasses[6]}>
-      <ResourceKebab actions={Kebab.factory.common} kind={routeReference} resource={obj} />
+      <ResourceKebab actions={[...Kebab.factory.common]} kind={routeReference} resource={obj} />
     </TableData>
   </TableRow>
 );

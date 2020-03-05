@@ -9,7 +9,7 @@ import {
   ResourceListPage,
   ResourceDetailsPage,
   GlobalConfig,
-  KebabActions,
+  KebabActionFactory,
   YAMLTemplate,
 } from '@console/plugin-sdk';
 import { referenceForModel } from '@console/internal/module/k8s';
@@ -52,7 +52,7 @@ import {
   getEventSourceKafka,
   getEventSourceSinkBinding,
 } from './utils/get-knative-resources';
-import { getKebabActionsForKind } from './utils/kebab-actions';
+import { getKebabActions } from './utils/kebab-actions';
 
 type ConsumedExtensions =
   | ResourceNSNavItem
@@ -62,7 +62,7 @@ type ConsumedExtensions =
   | OverviewResourceTab
   | OverviewCRD
   | ResourceListPage
-  | KebabActions
+  | KebabActionFactory
   | YAMLTemplate
   | ResourceDetailsPage;
 
@@ -359,9 +359,9 @@ const plugin: Plugin<ConsumedExtensions> = [
     },
   },
   {
-    type: 'KebabActions',
+    type: 'KebabActionFactory',
     properties: {
-      getKebabActionsForKind,
+      getKebabActions,
     },
   },
 ];

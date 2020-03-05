@@ -175,7 +175,7 @@ export const InstallPlanTableRow: React.FC<InstallPlanTableRowProps> = ({
       {/* Kebab */}
       <TableData className={tableColumnClasses[5]}>
         <ResourceKebab
-          actions={Kebab.factory.common}
+          actions={[...Kebab.factory.common]}
           kind={referenceForModel(InstallPlanModel)}
           resource={obj}
         />
@@ -479,7 +479,7 @@ export const InstallPlanDetailsPage: React.SFC<InstallPlanDetailsPageProps> = (p
       navFactory.editYaml(),
       { href: 'components', name: 'Components', component: InstallPlanPreview },
     ]}
-    menuActions={[...Kebab.getExtensionsActionsForKind(InstallPlanModel), ...Kebab.factory.common]}
+    menuActions={[...Kebab.factory.common]}
   />
 );
 

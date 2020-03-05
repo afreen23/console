@@ -8,6 +8,7 @@ import {
   kebabOptionsToMenu,
   isKebabSubMenu,
 } from '@console/internal/components/utils';
+import { KebabActionFactory } from '@console/plugin-sdk';
 import { workloadActions } from './actions/workloadActions';
 import { groupActions } from './actions/groupActions';
 import { nodeActions } from './actions/nodeActions';
@@ -41,7 +42,7 @@ const createMenuItems = (actions: KebabMenuOption[]) =>
 export const workloadContextMenu = (element: Node) =>
   createMenuItems(kebabOptionsToMenu(workloadActions(element.getData())));
 
-export const groupContextMenu = (element: Node, connectorSource?: Node) => {
+export const groupContextMenu = (element: Node, options?: NodeContextMenuOptions) => {
   const applicationData: TopologyApplicationObject = {
     id: element.getId(),
     name: element.getLabel(),
@@ -50,17 +51,23 @@ export const groupContextMenu = (element: Node, connectorSource?: Node) => {
 
   const graphData = element.getGraph().getData();
   return createMenuItems(
-    kebabOptionsToMenu(groupActions(graphData, applicationData, connectorSource)),
+    kebabOptionsToMenu(groupActions(graphData, applicationData, options?.connectorSource)),
   );
 };
-export const nodeContextMenu = (element: Node) =>
-  createMenuItems(kebabOptionsToMenu(nodeActions(element.getData())));
 
-export const graphContextMenu = (graph: Graph, connectorSource?: Node) =>
-  createMenuItems(kebabOptionsToMenu(graphActions(graph.getData(), connectorSource)));
+export const nodeContextMenu = (element: Node, options?: NodeContextMenuOptions) =>
+  createMenuItems(kebabOptionsToMenu(nodeActions(element.getData(), options?.actionExtensions)));
+
+export const graphContextMenu = (graph: Graph, options?: NodeContextMenuOptions) =>
+  createMenuItems(kebabOptionsToMenu(graphActions(graph.getData(), options?.connectorSource)));
 
 export const regroupContextMenu = (element: Node) =>
   createMenuItems(kebabOptionsToMenu(regroupActions(element)));
 
 export const regroupGroupContextMenu = (element: Node) =>
   createMenuItems(kebabOptionsToMenu(regroupActions(element, true)));
+
+type NodeContextMenuOptions = {
+  connectorSource?: Node;
+  actionExtensions?: KebabActionFactory[];
+};

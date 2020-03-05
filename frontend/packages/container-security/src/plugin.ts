@@ -3,7 +3,7 @@ import {
   Plugin,
   ModelDefinition,
   ModelFeatureFlag,
-  KebabActions,
+  KebabActionFactory,
   ResourceListPage,
   DashboardsOverviewHealthURLSubsystem,
   RoutePage,
@@ -14,7 +14,7 @@ import { ClusterServiceVersionModel } from '@console/operator-lifecycle-manager'
 import { ImageManifestVulnModel } from './models';
 import { SecurityLabellerFlag } from './const';
 import { securityHealthHandler } from './components/summary';
-import { getKebabActionsForKind } from './kebab-actions';
+import { getKebabActions } from './kebab-actions';
 
 type ConsumedExtensions =
   | ModelDefinition
@@ -23,7 +23,7 @@ type ConsumedExtensions =
   | ResourceDetailsPage
   | DashboardsOverviewHealthURLSubsystem
   | RoutePage
-  | KebabActions
+  | KebabActionFactory
   | ResourceNSNavItem;
 
 const plugin: Plugin<ConsumedExtensions> = [
@@ -110,9 +110,9 @@ const plugin: Plugin<ConsumedExtensions> = [
     },
   },
   {
-    type: 'KebabActions',
+    type: 'KebabActionFactory',
     properties: {
-      getKebabActionsForKind,
+      getKebabActions,
     },
   },
   {

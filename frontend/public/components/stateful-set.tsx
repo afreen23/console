@@ -9,21 +9,15 @@ import { WorkloadTableRow, WorkloadTableHeader } from './workload-table';
 import {
   AsyncComponent,
   Kebab,
-  KebabAction,
   ContainerTable,
   ResourceSummary,
   SectionHeading,
   navFactory,
 } from './utils';
 import { VolumesTable } from './volumes-table';
-import { StatefulSetModel } from '../models';
 
-const { AddStorage, common } = Kebab.factory;
-export const menuActions: KebabAction[] = [
-  AddStorage,
-  ...Kebab.getExtensionsActionsForKind(StatefulSetModel),
-  ...common,
-];
+const { AddStorage } = Kebab.factory;
+export const menuActions = [AddStorage, ...Kebab.factory.common];
 
 const kind = 'StatefulSet';
 

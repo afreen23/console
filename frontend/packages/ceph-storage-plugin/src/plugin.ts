@@ -12,7 +12,6 @@ import {
   DashboardsOverviewUtilizationItem,
   DashboardsTab,
   FeatureFlag,
-  KebabActions,
   ModelDefinition,
   ModelFeatureFlag,
   Plugin,
@@ -46,11 +45,9 @@ type ConsumedExtensions =
   | RoutePage
   | ActionFeatureFlag
   | ClusterServiceVersionAction
-  | KebabActions
   | ResourceDetailsPage
   | ResourceTabPage
   | ClusterServiceVersionAction
-  | KebabActions
   | FeatureFlag
   | DashboardsOverviewResourceActivity;
 

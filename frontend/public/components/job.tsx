@@ -41,11 +41,7 @@ const ModifyJobParallelism: KebabAction = (kind: K8sKind, obj: JobKind) => ({
     verb: 'patch',
   },
 });
-const menuActions: KebabAction[] = [
-  ModifyJobParallelism,
-  ...Kebab.getExtensionsActionsForKind(JobModel),
-  ...Kebab.factory.common,
-];
+const menuActions: KebabAction[] = [ModifyJobParallelism, ...Kebab.factory.common];
 
 const kind = 'Job';
 

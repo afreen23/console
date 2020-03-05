@@ -20,10 +20,12 @@ export class StorageClassDropdownInner extends React.Component<
   };
 
   componentWillMount() {
+    console.log('COMPONENT WILL MOUNT', this.props);
     this.componentWillReceiveProps(this.props);
   }
 
   componentWillReceiveProps(nextProps) {
+    console.log('COMPONENT WILL RECEIVE PROPS', nextProps);
     const { loaded, loadError, resources } = nextProps;
 
     if (loadError) {
@@ -80,13 +82,11 @@ export class StorageClassDropdownInner extends React.Component<
     }
 
     if (!this.props.loaded || !selectedKey) {
-      console.log('no storage class');
       state.title = <span className="text-muted">Select storage class</span>;
     }
 
     const selectedItem = unorderedItems[selectedKey || state.defaultClass];
     if (selectedItem) {
-      console.log('Selected Item', selectedItem);
       state.title = this.getTitle(selectedItem);
     }
 
@@ -99,14 +99,18 @@ export class StorageClassDropdownInner extends React.Component<
   }
 
   componentDidUpdate() {
+    console.log('COMPONENT DID UPDATE');
     const { defaultClass, selectedKey } = this.state;
-    console.log('DEfault CLass is set', defaultClass);
     if (!selectedKey && defaultClass) {
       this.onChange(defaultClass);
     }
   }
 
   shouldComponentUpdate(nextProps, nextState) {
+    const v = !_.isEqual(this.state, nextState);
+    console.log('SHOULD COMPONENT UPDATE', v);
+    console.log('SHOULD COMPONENT UPDATE: state', this.state);
+    console.log('SHOULD COMPONENT UPDATE: state', nextState);
     return !_.isEqual(this.state, nextState);
   }
 
@@ -121,7 +125,6 @@ export class StorageClassDropdownInner extends React.Component<
   };
 
   onChange = (key) => {
-    console.log('On change working');
     const storageClass = _.get(this.state, ['items', key], {});
     this.setState(
       {
@@ -133,6 +136,7 @@ export class StorageClassDropdownInner extends React.Component<
   };
 
   render() {
+    console.log('RENDER');
     const { id, loaded, describedBy } = this.props;
     const items = {};
     _.each(

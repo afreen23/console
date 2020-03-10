@@ -1,7 +1,7 @@
 import * as React from 'react';
 import * as _ from 'lodash';
 import * as classNames from 'classnames';
-import { connect } from 'react-redux';
+// import { connect } from 'react-redux';
 import {
   Table,
   TableHeader,
@@ -10,13 +10,13 @@ import {
   TableGridBreakpoint,
 } from '@patternfly/react-table';
 import {
-  getName,
+  // getName,
   getNodeRoles,
   getNodeCPUCapacity,
   getNodeAllocatableMemory,
 } from '@console/shared';
 import { Alert, ActionGroup, Button } from '@patternfly/react-core';
-import { tableFilters } from '@console/internal/components/factory/table-filters';
+import { tableFilters, TextFilter } from '@console/internal/components/factory/table-filters';
 import { ButtonBar } from '@console/internal/components/utils/button-bar';
 import { history } from '@console/internal/components/utils/router';
 import {
@@ -135,19 +135,13 @@ const getRows = (nodes: NodeKind[]) => {
     });
 };
 
-const getFilteredRows = (filters: {}, objects: any[]) => {
-  if (_.isEmpty(filters)) {
+const getFilteredRows = (filters: { name: string }, objects: any[]) => {
+  if (filters.name) {
     return objects;
   }
-
   let filteredObjects = objects;
-  _.each(filters, (value, name) => {
-    const filter = tableFilters[name];
-    if (_.isFunction(filter)) {
-      filteredObjects = _.filter(filteredObjects, (o) => filter(value, o));
-    }
-  });
-
+  const filter = tableFilters['name'] as TextFilter;
+  filteredObjects = _.filter(filteredObjects, (o) => filter(filters.name, o));
   return filteredObjects;
 };
 
@@ -158,84 +152,88 @@ const getPreSelectedNodes = (nodes: formattedNodeType[]) => {
   }));
 };
 
-const stateToProps = (obj, { data = [], filters = {}, staticFilters = [{}] }) => {
-  const allFilters = staticFilters ? Object.assign({}, filters, ...staticFilters) : filters;
-  const newData = getFilteredRows(allFilters, data);
-  return {
-    data: newData,
-    unfilteredData: data,
-    isFiltered: !!_.get(filters, 'name'),
-  };
+// const stateToProps = (obj, { data = [], filters = {}, staticFilters = [{}] }) => {
+//   const allFilters = staticFilters ? Object.assign({}, filters, ...staticFilters) : filters;
+//   const newData = getFilteredRows(allFilters, data);
+//   return {
+//     data: newData,
+//     unfilteredData: data,
+//     isFiltered: !!_.get(filters, 'name'),
+//   };
+// };
+
+const hasMinimumCPU = (node: formattedNodeType): boolean => {
+  return convertToBaseValue(node.cpuCapacity) >= 16;
 };
+
+const hasMinimumMemory = (node: formattedNodeType): boolean => {
+  return convertToBaseValue(node.allocatableMemory) >= convertToBaseValue('64 Gi');
+};
+
+const validateNodes = (selectedNodes: formattedNodeType[]): string => {
+  let invalidNodesCount = 0;
+  let nodeName = '';
+  selectedNodes.forEach((node: formattedNodeType) => {
+    if (!hasMinimumCPU(node) || !hasMinimumMemory(node)) {
+      invalidNodesCount += 1;
+      nodeName = node.id;
+    }
+  });
+
+  if (invalidNodesCount > 0) {
+    const msg =
+      invalidNodesCount > 1
+        ? `${invalidNodesCount} of the selected nodes do not meet minimum requirements of 16 cores and 64 GiB Memory`
+        : `Node ${nodeName} does not meet minimum requirements of 16 cores and 64 GiB memory.`;
+    return msg;
+  } else {
+    return '';
+  }
+};
+
 const CustomNodeTable: React.FC<CustomNodeTableProps> = ({
   data,
-  unfilteredData,
-  isFiltered,
+  filters,
   loaded,
   ocsProps,
 }) => {
   const columns = getColumns();
   const [osdSize, setOsdSize] = React.useState('2Ti');
   const [nodes, setNodes] = React.useState([]);
-  const [unfilteredNodes, setUnfilteredNodes] = React.useState([]);
   const [error, setError] = React.useState('');
+  // const [filter, setFilter] = React.useState(!!filters.name);
   const [inProgress, setProgress] = React.useState(false);
   const [selectedNodesCnt, setSelectedNodesCnt] = React.useState(0);
   const [nodesWarningMsg, setNodesWarningMsg] = React.useState('');
   const [storageClass, setStorageClass] = React.useState(null);
 
-  // pre-selection of nodes
-  if (loaded && !unfilteredNodes.length) {
-    const formattedNodes: formattedNodeType[] = getRows(unfilteredData);
-    const preSelectedNodes = getPreSelectedNodes(formattedNodes);
-    setUnfilteredNodes(preSelectedNodes);
-    setNodes(preSelectedNodes);
-  }
-
-  const hasMinimumCPU = (node: formattedNodeType): boolean => {
-    return convertToBaseValue(node.cpuCapacity) >= 16;
-  };
-
-  const hasMinimumMemory = (node: formattedNodeType): boolean => {
-    return convertToBaseValue(node.allocatableMemory) >= convertToBaseValue('64 Gi');
-  };
-
-  const validateNodes = React.useCallback((selectedNodes: formattedNodeType[]): void => {
-    let invalidNodesCount = 0;
-    let nodeName = '';
-    selectedNodes.forEach((node: formattedNodeType) => {
-      if (!hasMinimumCPU(node) || !hasMinimumMemory(node)) {
-        invalidNodesCount += 1;
-        nodeName = node.id;
-      }
-    });
-
-    if (invalidNodesCount > 0) {
-      const msg =
-        invalidNodesCount > 1
-          ? `${invalidNodesCount} of the selected nodes do not meet minimum requirements of 16 cores and 64 GiB Memory`
-          : `Node ${nodeName} does not meet minimum requirements of 16 cores and 64 GiB memory.`;
-      setNodesWarningMsg(msg);
-    } else {
-      setNodesWarningMsg('');
+  React.useEffect(() => {
+    // pre-selection of nodes
+    if (loaded && !nodes.length) {
+      const formattedNodes: formattedNodeType[] = getRows(data);
+      const preSelectedNodes = getPreSelectedNodes(formattedNodes);
+      setNodes(preSelectedNodes);
     }
   }, []);
 
   React.useEffect(() => {
-    const selectedNodes = _.filter(unfilteredNodes, 'selected');
-    setSelectedNodesCnt(selectedNodes.length);
-    validateNodes(selectedNodes);
-  }, [nodes, unfilteredNodes, validateNodes]);
-
-  React.useEffect(() => {
-    if (isFiltered || nodes.length !== data.length) {
-      const unfilteredNodesByID = _.keyBy(unfilteredNodes, 'metadata.name');
-      const filterData = _.each(getRows(data), (n) => {
+    if (filters.name || nodes.length !== data.length) {
+      const unfilteredNodesByID = _.keyBy(nodes, 'metadata.name');
+      const filteredRows = getFilteredRows(filters, data);
+      const filterData = _.each(getRows(filteredRows), (n) => {
         n.selected = _.get(unfilteredNodesByID, [n.id, 'selected'], false);
       });
       setNodes(filterData);
     }
-  }, [data, isFiltered, nodes.length, unfilteredNodes]);
+  }, [data, nodes.length, !!filters.name]);
+
+  React.useEffect(() => {
+    const selectedNodes = _.filter(nodes, 'selected');
+    setSelectedNodesCnt(selectedNodes.length);
+    const msg = validateNodes(selectedNodes);
+    setNodesWarningMsg(msg);
+  }, [nodes]);
+
   const onSelect = (
     event: React.MouseEvent<HTMLButtonElement>,
     isSelected: boolean,
@@ -253,13 +251,12 @@ const CustomNodeTable: React.FC<CustomNodeTableProps> = ({
       formattedNodes[index].selected = isSelected;
     }
     setNodes(formattedNodes);
-    const nodesByID = _.keyBy(nodes, 'id');
-    const setSelectedUnfilteredNodes = _.each(unfilteredNodes, (n) => {
-      if (_.get(nodesByID, [n.id, 'id']) === n.metadata.name) {
-        n.selected = _.get(nodesByID, [getName(n), 'selected'], false);
-      }
-    });
-    setUnfilteredNodes(setSelectedUnfilteredNodes);
+    // const nodesByID = _.keyBy(nodes, 'id');
+    // const setSelectedUnfilteredNodes = _.each(nodes, (n) => {
+    //   if (_.get(nodesByID, [n.id, 'id']) === n.metadata.name) {
+    //     n.selected = _.get(nodesByID, [getName(n), 'selected'], false);
+    //   }
+    // });
   };
 
   const makeLabelNodesRequest = (selectedNodes: NodeKind[]): Promise<NodeKind>[] => {
@@ -321,7 +318,7 @@ const CustomNodeTable: React.FC<CustomNodeTableProps> = ({
       .then(() => {
         history.push(
           `/k8s/ns/${ocsProps.namespace}/clusterserviceversions/${
-            ocsProps.clusterServiceVersion.metadata.name
+          ocsProps.clusterServiceVersion.metadata.name
           }/${referenceForModel(OCSServiceModel)}/${ocsObj.metadata.name}`,
         );
       })
@@ -365,7 +362,7 @@ const CustomNodeTable: React.FC<CustomNodeTableProps> = ({
         />
       )}
       <div className="ceph-ocs-install__ocs-service-capacity--dropdown">
-        <OCSStorageClassDropdown onChange={setStorageClass} />
+        <OCSStorageClassDropdown onChange={setStorageClass} defaultClass={storageClass} />
       </div>
       <div className="ceph-ocs-install__ocs-service-capacity">
         <label className="control-label" htmlFor="ocs-service-stoargeclass">
@@ -397,12 +394,13 @@ const CustomNodeTable: React.FC<CustomNodeTableProps> = ({
   );
 };
 
-export const NodeList = connect<{}, CustomNodeTableProps>(stateToProps)(CustomNodeTable);
+export const NodeList = (CustomNodeTable);
 
 type CustomNodeTableProps = {
   data: NodeKind[];
   unfilteredData: UnfilteredDataType[];
   loaded: boolean;
+  filters: { name: string };
   ocsProps: ocsPropsType;
   isFiltered: boolean;
 };

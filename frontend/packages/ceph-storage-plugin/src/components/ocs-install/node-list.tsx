@@ -46,6 +46,7 @@ import './ocs-install.scss';
 import { OSDSizeDropdown } from '../../utils/osd-size-dropdown';
 import { hasLabel } from '../../../../console-shared/src/selectors/common';
 import { OCSStorageClassDropdown } from '../modals/storage-class-dropdown';
+import { createSelector } from 'reselect';
 
 const ocsLabel = 'cluster.ocs.openshift.io/openshift-storage';
 
@@ -158,15 +159,23 @@ const getPreSelectedNodes = (nodes: formattedNodeType[]) => {
   }));
 };
 
-const stateToProps = (obj, { data = [], filters = {}, staticFilters = [{}] }) => {
-  const allFilters = staticFilters ? Object.assign({}, filters, ...staticFilters) : filters;
-  const newData = getFilteredRows(allFilters, data);
+const data = (obj, { data = [] }) => data;
+
+const filters = (obj, { filters }) => filters;
+
+const toFilter = () => createSelector([data, filters], (data, filters) => {
+  const newData = getFilteredRows(filters, data);
   return {
     data: newData,
     unfilteredData: data,
     isFiltered: !!_.get(filters, 'name'),
   };
-};
+});
+
+const stateToProps = () => {
+  return (state, props) => toFilter()(state, props);
+}
+
 const CustomNodeTable: React.FC<CustomNodeTableProps> = ({
   data,
   unfilteredData,
@@ -183,7 +192,7 @@ const CustomNodeTable: React.FC<CustomNodeTableProps> = ({
   const [selectedNodesCnt, setSelectedNodesCnt] = React.useState(0);
   const [nodesWarningMsg, setNodesWarningMsg] = React.useState('');
   const [storageClass, setStorageClass] = React.useState(null);
-
+  console.log("storage class", storageClass);
   // pre-selection of nodes
   if (loaded && !unfilteredNodes.length) {
     const formattedNodes: formattedNodeType[] = getRows(unfilteredData);
@@ -321,7 +330,7 @@ const CustomNodeTable: React.FC<CustomNodeTableProps> = ({
       .then(() => {
         history.push(
           `/k8s/ns/${ocsProps.namespace}/clusterserviceversions/${
-            ocsProps.clusterServiceVersion.metadata.name
+          ocsProps.clusterServiceVersion.metadata.name
           }/${referenceForModel(OCSServiceModel)}/${ocsObj.metadata.name}`,
         );
       })
@@ -365,7 +374,7 @@ const CustomNodeTable: React.FC<CustomNodeTableProps> = ({
         />
       )}
       <div className="ceph-ocs-install__ocs-service-capacity--dropdown">
-        <OCSStorageClassDropdown onChange={setStorageClass} />
+        <OCSStorageClassDropdown onChange={setStorageClass} selectedKey={storageClass} />
       </div>
       <div className="ceph-ocs-install__ocs-service-capacity">
         <label className="control-label" htmlFor="ocs-service-stoargeclass">

@@ -7,6 +7,7 @@ import { StorageClassDropdownInner } from '@console/internal/components/utils/st
 import { getInfrastructurePlatform } from '@console/shared';
 import { infraProvisionerMap, storageClassTooltip } from '../../constants/ocs-install';
 import './storage-class-dropdown.scss';
+import { Title } from '@patternfly/react-core';
 
 const StorageClassDropdown = (props: any) => {
   const scConfig = _.cloneDeep(props);
@@ -40,7 +41,7 @@ const StorageClassDropdown = (props: any) => {
 };
 
 export const OCSStorageClassDropdown: React.FC<OCSStorageClassDropdownProps> = (props) => {
-  const { onChange, defaultClass } = props;
+  const { onChange, defaultClass, storageClass } = props;
 
   const handleStorageClass = (sc: K8sResourceKind) => {
     onChange(sc.metadata.name);
@@ -52,11 +53,13 @@ export const OCSStorageClassDropdown: React.FC<OCSStorageClassDropdownProps> = (
         Storage Class
         <FieldLevelHelp>{storageClassTooltip}</FieldLevelHelp>
       </label>
+      <Title size="4xl">Afreen </Title>
       <Firehose resources={[{ kind: 'StorageClass', prop: 'StorageClass', isList: true }]}>
         <StorageClassDropdown
           onChange={handleStorageClass}
           name="storageClass"
           defaultClass={defaultClass}
+          selectedKey={storageClass}
           hideClassName="ceph-sc-dropdown__hide-default"
           required
         />
@@ -68,4 +71,5 @@ export const OCSStorageClassDropdown: React.FC<OCSStorageClassDropdownProps> = (
 type OCSStorageClassDropdownProps = {
   onChange: React.Dispatch<React.SetStateAction<string>>;
   defaultClass?: string;
+  selectedKey?: string;
 };

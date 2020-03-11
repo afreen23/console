@@ -10,7 +10,7 @@ import { isDefaultClass } from '../storage-class';
 export class StorageClassDropdownInner extends React.Component<
   StorageClassDropdownInnerProps,
   StorageClassDropdownInnerState
-> {
+  > {
   readonly state: StorageClassDropdownInnerState = {
     items: {},
     name: this.props.name,
@@ -113,8 +113,8 @@ export class StorageClassDropdownInner extends React.Component<
     return storageClass.kindLabel ? (
       <ResourceName kind="StorageClass" name={storageClass.name} />
     ) : (
-      <span>{storageClass.name}</span>
-    );
+        <span>{storageClass.name}</span>
+      );
   };
 
   onChange = (key) => {
@@ -137,8 +137,8 @@ export class StorageClassDropdownInner extends React.Component<
         (items[key] = key ? (
           <StorageClassDropdownEntry {...props} />
         ) : (
-          <StorageClassDropdownNoStorageClassOption {...props} />
-        )),
+            <StorageClassDropdownNoStorageClassOption {...props} />
+          )),
     );
 
     const { selectedKey, defaultClass } = this.state;
@@ -233,6 +233,7 @@ export type StorageClassDropdownInnerProps = {
   loaded?: boolean;
   resources?: any;
   name: string;
+  selectedKey: string;
   onChange: (object) => void;
   describedBy: string;
   defaultClass: string;

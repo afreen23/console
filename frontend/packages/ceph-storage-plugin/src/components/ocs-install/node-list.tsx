@@ -321,7 +321,7 @@ const CustomNodeTable: React.FC<CustomNodeTableProps> = ({
       .then(() => {
         history.push(
           `/k8s/ns/${ocsProps.namespace}/clusterserviceversions/${
-            ocsProps.clusterServiceVersion.metadata.name
+          ocsProps.clusterServiceVersion.metadata.name
           }/${referenceForModel(OCSServiceModel)}/${ocsObj.metadata.name}`,
         );
       })
@@ -340,6 +340,7 @@ const CustomNodeTable: React.FC<CustomNodeTableProps> = ({
 
   return (
     <>
+      {console.log("CUSTOM NODE TABLE", storageClass)}
       <div className="ceph-node-list__max-height">
         <Table
           aria-label="node list table"

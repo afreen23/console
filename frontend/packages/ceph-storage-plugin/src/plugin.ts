@@ -15,6 +15,7 @@ import {
   RoutePage,
   ResourceDetailsPage,
   ActionFeatureFlag,
+  KebabActionFactory,
   DashboardsOverviewResourceActivity,
 } from '@console/plugin-sdk';
 import {
@@ -30,10 +31,12 @@ import { referenceForModel, referenceFor } from '@console/internal/module/k8s';
 import { PersistentVolumeClaimModel } from '@console/internal/models';
 import { getCephHealthState } from './components/dashboard-page/storage-dashboard/status-card/utils';
 import { isClusterExpandActivity } from './components/dashboard-page/storage-dashboard/activity-card/cluster-expand-activity';
+import { getKebabActions } from './utils/kebab-actions';
 import { WatchCephResource } from './types';
 
 type ConsumedExtensions =
   | ModelFeatureFlag
+  | KebabActionFactory
   | ModelDefinition
   | DashboardsTab
   | DashboardsCard
@@ -396,6 +399,12 @@ const plugin: Plugin<ConsumedExtensions> = [
     },
     flags: {
       required: [CEPH_FLAG],
+    },
+  },
+  {
+    type: 'KebabActionFactory',
+    properties: {
+      getKebabActions,
     },
   },
 ];

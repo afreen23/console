@@ -2,12 +2,13 @@ import * as _ from 'lodash';
 import { ModelDefinition, ModelFeatureFlag, Plugin, RoutePage } from '@console/plugin-sdk';
 import { referenceForModel } from '@console/internal/module/k8s';
 import * as models from './models';
+import { ClusterServiceVersionModel } from '@console/operator-lifecycle-manager';
 
 type ConsumedExtensions = ModelFeatureFlag | ModelDefinition | RoutePage;
 
 const LSO_FLAG = 'LSO';
 
-const LocalVolumeGroupModel = models.LocalVolumeGroupModel;
+// const LocalVolumeGroupModel = models.LocalVolumeGroupModel;
 
 const plugin: Plugin<ConsumedExtensions> = [
   {
@@ -27,9 +28,9 @@ const plugin: Plugin<ConsumedExtensions> = [
     type: 'Page/Route',
     properties: {
       exact: true,
-      path: `/k8s/ns/:ns/${LocalVolumeGroupModel.plural}/:appName/${referenceForModel(LocalVolumeGroupModel)}/~new`,
+      path: `/k8s/ns/:ns/${ClusterServiceVersionModel.plural}/:appName/${referenceForModel(models.LocalVolumeModel)}/~new`,
       loader: () =>
-        import('./components/local-volume-group/lvg-install-wizard' /* webpackChunkName: "local-volume-group-install" */).then(
+        import('./components/local-volume-group/create-local-volume-group' /* webpackChunkName: "create-local-volume-group" */).then(
           (m) => m.default,
         ),
       required: LSO_FLAG,

@@ -8,7 +8,7 @@ type ConsumedExtensions = ModelFeatureFlag | ModelDefinition | RoutePage;
 
 const LSO_FLAG = 'LSO';
 
-// const LocalVolumeGroupModel = models.LocalVolumeGroupModel;
+// const LocalVolumeSetModel = models.LocalVolumeSetModel;
 
 const plugin: Plugin<ConsumedExtensions> = [
   {
@@ -28,11 +28,13 @@ const plugin: Plugin<ConsumedExtensions> = [
     type: 'Page/Route',
     properties: {
       exact: true,
-      path: `/k8s/ns/:ns/${ClusterServiceVersionModel.plural}/:appName/${referenceForModel(models.LocalVolumeModel)}/~new`,
+      path: `/k8s/ns/:ns/${ClusterServiceVersionModel.plural}/:appName/${referenceForModel(
+        models.LocalVolumeModel, // @TODO: change to local volume set
+      )}/~new`,
       loader: () =>
-        import('./components/local-volume-group/create-local-volume-group' /* webpackChunkName: "create-local-volume-group" */).then(
-          (m) => m.default,
-        ),
+        import(
+          './components/local-volume-group/create-local-volume-set' /* webpackChunkName: "create-local-volume-set" */
+        ).then((m) => m.default),
       required: LSO_FLAG,
     },
   },

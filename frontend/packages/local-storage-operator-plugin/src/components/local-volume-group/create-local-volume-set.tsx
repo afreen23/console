@@ -3,7 +3,7 @@ import { match as RouterMatch } from 'react-router';
 import { resourcePathFromModel, BreadCrumbs } from '@console/internal/components/utils';
 import { ClusterServiceVersionModel } from '@console/operator-lifecycle-manager';
 import { LocalVolumeSetModel } from '../../models';
-import { Form, FormGroup, TextInput } from '@patternfly/react-core';
+import { Form, FormGroup, TextInput, Radio } from '@patternfly/react-core';
 
 const CreateLocalVolumeSet: React.FC<CreateLocalVolumeSetProps> = ({ match }) => {
   const [volumeSetName, setVolumeSetName] = React.useState(null);
@@ -33,37 +33,48 @@ const CreateLocalVolumeSet: React.FC<CreateLocalVolumeSetProps> = ({ match }) =>
         </p>
       </div>
       <Form>
-        <FormGroup
-          label="Volume Set Name"
-          fieldId="simple-form-name"
-          helperText="Please provide your full name"
-        >
+        <FormGroup label="Volume Set Name" isRequired fieldId="volume-set-name">
           <TextInput
             isRequired
             type="text"
-            id="simple-form-name"
-            name="simple-form-name"
-            aria-describedby="simple-form-name-helper"
+            id="volume-set-name" // @TODO: why this
+            name="volume set name" // @TODO: why this
+            aria-describedby="volume set name" // @TODO: why this
             value={volumeSetName}
             onChange={setVolumeSetName}
           />
         </FormGroup>
-        <FormGroup
-          label="Storage Class Name"
-          fieldId="simple-form-name"
-          helperText="Please provide your full name"
-        >
+        <FormGroup label="Storage Class Name" fieldId="storage-class-name">
           <TextInput
             isRequired
             type="text"
-            id="simple-form-name"
-            name="simple-form-name"
-            aria-describedby="simple-form-name-helper"
+            id="storage-class-name"
+            name="storage class name"
+            aria-describedby="storage class name"
             value={storageClass}
             onChange={setStorageClass}
           />
         </FormGroup>
       </Form>
+      <p>Filter Volumes</p>
+      <Radio
+        isChecked={this.state.check1}
+        name="radio-1"
+        onChange={this.handleChange}
+        label="Controlled radio"
+        id="radio-controlled"
+        value="All nodes"
+        description="Selecting all nodes will search for available volume storage on all nodes."
+      />
+      <Radio
+        isChecked={this.state.check1}
+        name="radio-1"
+        onChange={this.handleChange}
+        label="Controlled radio"
+        id="radio-controlled"
+        value="Select nodes"
+        description="Selecting nodes allow you to limit the search for available volumes to specific nodes."
+      />
     </>
   );
 };

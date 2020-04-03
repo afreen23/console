@@ -3,6 +3,7 @@ import { ClusterServiceVersionKind } from '@console/operator-lifecycle-manager';
 import { HealthState } from '@console/shared/src/components/dashboard/status-card/states';
 import { DataValidator, DataState, ErrorType, Field } from './types';
 import { K8sResourceKind } from '@console/internal/module/k8s';
+import { SubsystemHealth } from '@console/plugin-sdk';
 
 export const getValidJSON: DataValidator = (fData) => {
   try {
@@ -39,20 +40,24 @@ enum ClusterPhase {
 }
 
 const PhaseToState = Object.freeze({
-  [ClusterPhase.CONNECTED]: HealthState.OK,
-  [ClusterPhase.READY]: HealthState.OK,
-  [ClusterPhase.CONNECTING]: HealthState.UPDATING,
-  [ClusterPhase.PROGRESSING]: HealthState.UPDATING,
-  [ClusterPhase.ERROR]: HealthState.ERROR,
+  [ClusterPhase.CONNECTED]: { state: HealthState.OK, message: 'Connected' },
+  [ClusterPhase.READY]: { state: HealthState.OK, message: 'Ready' },
+  [ClusterPhase.CONNECTING]: { state: HealthState.UPDATING, message: 'Connecting' },
+  [ClusterPhase.PROGRESSING]: { state: HealthState.UPDATING, message: 'Progressing' },
+  [ClusterPhase.ERROR]: { state: HealthState.ERROR, message: 'Error in Connection' },
 });
 
-export const getClusterHealth = (cluster: K8sResourceKind, loaded: boolean, error): HealthState => {
+export const getClusterHealth = (
+  cluster: K8sResourceKind,
+  loaded: boolean,
+  error,
+): SubsystemHealth => {
   const phase = cluster?.status?.phase;
   if (!_.isEmpty(error)) {
-    if (error?.response?.status === 404) return HealthState.NOT_AVAILABLE;
-    return HealthState.ERROR;
+    if (error?.response?.status === 404) return { state: HealthState.NOT_AVAILABLE };
+    return { state: HealthState.ERROR, message: 'Error in Connection' };
   }
-  if (!loaded) return HealthState.LOADING;
+  if (!loaded) return { state: HealthState.LOADING };
   if (!_.isEmpty(cluster)) return PhaseToState[phase];
-  return HealthState.NOT_AVAILABLE;
+  return { state: HealthState.NOT_AVAILABLE };
 };

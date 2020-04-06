@@ -3,14 +3,28 @@ import { match as RouterMatch } from 'react-router';
 import { resourcePathFromModel, BreadCrumbs } from '@console/internal/components/utils';
 import { ClusterServiceVersionModel } from '@console/operator-lifecycle-manager';
 import { LocalVolumeSetModel } from '../../models';
-import { Form, FormGroup, TextInput, Radio } from '@patternfly/react-core';
+import {
+  Form,
+  FormGroup,
+  TextInput,
+  Radio,
+  Expandable,
+  TextInputTypes,
+} from '@patternfly/react-core';
 
 const CreateLocalVolumeSet: React.FC<CreateLocalVolumeSetProps> = ({ match }) => {
-  const [volumeSetName, setVolumeSetName] = React.useState(null);
-  const [storageClass, setStorageClass] = React.useState(null);
+  const [volumeSetName, setVolumeSetName] = React.useState('');
+  const [storageClass, setStorageClass] = React.useState('');
+  const [showNodesSelection, setShowNodesSelection] = React.useState(false);
+  const [volumeType, setVolumeType] = React.useState('');
+  const [maxVolumeLimit, setMaxVolumeLimit] = React.useState('');
 
   const { ns, appName } = match.params;
   const name = LocalVolumeSetModel.label;
+
+  const handleSelection = () => {
+    setShowNodesSelection(!showNodesSelection);
+  };
 
   return (
     <>
@@ -32,49 +46,75 @@ const CreateLocalVolumeSet: React.FC<CreateLocalVolumeSetProps> = ({ match }) =>
           storage class to consume storage for them.
         </p>
       </div>
-      <Form>
-        <FormGroup label="Volume Set Name" isRequired fieldId="volume-set-name">
+      <Form className="co-m-pane__body co-m-pane__form">
+        <FormGroup label="Volume Set Name" isRequired fieldId="create-lvs-volume-set-name">
           <TextInput
-            isRequired
-            type="text"
-            id="volume-set-name" // @TODO: why this
-            name="volume set name" // @TODO: why this
-            aria-describedby="volume set name" // @TODO: why this
+            type={TextInputTypes.text}
+            id="create-lvs-volume-set-name"
             value={volumeSetName}
             onChange={setVolumeSetName}
+            isRequired
           />
         </FormGroup>
-        <FormGroup label="Storage Class Name" fieldId="storage-class-name">
+        <FormGroup label="Storage Class Name" fieldId="create-lvs-storage-class-name">
           <TextInput
-            isRequired
-            type="text"
-            id="storage-class-name"
-            name="storage class name"
-            aria-describedby="storage class name"
+            type={TextInputTypes.text}
+            id="create-lvs-storage-class-name"
             value={storageClass}
             onChange={setStorageClass}
           />
         </FormGroup>
+        <p>Filter Volumes</p>
+        <FormGroup label="Node Selector" fieldId="create-lvs-radio-group-node-selector">
+          <div id="create-lvs-radio-group-node-selector">
+            <Radio
+              label="All nodes"
+              name="nodes-selection"
+              id="create-lvs-radio-all-nodes"
+              value="allNodes"
+              onChange={handleSelection}
+              description="Selecting all nodes will search for available volume storage on all nodes."
+              defaultChecked
+            />
+            <Radio
+              label="Select nodes"
+              name="nodes-selection"
+              id="create-lvs-radio-select-nodes"
+              value="selectedNodes"
+              onChange={handleSelection}
+              description="Selecting nodes allow you to limit the search for available volumes to specific nodes."
+            />
+          </div>
+          {showNodesSelection && <div>I am shown</div>}
+        </FormGroup>
+        <FormGroup label="Volume Type" fieldId="create-lvs-volume-type">
+          <TextInput
+            isRequired
+            type={TextInputTypes.text}
+            id="create-lvs-volume-type"
+            value={volumeType}
+            onChange={setVolumeType}
+          />
+        </FormGroup>
+        <Expandable toggleText="Advanced">
+          <p>Volume Mode</p>
+          {/* Add dropdown blokc/file */}
+          <p>Volume Size</p>
+          {/* two inputs min and max and units dropdown */}
+          <FormGroup
+            label="Max Volume Limit"
+            fieldId="create-lvs-max-volume-limit"
+            helperText="Volume limit will set the max number of PVs to create on a node. If the field is empty we will create PVs for all available volumes on the matching nodes."
+          >
+            <TextInput
+              type={TextInputTypes.number}
+              id="create-lvs-max-volume-limit"
+              value={maxVolumeLimit}
+              onChange={setMaxVolumeLimit}
+            />
+          </FormGroup>
+        </Expandable>
       </Form>
-      <p>Filter Volumes</p>
-      <Radio
-        isChecked={this.state.check1}
-        name="radio-1"
-        onChange={this.handleChange}
-        label="Controlled radio"
-        id="radio-controlled"
-        value="All nodes"
-        description="Selecting all nodes will search for available volume storage on all nodes."
-      />
-      <Radio
-        isChecked={this.state.check1}
-        name="radio-1"
-        onChange={this.handleChange}
-        label="Controlled radio"
-        id="radio-controlled"
-        value="Select nodes"
-        description="Selecting nodes allow you to limit the search for available volumes to specific nodes."
-      />
     </>
   );
 };

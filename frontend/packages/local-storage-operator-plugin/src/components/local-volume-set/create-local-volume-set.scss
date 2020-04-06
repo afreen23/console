@@ -1,0 +1,27 @@
+.lso-create-lvs__all-nodes-radio--padding {
+  padding-bottom: var(--pf-global--spacer--sm);
+}
+
+.lso-create-lvs__filter-volumes-text--margin {
+  margin: 0;
+}
+
+.lso-create-lvs__max-volume-limit-help-text--margin {
+  margin-top: 0;
+}
+
+.lso-create-lvs__volume-size-form-group--margin {
+  margin: var(--pf-global--spacer--lg) 0;
+}
+
+.lso-create-lvs__volume-size-form-group--flex-box {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  width: 22em;
+}
+
+.lso-create-lvs__volume-size-form-group-max-min-input {
+  display: flex;
+  flex-direction: column;
+}

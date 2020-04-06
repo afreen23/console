@@ -33,7 +33,7 @@ const plugin: Plugin<ConsumedExtensions> = [
       )}/~new`,
       loader: () =>
         import(
-          './components/local-volume-group/create-local-volume-set' /* webpackChunkName: "create-local-volume-set" */
+          './components/local-volume-set/create-local-volume-set' /* webpackChunkName: "create-local-volume-set" */
         ).then((m) => m.default),
       required: LSO_FLAG,
     },

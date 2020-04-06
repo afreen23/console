@@ -274,34 +274,36 @@ export const FireMan_ = connect(null, { filterList })(
           {helpText && createLink && (
             <p className="co-m-pane__help-text co-help-text">{helpText}</p>
           )}
-          <div
-            className={classNames('co-m-pane__filter-bar', {
-              'co-m-pane__filter-bar--with-help-text': helpText && !createLink,
-            })}
-          >
-            {helpText && !createLink && (
-              <div className="co-m-pane__filter-bar-group co-m-pane__filter-bar-group--help-text">
-                {helpText}
-              </div>
-            )}
-            {createLink && <div className="co-m-pane__filter-bar-group">{createLink}</div>}
-            {!hideTextFilter && (
-              <div className="co-m-pane__filter-bar-group co-m-pane__filter-bar-group--filter">
-                <TextFilter
-                  label={filterLabel}
-                  onChange={(e) => this.applyFilter(textFilter, e.target.value)}
-                  defaultValue={this.defaultValue}
-                  tabIndex={1}
-                  autoFocus={autoFocus}
-                />
-              </div>
-            )}
-            {!title && badge && (
-              <div className="co-m-pane__filter-bar-group co-m-pane__filter-bar-group--badge">
-                {badge}
-              </div>
-            )}
-          </div>
+          {(helpText || createLink || !hideTextFilter) && (
+            <div
+              className={classNames('co-m-pane__filter-bar', {
+                'co-m-pane__filter-bar--with-help-text': helpText && !createLink,
+              })}
+            >
+              {helpText && !createLink && (
+                <div className="co-m-pane__filter-bar-group co-m-pane__filter-bar-group--help-text">
+                  {helpText}
+                </div>
+              )}
+              {createLink && <div className="co-m-pane__filter-bar-group">{createLink}</div>}
+              {!hideTextFilter && (
+                <div className="co-m-pane__filter-bar-group co-m-pane__filter-bar-group--filter">
+                  <TextFilter
+                    label={filterLabel}
+                    onChange={(e) => this.applyFilter(textFilter, e.target.value)}
+                    defaultValue={this.defaultValue}
+                    tabIndex={1}
+                    autoFocus={autoFocus}
+                  />
+                </div>
+              )}
+            </div>
+          )}
+          {!title && badge && (
+            <div className="co-m-pane__filter-bar-group co-m-pane__filter-bar-group--badge">
+              {badge}
+            </div>
+          )}
           <div className="co-m-pane__body">
             {inject(this.props.children, {
               resources,
@@ -350,7 +352,7 @@ FireMan_.propTypes = {
   title: PropTypes.string,
 };
 
-/** @type {React.SFC<{ListComponent: React.ComponentType<any>, kind: string, helpText?: any, namespace?: string, filterLabel?: string, textFilter?: string, title?: string, showTitle?: boolean, rowFilters?: any[], selector?: any, fieldSelector?: string, canCreate?: boolean, createButtonText?: string, createProps?: any, mock?: boolean, badge?: React.ReactNode, createHandler?: any} >} */
+/** @type {React.SFC<{ListComponent: React.ComponentType<any>, kind: string, helpText?: any, namespace?: string, filterLabel?: string, textFilter?: string, title?: string, showTitle?: boolean, rowFilters?: any[], selector?: any, fieldSelector?: string, canCreate?: boolean, createButtonText?: string, createProps?: any, mock?: boolean, badge?: React.ReactNode, createHandler?: any, hideTextFilter?: boolean} >} */
 export const ListPage = withFallback((props) => {
   const {
     autoFocus,

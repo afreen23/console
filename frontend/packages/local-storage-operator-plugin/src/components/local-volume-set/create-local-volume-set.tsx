@@ -16,6 +16,7 @@ import {
   TextVariants,
 } from '@patternfly/react-core';
 import './create-local-volume-set.scss';
+import { NodesSelectionList } from './nodes-table';
 
 const volumeTypeOptions = Object.freeze({
   'SSD/NVMe': 'SSD / NVMe',
@@ -50,6 +51,10 @@ const CreateLocalVolumeSet: React.FC<CreateLocalVolumeSetProps> = ({ match }) =>
     setShowNodesSelection(!showNodesSelection);
   };
 
+  const onSubmit = (e: React.FormEvent<EventTarget>) => {
+    e.preventDefault();
+  };
+
   return (
     <>
       <div className="co-create-operand__header">
@@ -70,7 +75,7 @@ const CreateLocalVolumeSet: React.FC<CreateLocalVolumeSetProps> = ({ match }) =>
           dedicated storage class to consume storage for them.
         </p>
       </div>
-      <Form className="co-m-pane__body co-m-pane__form">
+      <Form className="co-m-pane__body co-m-pane__form" onSubmit={onSubmit}>
         <FormGroup label="Volume Set Name" isRequired fieldId="create-lvs--volume-set-name">
           <TextInput
             type={TextInputTypes.text}
@@ -113,7 +118,9 @@ const CreateLocalVolumeSet: React.FC<CreateLocalVolumeSetProps> = ({ match }) =>
             />
           </div>
         </FormGroup>
-        {showNodesSelection && <div>I am shown</div>}
+        {showNodesSelection && (
+          <NodesSelectionList className="lso-create-lvs__node-selection-table--margin" />
+        )}
         <FormGroup label="Volume Type" fieldId="create-lvs--volume-type-dropdown">
           <Dropdown
             id="create-lvs--volume-type-dropdown"

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import * as classNames from 'classnames';
+// import * as classNames from 'classnames';
 import { sortable } from '@patternfly/react-table';
 import {
   Table,
@@ -14,14 +14,7 @@ import { NodeModel } from '@console/internal/models';
 import { getUID, getName } from '@console/shared';
 import './node-selection-list.scss';
 
-const tableColumnClasses = [
-  '',
-  classNames('pf-m-hidden', 'pf-m-visible-on-xl'),
-  classNames('pf-m-hidden', 'pf-m-visible-on-xl'),
-  classNames('pf-m-hidden', 'pf-m-visible-on-xl'),
-  classNames('pf-m-hidden', 'pf-m-visible-on-xl'),
-  classNames('pf-m-hidden', 'pf-m-visible-on-lg'),
-];
+const tableColumnClasses = ['', '', '', ''];
 
 // @TODO: fix classes
 const NodeTableHeader = () => {

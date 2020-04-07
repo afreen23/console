@@ -1,8 +1,5 @@
 import * as React from 'react';
 import { match as RouterMatch } from 'react-router';
-import { resourcePathFromModel, BreadCrumbs, Dropdown } from '@console/internal/components/utils';
-import { ClusterServiceVersionModel } from '@console/operator-lifecycle-manager';
-import { LocalVolumeSetModel } from '../../models';
 import {
   ActionGroup,
   Button,
@@ -15,8 +12,12 @@ import {
   Text,
   TextVariants,
 } from '@patternfly/react-core';
+import { resourcePathFromModel, BreadCrumbs, Dropdown } from '@console/internal/components/utils';
+import { history } from '@console/internal/components/utils/router';
+import { ClusterServiceVersionModel } from '@console/operator-lifecycle-manager';
+import { LocalVolumeSetModel } from '../../models';
+import { NodesSelectionList } from './nodes-selection-list';
 import './create-local-volume-set.scss';
-import { NodesSelectionList } from './nodes-table';
 
 const volumeTypeOptions = Object.freeze({
   'SSD/NVMe': 'SSD / NVMe',
@@ -31,12 +32,12 @@ const volumeSizeUnitOptions = Object.freeze({
   GiB: 'GiB', // @TODO: check what unit backend expects
 });
 
-// @TODO: Should min and max be require field in advanced section ?
+// @TODO: Should min and max be required field in advanced section ?
 
 const CreateLocalVolumeSet: React.FC<CreateLocalVolumeSetProps> = ({ match }) => {
   const [volumeSetName, setVolumeSetName] = React.useState('');
   const [storageClassName, setStorageClassName] = React.useState('');
-  const [showNodesSelection, setShowNodesSelection] = React.useState(false);
+  const [showNodesList, setShowNodesList] = React.useState(false);
   const [volumeType, setVolumeType] = React.useState(volumeTypeOptions['SSD/NVMe']);
   const [volumeMode, setVolumeMode] = React.useState(volumeModeOptions.Block);
   const [minVolumeSize, setMinVolumeSize] = React.useState('0');
@@ -47,12 +48,17 @@ const CreateLocalVolumeSet: React.FC<CreateLocalVolumeSetProps> = ({ match }) =>
   const { ns, appName } = match.params;
   const modelName = LocalVolumeSetModel.label;
 
-  const toggleShowNodesSelection = () => {
-    setShowNodesSelection(!showNodesSelection);
+  const toggleShowNodesList = () => {
+    setShowNodesList(!showNodesList);
   };
 
   const onSubmit = (e: React.FormEvent<EventTarget>) => {
     e.preventDefault();
+    /* TODO: Format of response to backend for processing */
+  };
+
+  const onCancel = () => {
+    history.goBack();
   };
 
   return (
@@ -102,23 +108,23 @@ const CreateLocalVolumeSet: React.FC<CreateLocalVolumeSetProps> = ({ match }) =>
               label="All nodes"
               name="nodes-selection"
               id="create-lvs--radio-all-nodes"
+              className="lso-create-lvs__all-nodes-radio--padding"
               value="allNodes"
-              onChange={toggleShowNodesSelection}
+              onChange={toggleShowNodesList}
               description="Selecting all nodes will search for available volume storage on all nodes."
               defaultChecked
-              className="lso-create-lvs__all-nodes-radio--padding"
             />
             <Radio
               label="Select nodes"
               name="nodes-selection"
               id="create-lvs--radio-select-nodes"
               value="selectedNodes"
-              onChange={toggleShowNodesSelection}
+              onChange={toggleShowNodesList}
               description="Selecting nodes allow you to limit the search for available volumes to specific nodes."
             />
           </div>
         </FormGroup>
-        {showNodesSelection && (
+        {showNodesList && (
           <NodesSelectionList className="lso-create-lvs__node-selection-table--margin" />
         )}
         <FormGroup label="Volume Type" fieldId="create-lvs--volume-type-dropdown">
@@ -201,7 +207,10 @@ const CreateLocalVolumeSet: React.FC<CreateLocalVolumeSetProps> = ({ match }) =>
         </Expandable>
         <ActionGroup>
           <Button>Create</Button>
-          <Button variant="secondary">Cancel</Button>
+          <Button variant="secondary" onClick={onCancel}>
+            {/* @TODO: check why just history.goback() is suffice */}
+            Cancel
+          </Button>
         </ActionGroup>
       </Form>
     </>

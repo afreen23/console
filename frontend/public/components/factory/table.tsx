@@ -372,6 +372,7 @@ export type TableProps = {
   loaded?: boolean;
   reduxID?: string;
   reduxIDs?: string[];
+  onSelect?: any;
 };
 
 type TablePropsFromState = {};

@@ -8,7 +8,11 @@ export const hasTaints = (node: NodeKind) => {
 };
 
 export const hasOCSTaint = (node: NodeKind) => {
+<<<<<<< HEAD
   const taints: Taint[] = node.spec?.taints || [];
+=======
+  const taints: Taint[] = node.spec.taints || [];
+>>>>>>> Refactored Node Selection Page for OCS Installation Flow
   return taints.some((taint: Taint) => _.isEqual(taint, ocsTaint));
 };
 

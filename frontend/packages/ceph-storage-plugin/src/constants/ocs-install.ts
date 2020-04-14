@@ -13,6 +13,8 @@ export const storageClassTooltip =
 export const labelTooltip =
   'The backing storage requested will be higher as it will factor in the requested capacity, replica factor, and fault tolerant costs associated with the requested capacity.';
 
+export const OCS_LABEL = 'cluster.ocs.openshift.io/openshift-storage';
+
 export const ocsRequestData: K8sResourceKind = {
   apiVersion: 'ocs.openshift.io/v1',
   kind: 'StorageCluster',

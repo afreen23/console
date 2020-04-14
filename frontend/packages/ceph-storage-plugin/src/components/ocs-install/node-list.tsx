@@ -7,13 +7,21 @@ import {
   getNodeCPUCapacity,
   getNodeAllocatableMemory,
 } from '@console/shared';
+<<<<<<< HEAD
 import { humanizeCpuCores, ResourceLink, pluralize } from '@console/internal/components/utils/';
+=======
+import { humanizeCpuCores, ResourceLink } from '@console/internal/components/utils/';
+>>>>>>> Refactored Node Selection Page for OCS Installation Flow
 import { NodeKind } from '@console/internal/module/k8s';
 import './ocs-install.scss';
 import { hasOCSTaint, hasTaints, getConvertedUnits } from '../../utils/install';
 import { Table } from '@console/internal/components/factory';
+<<<<<<< HEAD
 import { IRowData, IRow } from '@patternfly/react-table';
 import { cephStorageLabel } from '../../selectors';
+=======
+import { OCS_LABEL } from '../../constants/ocs-install';
+>>>>>>> Refactored Node Selection Page for OCS Installation Flow
 
 const tableColumnClasses = [
   classNames('col-md-1', 'col-sm-1', 'col-xs-1'),
@@ -49,18 +57,31 @@ const getColumns = () => {
   ];
 };
 
+<<<<<<< HEAD
 const getRows = ({ componentProps, customData }): NodeTableRow[] => {
+=======
+const getRows = ({ componentProps, customData }): NodeRow[] => {
+>>>>>>> Refactored Node Selection Page for OCS Installation Flow
   const { data } = componentProps;
   const { selectedNodes, setSelectedNodes, setVisibleRows, visibleRows } = customData;
 
   const isSelected = (selected: NodeKind[], nodeUID: string) =>
     selected.map((node) => node.metadata.uid).includes(nodeUID);
+<<<<<<< HEAD
 
   const filteredData = data.filter((node: NodeKind) => hasOCSTaint(node) || !hasTaints(node));
 
   const rows = filteredData
     .filter((node: NodeKind) => hasOCSTaint(node) || !hasTaints(node))
     .map((node: NodeKind) => {
+=======
+
+  const filteredData = data.filter((node) => hasOCSTaint(node) || !hasTaints(node));
+
+  const rows = filteredData
+    .filter((node) => hasOCSTaint(node) || !hasTaints(node))
+    .map((node) => {
+>>>>>>> Refactored Node Selection Page for OCS Installation Flow
       const roles = getNodeRoles(node).sort();
       const cpuSpec: string = getNodeCPUCapacity(node);
       const memSpec: string = getNodeAllocatableMemory(node);
@@ -85,18 +106,30 @@ const getRows = ({ componentProps, customData }): NodeTableRow[] => {
         cells,
         selected: _.isArray(selectedNodes)
           ? isSelected(selectedNodes, node.metadata.uid)
+<<<<<<< HEAD
           : _.has(node, ['metadata', 'labels', cephStorageLabel]),
+=======
+          : _.has(node, ['metadata', 'labels', OCS_LABEL]),
+>>>>>>> Refactored Node Selection Page for OCS Installation Flow
         props: {
           id: node.metadata.uid,
         },
       };
     });
 
+<<<<<<< HEAD
   if (!_.isEqual(filteredData, visibleRows)) {
     setVisibleRows(filteredData);
     if (!selectedNodes && filteredData.length) {
       const preSelected = filteredData.filter((row) =>
         _.has(row, ['metadata', 'labels', cephStorageLabel]),
+=======
+  if (JSON.stringify(filteredData) !== JSON.stringify(visibleRows)) {
+    setVisibleRows(filteredData);
+    if (!selectedNodes && filteredData.length) {
+      const preSelected = filteredData.filter((row) =>
+        _.has(row, ['metadata', 'labels', OCS_LABEL]),
+>>>>>>> Refactored Node Selection Page for OCS Installation Flow
       );
       setSelectedNodes(preSelected);
     }
@@ -104,10 +137,17 @@ const getRows = ({ componentProps, customData }): NodeTableRow[] => {
   return rows;
 };
 
+<<<<<<< HEAD
 const NodeTable: React.FC<NodeTableProps> = (props) => {
   const { selectedNodes, setSelectedNodes, visibleRows } = props.customData;
 
   const onSelect = (_event, isSelected: boolean, rowIndex: number, rowData: IRowData) => {
+=======
+const CustomNodeTable: React.FC<CustomNodeTableProps> = (props) => {
+  const { selectedNodes, setSelectedNodes, visibleRows } = props.customData;
+
+  const onSelect = (_event, isSelected, rowIndex, rowData) => {
+>>>>>>> Refactored Node Selection Page for OCS Installation Flow
     const selectedUIDs = selectedNodes?.map((node) => node.metadata.uid) ?? [];
     const visibleUIDs = visibleRows?.map((row) => row.metadata.uid);
     if (rowIndex === -1) {
@@ -124,6 +164,7 @@ const NodeTable: React.FC<NodeTableProps> = (props) => {
     }
   };
   return (
+<<<<<<< HEAD
     <>
       <div className="ceph-node-list__max-height">
         <Table
@@ -143,6 +184,20 @@ const NodeTable: React.FC<NodeTableProps> = (props) => {
 };
 
 export default NodeTable;
+=======
+    <Table
+      aria-label="node list table"
+      {...props}
+      Rows={getRows}
+      Header={getColumns}
+      virtualize={false}
+      onSelect={onSelect}
+    />
+  );
+};
+
+export const NodeList = CustomNodeTable;
+>>>>>>> Refactored Node Selection Page for OCS Installation Flow
 
 type NodeTableProps = {
   data: NodeKind[];
@@ -155,8 +210,15 @@ type NodeTableProps = {
   filters: { name: string; label: { all: string[] } };
 };
 
+<<<<<<< HEAD
 type NodeTableRow = {
   cells: Pick<IRow, 'cells'>;
+=======
+type NodeRow = {
+  cells: {
+    [key: string]: React.ReactText | React.ReactElement;
+  }[];
+>>>>>>> Refactored Node Selection Page for OCS Installation Flow
   props: {
     id: string;
   };

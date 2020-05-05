@@ -27,6 +27,18 @@ const NODE_STATUS_GROUP_MAPPING = {
   [InventoryStatusGroup.PROGRESS]: ['Not Ready'],
 };
 
+const OB_STATUS_GROUP_MAPPING = {
+  [InventoryStatusGroup.NOT_MAPPED]: ['Bound'],
+  [InventoryStatusGroup.ERROR]: ['Lost'],
+  [InventoryStatusGroup.PROGRESS]: ['Pending'],
+};
+
+const OBC_STATUS_GROUP_MAPPING = {
+  [InventoryStatusGroup.NOT_MAPPED]: ['Available', 'Bound'],
+  [InventoryStatusGroup.PROGRESS]: ['Released'],
+  [InventoryStatusGroup.ERROR]: ['Failed'],
+};
+
 const getStatusGroups = (resources, mapping, mapper, filterType) => {
   const groups = {
     [InventoryStatusGroup.UNKNOWN]: {
@@ -61,3 +73,8 @@ export const getPVCStatusGroups: StatusGroupMapper = (resources) =>
   getStatusGroups(resources, PVC_STATUS_GROUP_MAPPING, (pvc) => pvc.status.phase, 'pvc-status');
 export const getPVStatusGroups: StatusGroupMapper = (resources) =>
   getStatusGroups(resources, PV_STATUS_GROUP_MAPPING, (pv) => pv.status.phase, 'pv-status');
+
+export const getObStatusGroups: StatusGroupMapper = (resources) =>
+  getStatusGroups(resources, OB_STATUS_GROUP_MAPPING, (ob) => ob.status.phase, 'ob-status');
+export const getObcStatusGroups: StatusGroupMapper = (resources) =>
+  getStatusGroups(resources, OBC_STATUS_GROUP_MAPPING, (obc) => obc.status.phase, 'obc-status');

@@ -73,7 +73,6 @@ export const getPVCStatusGroups: StatusGroupMapper = (resources) =>
   getStatusGroups(resources, PVC_STATUS_GROUP_MAPPING, (pvc) => pvc.status.phase, 'pvc-status');
 export const getPVStatusGroups: StatusGroupMapper = (resources) =>
   getStatusGroups(resources, PV_STATUS_GROUP_MAPPING, (pv) => pv.status.phase, 'pv-status');
-
 export const getObStatusGroups: StatusGroupMapper = (resources) =>
   getStatusGroups(resources, OB_STATUS_GROUP_MAPPING, (ob) => ob.status.phase, 'ob-status');
 export const getObcStatusGroups: StatusGroupMapper = (resources) =>

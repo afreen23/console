@@ -135,10 +135,10 @@ const ObjectDashboardBucketsCard: React.FC<DashboardItemProps> = ({
       <DashboardCardBody>
         <InventoryItem
           title="Noobaa Bucket"
+          TitleComponent={getBucketObjects(getGaugeValue(noobaaBucketsObjects))}
           isLoading={!(noobaaBuckets && noobaaBucketsObjects)}
           error={noobaaBucketsError || noobaaBucketsObjectsError}
           count={+getGaugeValue(noobaaBuckets)}
-          ExpandedComponent={getBucketObjects(getGaugeValue(noobaaBucketsObjects))}
         />
         <ResourceInventoryItem
           isLoading={!(storageClassesLoaded && obLoaded && obcObjects)}

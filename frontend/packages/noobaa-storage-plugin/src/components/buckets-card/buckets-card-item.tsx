@@ -92,8 +92,13 @@ export const BucketsItem: React.FC<BucketsItemProps> = React.memo(
   ),
 );
 
-export const getBucketObjects = (objectsCount: string) => () => (
-  <div className="co-dashboard-text--small text-secondary">{formatCount(Number(objectsCount))}</div>
+export const getBucketObjects = (objectsCount: string) => ({ children }) => (
+  <div className="nb-buckets-card__buckets-status-title">
+    <div>{children}</div>
+    <div className="co-dashboard-text--small text-secondary">
+      {formatCount(Number(objectsCount))}
+    </div>
+  </div>
 );
 
 export type BucketsItemProps = {

@@ -1,19 +1,27 @@
 import * as React from 'react';
 import { match } from 'react-router';
-import { k8sGet } from '@console/internal/module/k8s';
+import { k8sGet, TemplateKind, k8sCreate } from '@console/internal/module/k8s';
 import { ClusterServiceVersionModel } from '@console/operator-lifecycle-manager';
 import { BreadCrumbs } from '@console/internal/components/utils';
-import { Radio, Title } from '@patternfly/react-core';
+import { Radio, Title, Button } from '@patternfly/react-core';
 import { checkForIndependentSupport } from '../independent-mode/utils';
 import { OCSServiceModel } from '../../models';
 import InstallExternalCluster from '../independent-mode/install';
 import { CreateOCSServiceForm } from './create-form';
 import './install-page.scss';
+import { useK8sWatchResource } from '@console/internal/components/utils/k8s-watch-hook';
+import { TemplateModel, JobModel } from '@console/internal/models';
 
 enum MODES {
   CONVERGED = 'Converged',
   INDEPENDENT = 'Independent',
 }
+
+const templateResource = {
+  kind: TemplateModel.kind,
+  name: 'ocs-osd-removal',
+  namespace: 'openshift-storage',
+};
 
 // eslint-disable-next-line no-shadow
 const InstallCluster: React.FC<InstallClusterProps> = ({ match }) => {
@@ -25,6 +33,14 @@ const InstallCluster: React.FC<InstallClusterProps> = ({ match }) => {
   const [isIndependent, setIsIndependent] = React.useState(false);
   const [mode, setMode] = React.useState(MODES.CONVERGED);
   const [clusterServiceVersion, setClusterServiceVersion] = React.useState(null);
+  const [data, loaded, loadError] = useK8sWatchResource<TemplateKind>(templateResource);
+
+  console.log(data);
+
+  const templateTrigger = () => {
+    const objects = data?.objects;
+    k8sCreate(JobModel.kind, objects);
+  };
 
   const handleModeChange = (_checked: boolean, event: React.FormEvent<HTMLInputElement>) => {
     const { value } = event.currentTarget;
@@ -99,6 +115,7 @@ const InstallCluster: React.FC<InstallClusterProps> = ({ match }) => {
           <CreateOCSServiceForm match={match} />
         )}
         {mode === MODES.INDEPENDENT && <InstallExternalCluster match={match} />}
+        <Button onSubmit={templateTrigger}>Trigger Template</Button>
       </div>
     </>
   );

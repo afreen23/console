@@ -14,6 +14,14 @@ const enum status {
 export const filterCephAlerts = (alerts: Alert[]): Alert[] =>
   alerts.filter((alert) => _.get(alert, 'annotations.storage_type') === 'ceph');
 
+export const isCephPV = (pv: K8sResourceKind) =>
+  cephStorageProvisioners.includes(pv?.metadata?.annotations?.['pv.kubernetes.io/provisioned-by']);
+
+export const isCephPVC = (pvc: K8sResourceKind) =>
+  cephStorageProvisioners.includes(
+    pvc?.metadata?.annotations?.['volume.beta.kubernetes.io/storage-provisioner'],
+  );
+
 export const getCephPVs = (pvsData: K8sResourceKind[] = []): K8sResourceKind[] =>
   pvsData.filter((pv) => {
     return cephStorageProvisioners.some((provisioner: string) =>

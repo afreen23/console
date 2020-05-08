@@ -27,6 +27,7 @@ import { CEPH_STORAGE_NAMESPACE, OCS_OPERATOR } from '../../../../constants/inde
 import { DATA_RESILIENCY_QUERY, StorageDashboardQuery } from '../../../../constants/queries';
 import { getResiliencyProgress } from '../../../../utils';
 import { OCSServiceModel } from '../../../../models';
+import { isCephPV, isCephPVC } from '../../../../selectors';
 import { isClusterExpandActivity, ClusterExpandActivity } from './cluster-expand-activity';
 import { isOCSUpgradeActivity, OCSUpgradeActivity } from './ocs-upgrade-activity';
 import './activity-card.scss';
@@ -51,11 +52,21 @@ export const getOCSSubscription = (subscriptions: FirehoseResult): SubscriptionK
   return _.find(itemsData, (item) => item?.spec?.name === OCS_OPERATOR) as SubscriptionKind;
 };
 
-const ocsEventNamespaceKindFilter = (event: EventKind): boolean =>
-  getNamespace(event) === CEPH_STORAGE_NAMESPACE ||
-  _.get(event, 'involvedObject.kind') ===
-    (PersistentVolumeClaimModel.kind || PersistentVolumeModel.kind);
-
+const ocsEventNamespaceKindFilter = (event: EventKind): boolean => {
+  const resource = event?.involvedObject;
+  const eventKind = resource?.kind;
+  const namespace = getNamespace(event);
+  if (namespace === CEPH_STORAGE_NAMESPACE) {
+    return true;
+  }
+  if (eventKind === PersistentVolumeClaimModel.kind) {
+    return isCephPVC(resource);
+  }
+  if (eventKind === PersistentVolumeModel.kind) {
+    return isCephPV(resource);
+  }
+  return false;
+};
 const RecentEvent = withDashboardResources(
   ({ watchK8sResource, stopWatchK8sResource, resources }: DashboardItemProps) => {
     React.useEffect(() => {

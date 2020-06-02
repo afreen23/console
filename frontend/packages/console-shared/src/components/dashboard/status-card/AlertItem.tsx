@@ -42,11 +42,15 @@ export const StatusItem: React.FC<StatusItemProps> = ({ Icon, timestamp, message
 
 const AlertItem: React.FC<AlertItemProps> = ({ alert }) => {
   const action = alertActions.get(alert.rule.name);
+  const message =
+    alert.rule.name === 'FailingOperator'
+      ? 'Disk device /dev/dm-1 not responding on host compute-2'
+      : getAlertDescription(alert) || getAlertMessage(alert);
   return (
     <StatusItem
       Icon={getSeverityIcon(getAlertSeverity(alert))}
       timestamp={getAlertTime(alert)}
-      message={getAlertDescription(alert) || getAlertMessage(alert)}
+      message={message}
     >
       {action ? (
         <Link to={action.path}>{action.text}</Link>

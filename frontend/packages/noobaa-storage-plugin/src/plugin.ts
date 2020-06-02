@@ -83,6 +83,23 @@ const plugin: Plugin<ConsumedExtensions> = [
     },
   },
   {
+    type: 'Page/Route',
+    properties: {
+      exact: true,
+      path: [
+        `/k8s/ns/:ns/${ClusterServiceVersionModel.plural}/:appName/${referenceForModel(
+          models.NooBaaBackingStoreModel,
+        )}/~new`,
+        `/k8s/ns/:ns/${referenceForModel(models.NooBaaBackingStoreModel)}/~new`,
+      ],
+      loader: () =>
+        import(
+          './components/create-backingstore-page/create-bs-page' /* webpackChunkName: "create-bs" */
+        ).then((m) => m.default),
+      required: NOOBAA_FLAG,
+    },
+  },
+  {
     type: 'FeatureFlag/Model',
     properties: {
       model: models.NooBaaSystemModel,

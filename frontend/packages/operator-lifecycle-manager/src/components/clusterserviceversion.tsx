@@ -198,13 +198,62 @@ const uninstall = (sub: SubscriptionKind, csv?: ClusterServiceVersionKind): Keba
       }
     : null;
 
+const removal = (sub: SubscriptionKind, csv?: ClusterServiceVersionKind): KebabOption =>
+  !_.isNil(sub)
+    ? {
+        label: 'Remove Disk',
+        callback: () =>
+          createUninstallOperatorModal({
+            k8sKill,
+            k8sGet,
+            k8sPatch,
+            subscription: sub,
+            csv,
+          }),
+        accessReview: {
+          group: SubscriptionModel.apiGroup,
+          resource: SubscriptionModel.plural,
+          name: sub.metadata.name,
+          namespace: sub.metadata.namespace,
+          verb: 'delete',
+        },
+      }
+    : null;
+
+const replace = (sub: SubscriptionKind, csv?: ClusterServiceVersionKind): KebabOption =>
+  !_.isNil(sub)
+    ? {
+        label: 'Replace Disk',
+        callback: () =>
+          createUninstallOperatorModal({
+            k8sKill,
+            k8sGet,
+            k8sPatch,
+            subscription: sub,
+            csv,
+          }),
+        accessReview: {
+          group: SubscriptionModel.apiGroup,
+          resource: SubscriptionModel.plural,
+          name: sub.metadata.name,
+          namespace: sub.metadata.namespace,
+          verb: 'delete',
+        },
+      }
+    : null;
+
 const menuActionsForCSV = (
   csv: ClusterServiceVersionKind,
   subscription: SubscriptionKind,
 ): KebabAction[] => {
   return _.isEmpty(subscription)
     ? [Kebab.factory.Delete]
-    : [() => editSubscription(subscription), () => uninstall(subscription, csv)];
+    : [
+        () => editSubscription(subscription),
+        () => uninstall(subscription, csv),
+        () => removal(subscription, csv),
+        () => replace(subscription, csv),
+      ];
 };
 
 const ClusterServiceVersionStatus: React.FC<ClusterServiceVersionStatusProps> = ({
@@ -1008,7 +1057,12 @@ export const ClusterServiceVersionsDetailsPage: React.FC<ClusterServiceVersionsD
     return [
       ...(_.isEmpty(subscription)
         ? [Kebab.factory.Delete(model, obj)]
-        : [editSubscription(subscription), uninstall(subscription, obj)]),
+        : [
+            editSubscription(subscription),
+            uninstall(subscription, obj),
+            removal(subscription, obj),
+            replace(subscription, obj),
+          ]),
     ];
   };
 

@@ -31,6 +31,7 @@ import { PersistentVolumeClaimModel } from '@console/internal/models';
 import { getCephHealthState } from './components/dashboard-page/storage-dashboard/status-card/utils';
 import { isClusterExpandActivity } from './components/dashboard-page/storage-dashboard/activity-card/cluster-expand-activity';
 import { WatchCephResource } from './types';
+import { getKebabActionsForKind } from './utils/kebab-actions';
 
 type ConsumedExtensions =
   | ModelFeatureFlag
@@ -48,6 +49,14 @@ type ConsumedExtensions =
   | ClusterServiceVersionAction
   | KebabActions
   | DashboardsOverviewResourceActivity;
+
+// export const getKebabActionsForKind = (resourceKind: K8sKind): KebabAction[] => {
+//   if (!resourceKind) {
+//     // no common actions
+//     return [];
+//   }
+
+// };
 
 const CEPH_FLAG = 'CEPH';
 
@@ -395,6 +404,12 @@ const plugin: Plugin<ConsumedExtensions> = [
     },
     flags: {
       required: [CEPH_FLAG],
+    },
+  },
+  {
+    type: 'KebabActions',
+    properties: {
+      getKebabActionsForKind,
     },
   },
 ];

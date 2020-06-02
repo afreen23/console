@@ -32,9 +32,10 @@ import {
 
 import { coFetchJSON } from '../co-fetch';
 import { FirehoseResult } from './utils/types';
-import { ClusterUpdate, ClusterVersionKind } from '../module/k8s';
+import { ClusterUpdate, ClusterVersionKind, referenceForModel } from '../module/k8s';
 import { getSortedUpdates } from './modals/cluster-update-modal';
 import { usePrevious } from '@console/metal3-plugin/src/hooks';
+import { NooBaaBackingStoreModel } from '@console/noobaa-storage-plugin/src/models';
 
 const criticalCompare = (a: Alert): boolean => getAlertSeverity(a) === 'critical';
 const otherAlertCompare = (a: Alert): boolean => getAlertSeverity(a) !== 'critical';
@@ -71,6 +72,11 @@ export const alertActions = new Map().set('AlertmanagerReceiversNotConfigured', 
   path: '/monitoring/alertmanagerconfig',
 });
 
+alertActions.set('FailingOperator', {
+  text: 'Troubleshoot',
+  path: `/k8s/ns/:ns/${referenceForModel(NooBaaBackingStoreModel)}/~new`,
+});
+
 const getAlertNotificationEntries = (
   isLoaded: boolean,
   alertData: Alert[],
@@ -85,10 +91,18 @@ const getAlertNotificationEntries = (
           return (
             <NotificationEntry
               key={`${i}_${alert.activeAt}`}
-              description={getAlertDescription(alert) || getAlertMessage(alert)}
+              description={
+                alert.rule.name === 'FailingOperator'
+                  ? 'Disk device /dev/dm-1 not responding on host compute-2'
+                  : getAlertDescription(alert) || getAlertMessage(alert)
+              }
               timestamp={getAlertTime(alert)}
               type={NotificationTypes[getAlertSeverity(alert)]}
-              title={getAlertName(alert)}
+              title={
+                alert.rule.name === 'FailingOperator'
+                  ? 'CephOSDDiskNotResponding'
+                  : getAlertName(alert)
+              }
               toggleNotificationDrawer={toggleNotificationDrawer}
               targetPath={alertURL(alert, alert.rule.id)}
               actionText={action?.text}

@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Grid, GridItem } from '@patternfly/react-core';
 import { Humanize } from '@console/internal/components/utils';
 import { K8sKind } from '@console/internal/module/k8s';
-import { addAvailable, getCapacityValue, StackDataPoint, getLegends } from './utils';
+import { addAvailable, StackDataPoint, getLegends } from './utils';
 import { BreakdownChart } from './breakdown-chart';
 import { BreakdownChartLoading } from './breakdown-loading';
 import { TotalCapacityBody } from './breakdown-capacity';
@@ -28,11 +28,8 @@ export const BreakdownCardBody: React.FC<BreakdownBodyProps> = ({
     return <div className="text-secondary">Not enough usage data</div>;
   }
 
-  const available = getCapacityValue(capacityUsed, capacityTotal, humanize);
-  const usedCapacity = `${humanize(capacityUsed, null, 'GiB').string} used${
-    capacityTotal ? ` of ${humanize(capacityTotal).string}` : ''
-  }`;
-  const availableCapacity = `${available.string} available`;
+  const usedCapacity = `${humanize(capacityUsed).string} used`;
+  const availableCapacity = `${humanize(capacityTotal).string} available`;
 
   const chartData = addAvailable(
     top5MetricsStats,

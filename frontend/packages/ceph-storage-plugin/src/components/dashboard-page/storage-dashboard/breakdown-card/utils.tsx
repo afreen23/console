@@ -42,7 +42,7 @@ export const addAvailable = (
     newChartData = [...stats, othersData] as StackDataPoint[];
   }
   if (capacityTotal) {
-    const availableInBytes = Number(capacityTotal) - Number(capacityUsed);
+    const availableInBytes = +capacityTotal;
     availableData = {
       x: '0',
       y: availableInBytes,

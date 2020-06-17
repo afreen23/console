@@ -8,12 +8,14 @@ import {
   getNodeAllocatableMemory,
   hasLabel,
 } from '@console/shared';
+import { useSelectList } from '@console/shared/src/hooks/select-list';
 import { humanizeCpuCores, ResourceLink, pluralize } from '@console/internal/components/utils/';
 import { NodeKind } from '@console/internal/module/k8s';
 import { Table } from '@console/internal/components/factory';
-import { IRow, OnSelect } from '@patternfly/react-table';
+import { IRow } from '@patternfly/react-table';
 import { hasOCSTaint, hasTaints, getConvertedUnits } from '../../utils/install';
 import { cephStorageLabel } from '../../selectors';
+
 import './ocs-install.scss';
 
 const tableColumnClasses = [
@@ -50,25 +52,28 @@ const getColumns = () => {
   ];
 };
 
-const getSelected = (selected: NodeKind[], nodeUID: string) =>
-  selected.map((node) => node.metadata.uid).includes(nodeUID);
+const isSelected = (selected: string[], nodeUID: string) => selected.some((uid) => uid === nodeUID);
 
-type GetRows = ({
-  componentProps,
-  customData,
-}: {
-  componentProps: { data: NodeKind[] };
-  customData: {
-    selectedNodes: NodeKind[];
-    setSelectedNodes: React.Dispatch<React.SetStateAction<NodeKind[]>>;
-    visibleRows: NodeKind[];
-    setVisibleRows: React.Dispatch<React.SetStateAction<NodeKind[]>>;
-  };
-}) => NodeTableRow[];
+type GetRows = (
+  {
+    componentProps,
+  }: {
+    componentProps: { data: NodeKind[] };
+  },
+  visibleRows: string[],
+  setVisibleRows: React.Dispatch<React.SetStateAction<string[]>>,
+  selectedNodes: string[],
+  setSelectedNodes: (nodes: NodeKind[]) => void,
+) => NodeTableRow[];
 
-const getRows: GetRows = ({ componentProps, customData }) => {
+const getRows: GetRows = (
+  { componentProps },
+  visibleRows,
+  setVisibleRows,
+  selectedNodes,
+  setSelectedNodes,
+) => {
   const { data } = componentProps;
-  const { selectedNodes, setSelectedNodes, setVisibleRows, visibleRows } = customData;
 
   const filteredData = data.filter((node: NodeKind) => hasOCSTaint(node) || !hasTaints(node));
 
@@ -96,7 +101,7 @@ const getRows: GetRows = ({ componentProps, customData }) => {
     return {
       cells,
       selected: _.isArray(selectedNodes)
-        ? getSelected(selectedNodes, node.metadata.uid)
+        ? isSelected(selectedNodes, node.metadata.uid)
         : hasLabel(node, cephStorageLabel),
       props: {
         id: node.metadata.uid,
@@ -104,50 +109,27 @@ const getRows: GetRows = ({ componentProps, customData }) => {
     };
   });
 
-  if (!_.isEqual(filteredData, visibleRows)) {
-    setVisibleRows(filteredData);
-    if (!selectedNodes && filteredData.length) {
+  const uids = filteredData.map((n) => n.metadata.uid);
+
+  if (!_.isEqual(uids, visibleRows)) {
+    setVisibleRows(uids);
+    if (!selectedNodes.length && filteredData.length) {
       const preSelected = filteredData.filter((row) => hasLabel(row, cephStorageLabel));
       setSelectedNodes(preSelected);
     }
   }
+
   return rows;
 };
 
 const NodeTable: React.FC<NodeTableProps> = (props) => {
-  const { selectedNodes, setSelectedNodes, visibleRows } = props.customData;
+  const [visibleRows, setVisibleRows] = React.useState<string[]>();
 
-  const onSelect: OnSelect = (_event, isSelected, rowIndex, rowData) => {
-    const selectedUIDs = selectedNodes?.map((node) => node.metadata.uid) ?? [];
-    const visibleUIDs = visibleRows?.map((row) => row.metadata.uid);
-    if (rowIndex === -1) {
-      if (isSelected) {
-        const uniqueUIDs = _.uniq([...visibleUIDs, ...selectedUIDs]);
-        setSelectedNodes(
-          _.uniqBy(
-            [...visibleRows, ...selectedNodes].filter((node) =>
-              uniqueUIDs.includes(node.metadata.uid),
-            ),
-            (n) => n.metadata.uid,
-          ),
-        );
-      } else {
-        setSelectedNodes(
-          _.uniqBy(
-            selectedNodes.filter((node) => !visibleUIDs.includes(node.metadata.uid)),
-            (n) => n.metadata.uid,
-          ),
-        );
-      }
-    } else {
-      const uniqueUIDs = _.xor(selectedUIDs, [rowData.props.id]);
-      const data = _.uniqBy(
-        [...visibleRows, ...selectedNodes].filter((node) => uniqueUIDs.includes(node.metadata.uid)),
-        (n) => n.metadata.uid,
-      );
-      setSelectedNodes(data);
-    }
-  };
+  const {
+    onSelect,
+    selectedRows: selectedNodes,
+    updateSelectedRows: setSelectedNodes,
+  } = useSelectList<NodeKind>(props.data, visibleRows, props.customData.onRowSelected);
 
   return (
     <>
@@ -156,14 +138,16 @@ const NodeTable: React.FC<NodeTableProps> = (props) => {
           aria-label="Node Table"
           data-test-id="select-nodes-table"
           {...props}
-          Rows={getRows}
+          Rows={(rowProps) =>
+            getRows(rowProps, visibleRows, setVisibleRows, selectedNodes, setSelectedNodes)
+          }
           Header={getColumns}
           virtualize={false}
           onSelect={onSelect}
         />
       </div>
       <p className="control-label help-block" data-test-id="nodes-selected">
-        {`${pluralize(selectedNodes?.length || 0, 'node')} selected`}
+        {pluralize(selectedNodes?.length, 'node')} selected
       </p>
     </>
   );
@@ -174,10 +158,7 @@ export default NodeTable;
 type NodeTableProps = {
   data: NodeKind[];
   customData: {
-    selectedNodes: NodeKind[];
-    setSelectedNodes: React.Dispatch<React.SetStateAction<NodeKind[]>>;
-    visibleRows: NodeKind[];
-    setVisibleRows: React.Dispatch<React.SetStateAction<NodeKind[]>>;
+    onRowSelected: (nodes: NodeKind[]) => void;
   };
   filters: { name: string; label: { all: string[] } };
 };

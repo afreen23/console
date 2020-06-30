@@ -1,6 +1,7 @@
 import * as _ from 'lodash';
 
 import { ActivePlugin, Extension, isKebabActions } from './typings';
+import { isStorageClassProvisioner } from './typings/storage-class-params';
 
 // TODO(vojtech): legacy, remove
 
@@ -16,5 +17,9 @@ export class ExtensionRegistry {
 
   public getKebabActions() {
     return this.extensions.filter(isKebabActions);
+  }
+
+  public getStorageClassProvisioner() {
+    return this.extensions.filter(isStorageClassProvisioner);
   }
 }

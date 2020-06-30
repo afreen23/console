@@ -28,8 +28,10 @@ import { ClusterServiceVersionModel } from '@console/operator-lifecycle-manager/
 import { GridPosition } from '@console/shared/src/components/dashboard/DashboardGrid';
 import { referenceForModel, referenceFor } from '@console/internal/module/k8s';
 import { PersistentVolumeClaimModel } from '@console/internal/models';
+import { StorageClassProviosner } from '@console/plugin-sdk/src/typings/storage-class-params';
 import { getCephHealthState } from './components/dashboard-page/storage-dashboard/status-card/utils';
 import { isClusterExpandActivity } from './components/dashboard-page/storage-dashboard/activity-card/cluster-expand-activity';
+import { getStorageClassProvisoner } from './utils/storage-class-params';
 import { WatchCephResource } from './types';
 
 type ConsumedExtensions =
@@ -47,7 +49,8 @@ type ConsumedExtensions =
   | ResourceTabPage
   | ClusterServiceVersionAction
   | KebabActions
-  | DashboardsOverviewResourceActivity;
+  | DashboardsOverviewResourceActivity
+  | StorageClassProviosner;
 
 const apiObjectRef = referenceForModel(models.OCSServiceModel);
 
@@ -75,6 +78,12 @@ const plugin: Plugin<ConsumedExtensions> = [
     type: 'FeatureFlag/Custom',
     properties: {
       detect: detectOCS,
+    },
+  },
+  {
+    type: 'StorageClass/Proviosner',
+    properties: {
+      getStorageClassProvisoner,
     },
   },
   {

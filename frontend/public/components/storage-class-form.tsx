@@ -19,6 +19,7 @@ import {
 import { k8sCreate, K8sResourceKind, referenceForModel } from './../module/k8s';
 import * as k8sActions from '../actions/k8s';
 import { CSIDriverModel, StorageClassModel } from './../models';
+import * as plugins from '../plugins';
 
 const NameValueEditorComponent = (props) => (
   <AsyncComponent
@@ -64,105 +65,29 @@ export class StorageClassForm_ extends React.Component<
 
   storageTypes = {};
 
+  // Fetch Storage type provisoners from different operators
+  // For CSI - provionerType: 'csi'
+  // For Defaults - provionerType: 'other'
+  getExtensionsStorageClassProvisioners = (provionerType: string) => {
+    const extensionCSIProvisoners = {};
+    _.forEach(plugins.registry.getStorageClassProvisioner(), (operator: any) => {
+      if (operator) {
+        _.forEach(operator.properties.getStorageClassProvisoner(), (params, type) => {
+          extensionCSIProvisoners[type] = params;
+        });
+      }
+    });
+    return extensionCSIProvisoners[provionerType];
+  };
+
+  // For 'csi' storage type
   CSIStorageTypes = Object.freeze({
-    'rbd.csi.ceph.com': {
-      title: 'Ceph RBD',
-      provisioner: 'rbd.csi.ceph.com',
-      documentationLink: 'https://rook.io/docs/rook/v1.1/',
-      parameters: {
-        clusterID: {
-          name: 'Cluster ID',
-          hintText: 'The namespace where Ceph is deployed',
-          required: true,
-        },
-        pool: {
-          name: 'Pool',
-          hintText: 'Ceph pool into which volume data shall be stored',
-          required: true,
-        },
-        imageFormat: {
-          name: 'Image Format',
-          hintText: 'RBD image format. Defaults to "2"',
-          values: { '2': '2' },
-          required: true,
-        },
-        imageFeatures: {
-          name: 'Image Features',
-          hintText: 'Ceph RBD image features',
-          values: { layering: 'layering' },
-          required: true,
-        },
-        'csi.storage.k8s.io/provisioner-secret-name': {
-          name: 'Provisioner Secret Name',
-          hintText: 'The name of provisioner secret',
-          required: true,
-        },
-        'csi.storage.k8s.io/provisioner-secret-namespace': {
-          name: 'Provisioner Secret Namespace',
-          hintText: 'The namespace where provisioner secret is created',
-          required: true,
-        },
-        'csi.storage.k8s.io/node-stage-secret-name': {
-          name: 'Node Stage Secret Name',
-          hintText: 'The name of Node Stage secret',
-          required: true,
-        },
-        'csi.storage.k8s.io/node-stage-secret-namespace': {
-          name: 'Node Stage Secret Namespace',
-          hintText: 'The namespace where provisioner secret is created',
-          required: true,
-        },
-        'csi.storage.k8s.io/fstype': {
-          name: 'Filesystem Type',
-          hintText: 'Ceph RBD filesystem type. Default set to ext4',
-          required: true,
-        },
-      },
-    },
-    'cephfs.csi.ceph.com': {
-      title: 'Ceph FS',
-      provisioner: 'cephfs.csi.ceph.com',
-      documentationLink: 'https://rook.io/docs/rook/v1.1/',
-      parameters: {
-        clusterID: {
-          name: 'Cluster ID',
-          hintText: 'The namespace where Ceph is deployed',
-          required: true,
-        },
-        pool: {
-          name: 'Pool',
-          hintText: 'Ceph pool into which volume data shall be stored',
-        },
-        fsName: {
-          name: 'Filesystem Name',
-          hintText: 'CephFS filesystem name into which the volume shall be created',
-          required: true,
-        },
-        'csi.storage.k8s.io/provisioner-secret-name': {
-          name: 'Provisioner Secret Name',
-          hintText: 'The name of provisioner secret',
-          required: true,
-        },
-        'csi.storage.k8s.io/provisioner-secret-namespace': {
-          name: 'Provisioner Secret Namespace',
-          hintText: 'The namespace where provisioner secret is created',
-          required: true,
-        },
-        'csi.storage.k8s.io/node-stage-secret-name': {
-          name: 'Node Stage Secret Name',
-          hintText: 'The name of Node Stage secret',
-          required: true,
-        },
-        'csi.storage.k8s.io/node-stage-secret-namespace': {
-          name: 'Node Stage Secret Namespace',
-          hintText: 'The namespace where provisioner secret is created',
-          required: true,
-        },
-      },
-    },
+    ...this.getExtensionsStorageClassProvisioners('csi'),
   });
 
+  // For 'other' storage type
   defaultStorageTypes = Object.freeze({
+    ...this.getExtensionsStorageClassProvisioners('other'), // Plugin provisoners
     local: {
       title: 'Local',
       provisioner: 'kubernetes.io/no-provisioner',
@@ -648,40 +573,60 @@ export class StorageClassForm_ extends React.Component<
       : this.setState({ newStorageClass: newParams });
   };
 
+  addDefaultParams = () => {
+    const defaultParams = this.state.newStorageClass.type
+      ? this.storageTypes[this.state.newStorageClass.type].parameters
+      : {};
+    const hiddenParmas = {};
+    _.each(defaultParams, (values, param) => {
+      if (values.visible && !values.visible() && values.value) {
+        hiddenParmas[param] = values;
+      }
+    });
+    const value = { ...this.state.newStorageClass.parameters, ...hiddenParmas };
+    const newParams = {
+      ...this.state.newStorageClass,
+      parameters: value,
+    };
+
+    return newParams;
+  };
+
   createStorageClass = (e: React.FormEvent<EventTarget>) => {
     e.preventDefault();
 
     this.setState({
       loading: true,
     });
+    this.setState({ newStorageClass: this.addDefaultParams() }, () => {
+      const { description, type, reclaim } = this.state.newStorageClass;
+      const dataParameters = this.getFormParams();
+      const annotations = description ? { description } : {};
+      const data: StorageClass = {
+        metadata: {
+          name: this.state.newStorageClass.name,
+          annotations,
+        },
+        provisioner: this.storageTypes[type].provisioner,
+        parameters: dataParameters,
+      };
 
-    const { description, type, reclaim } = this.state.newStorageClass;
-    const dataParameters = this.getFormParams();
-    const annotations = description ? { description } : {};
-    const data: StorageClass = {
-      metadata: {
-        name: this.state.newStorageClass.name,
-        annotations,
-      },
-      provisioner: this.storageTypes[type].provisioner,
-      parameters: dataParameters,
-    };
+      if (reclaim) {
+        data.reclaimPolicy = reclaim;
+      }
 
-    if (reclaim) {
-      data.reclaimPolicy = reclaim;
-    }
+      const volumeBindingMode = _.get(this.storageTypes[type], 'volumeBindingMode', null);
+      if (volumeBindingMode) {
+        data.volumeBindingMode = volumeBindingMode;
+      }
 
-    const volumeBindingMode = _.get(this.storageTypes[type], 'volumeBindingMode', null);
-    if (volumeBindingMode) {
-      data.volumeBindingMode = volumeBindingMode;
-    }
-
-    k8sCreate(StorageClassModel, data)
-      .then(() => {
-        this.setState({ loading: false });
-        history.push('/k8s/cluster/storageclasses');
-      })
-      .catch((error) => this.setState({ loading: false, error }));
+      k8sCreate(StorageClassModel, data)
+        .then(() => {
+          this.setState({ loading: false });
+          history.push('/k8s/cluster/storageclasses');
+        })
+        .catch((error) => this.setState({ loading: false, error }));
+    });
   };
 
   getFormParams = () => {
@@ -825,6 +770,10 @@ export class StorageClassForm_ extends React.Component<
     return isRequired;
   };
 
+  handleComponentParams = (value: string, key: string) => {
+    this.setParameterHandler(key, value, false);
+  };
+
   getProvisionerElements = () => {
     const parameters = this.storageTypes[this.state.newStorageClass.type].parameters;
 
@@ -840,6 +789,11 @@ export class StorageClassForm_ extends React.Component<
 
       if (parameter.visible && !parameter.visible(this.state.newStorageClass.parameters)) {
         return null;
+      }
+
+      if (parameter.Component) {
+        const Component = parameter.Component;
+        return <Component onParamChange={(value) => this.handleComponentParams(value, key)} />;
       }
 
       const children = parameter.values ? (
@@ -916,23 +870,25 @@ export class StorageClassForm_ extends React.Component<
       <>
         {dynamicContent}
 
-        <div className="form-group">
-          <label>Additional Parameters</label>
-          <p>
-            Specific fields for the selected provisioner. &nbsp;
-            <ExternalLink
-              href={this.storageTypes[this.state.newStorageClass.type].documentationLink}
-              text="What should I enter here?"
+        {this.storageTypes[this.state.newStorageClass.type].documentationLink && (
+          <div className="form-group">
+            <label>Additional Parameters</label>
+            <p>
+              Specific fields for the selected provisioner. &nbsp;
+              <ExternalLink
+                href={this.storageTypes[this.state.newStorageClass.type].documentationLink}
+                text="What should I enter here?"
+              />
+            </p>
+            <NameValueEditorComponent
+              nameValuePairs={this.state.customParams}
+              nameString="Parameter"
+              valueString="Value"
+              addString="Add Parameter"
+              updateParentData={this.updateCustomParams}
             />
-          </p>
-          <NameValueEditorComponent
-            nameValuePairs={this.state.customParams}
-            nameString="Parameter"
-            valueString="Value"
-            addString="Add Parameter"
-            updateParentData={this.updateCustomParams}
-          />
-        </div>
+          </div>
+        )}
       </>
     );
   };

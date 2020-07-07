@@ -15,8 +15,10 @@ import {
   useExtensions,
   DashboardsCard,
   DashboardsTab,
+  DashboardsTab2,
   isDashboardsCard,
   isDashboardsTab,
+  isDashboardsTab2,
 } from '@console/plugin-sdk';
 import { RootState } from '../../../redux';
 
@@ -50,6 +52,7 @@ const DashboardsPage_: React.FC<DashboardsPageProps> = ({ match, kindsInFlight, 
   const title = 'Overview';
   const tabExtensions = useExtensions<DashboardsTab>(isDashboardsTab);
   const cardExtensions = useExtensions<DashboardsCard>(isDashboardsCard);
+  const pocExtensions = useExtensions<DashboardsTab2>(isDashboardsTab2);
 
   const pluginPages = React.useMemo(() => getPluginTabPages(tabExtensions, cardExtensions), [
     tabExtensions,
@@ -64,8 +67,9 @@ const DashboardsPage_: React.FC<DashboardsPageProps> = ({ match, kindsInFlight, 
         component: ClusterDashboard,
       },
       ...pluginPages,
+      ...pocExtensions.map((p) => p.properties),
     ],
-    [pluginPages],
+    [pluginPages, pocExtensions],
   );
 
   return kindsInFlight && k8sModels.size === 0 ? (

@@ -11,6 +11,7 @@ import {
   RoutePage,
   DashboardsOverviewResourceActivity,
   DashboardsOverviewHealthURLSubsystem,
+  DashboardsTab2,
   DashboardsOverviewHealthPrometheusSubsystem,
   DashboardsOverviewInventoryItem,
   DashboardsOverviewHealthOperator,
@@ -48,6 +49,7 @@ import {
 } from './components/dashboards-page/activity';
 import reducer from './redux/reducer';
 import * as models from './models';
+import { ClusterDashboard } from '@console/internal/components/dashboard/dashboards-page/cluster-dashboard/cluster-dashboard';
 
 type ConsumedExtensions =
   | Perspective
@@ -55,6 +57,7 @@ type ConsumedExtensions =
   | ModelFeatureFlag
   | RoutePage
   | DashboardsOverviewResourceActivity
+  | DashboardsTab2
   | DashboardsOverviewHealthURLSubsystem<any>
   | DashboardsOverviewHealthPrometheusSubsystem
   | DashboardsOverviewInventoryItem
@@ -73,6 +76,14 @@ const plugin: Plugin<ConsumedExtensions> = [
     properties: {
       model: models.WorkspaceModel,
       flag: FLAG_DEVWORKSPACE,
+    },
+  },
+  {
+    type: 'Dashboards/Tab2',
+    properties: {
+      href: '/tab2/check',
+      name: 'Afreen',
+      component: ClusterDashboard,
     },
   },
   {

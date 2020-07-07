@@ -134,6 +134,14 @@ namespace ExtensionProperties {
     title: string;
   }
 
+  export interface DashboardsTab2 {
+    name: string;
+
+    href: string;
+
+    component: React.FC<{}>;
+  }
+
   export interface DashboardsCard {
     /** The tab's ID where this card should be rendered */
     tab: string;
@@ -283,6 +291,12 @@ export const isDashboardsOverviewHealthSubsystem = (
 export interface DashboardsTab extends Extension<ExtensionProperties.DashboardsTab> {
   type: 'Dashboards/Tab';
 }
+
+export interface DashboardsTab2 extends Extension<ExtensionProperties.DashboardsTab2> {
+  type: 'Dashboards/Tab2';
+}
+
+export const isDashboardsTab2 = (e: Extension): e is DashboardsTab2 => e.type === 'Dashboards/Tab2';
 
 export const isDashboardsTab = (e: Extension): e is DashboardsTab => e.type === 'Dashboards/Tab';
 

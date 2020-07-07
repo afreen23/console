@@ -10,6 +10,7 @@ import {
   nodeFS,
   nodePods,
   pvcUsed,
+  snapshotSize,
 } from '@console/shared';
 import * as UIActions from '../../actions/ui';
 import {
@@ -145,6 +146,7 @@ const sorts = {
   machinePhase: (machine: MachineKind): string => getMachinePhase(machine),
   nodePods: (node: NodeKind): number => nodePods(node),
   pvcUsed: (pvc: K8sResourceKind): number => pvcUsed(pvc),
+  volumeSnapshotSize: (snapshot: K8sResourceKind): number => snapshotSize(snapshot),
 };
 
 const stateToProps = (

@@ -17,6 +17,7 @@ export const OCS_SUPPORT_ANNOTATION = 'features.ocs.openshift.io/enabled';
 export const OCS_DEVICE_SET_REPLICA = 3;
 export const ATTACHED_DEVICES_ANNOTATION = 'cluster.ocs.openshift.io/local-devices';
 export const AVAILABLE = 'Available';
+export const OSD_REMOVAL_TEMPLATE = 'ocs-osd-removal';
 export const dropdownUnits = {
   GiB: 'Gi',
   TiB: 'Ti',

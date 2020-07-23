@@ -2,26 +2,40 @@ import * as React from 'react';
 import { TableData } from '@console/internal/components/factory';
 import { KebabOption, Kebab } from '@console/internal/components/utils';
 import { diskReplacementModal } from './disk-replacement-modal';
+import { OCSStateAction, OCSState } from './state-reducer';
 
-const startDiskReplacementAction = (diskName: string, osdId: string): KebabOption => ({
+const startDiskReplacementAction = (diskName, diskInfo, isRebalancing, dispatch): KebabOption => ({
   label: 'Start Disk Replacement',
   callback: () =>
     diskReplacementModal({
       diskName,
-      osdId,
+      diskInfo,
+      isRebalancing,
+      dispatch,
     }),
 });
 
-export const OCSKebabOptions: React.FC<OCSKebabOptionsProps> = ({ diskName, diskOsdMap }) => {
-  const osdId: string = diskOsdMap.get(diskName);
-  const kebabOptions: KebabOption[] = [startDiskReplacementAction(diskName, osdId)];
+export const OCSKebabOptions: React.FC<OCSKebabOptionsProps> = ({
+  diskName,
+  ocsState,
+  dispatch,
+}) => {
+  const { diskOsdMap, isRebalancing } = ocsState;
+  const diskInfo = diskOsdMap[diskName];
+  const kebabOptions: KebabOption[] = [
+    startDiskReplacementAction(diskName, diskInfo, isRebalancing, dispatch),
+  ];
 
   return (
     <TableData className={Kebab.columnClass}>
       {/* Disable options for non OCS based disks */}
-      <Kebab options={kebabOptions} isDisabled={!!osdId} />
+      <Kebab options={kebabOptions} isDisabled={!!diskInfo.osdName} />
     </TableData>
   );
 };
 
-type OCSKebabOptionsProps = { diskName: string; diskOsdMap: Map<string, string> };
+type OCSKebabOptionsProps = {
+  diskName: string;
+  dispatch: React.Dispatch<OCSStateAction>;
+  ocsState: OCSState;
+};

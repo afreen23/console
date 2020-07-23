@@ -16,8 +16,14 @@ import { RowFilter } from '@console/internal/components/filter-toolbar';
 import { useFlag } from '@console/shared/src/hooks/flag';
 import { OCS_ATTACHED_DEVICES_FLAG } from '@console/ceph-storage-plugin/src/features';
 import { OCSKebabOptions } from '@console/ceph-storage-plugin/src/components/attached-devices-mode/lso-disk-inventory/ocs-kebab-options';
+import { OCSStatus } from '@console/ceph-storage-plugin/src/components/attached-devices-mode/lso-disk-inventory/ocs-status-column';
+import { useOCStateWatch } from '@console/ceph-storage-plugin/src/components/attached-devices-mode/lso-disk-inventory/use-disk-resource-watch';
 import { LocalVolumeDiscoveryResult } from '../../models';
 import { LABEL_SELECTOR } from '../../constants/disks-list';
+import {
+  OCSStateAction,
+  OCSState,
+} from '@console/ceph-storage-plugin/src/components/attached-devices-mode/lso-disk-inventory/state-reducer';
 
 export const diskFilters: RowFilter[] = [
   {
@@ -92,12 +98,19 @@ const getDiskHeader = (isOCSAttachedDevices: boolean) => {
   ];
   if (isOCSAttachedDevices) {
     headers.push({
+      title: 'OCS Status',
+      sortField: '',
+      transforms: [sortable],
+      props: { className: tableColumnClasses[5] },
+    });
+    headers.push({
       title: '',
       sortField: '',
       transforms: [],
       props: { className: tableColumnClasses[6] },
     });
   }
+  // add an extension in ceph to allow adding columns and headers
   return () => headers;
 };
 
@@ -108,8 +121,9 @@ const diskRow: RowFunction<DiskMetadata, OCSMetadata> = ({
   style,
   customData,
 }) => {
-  const { isOCSAttachedDevices, diskOsdMap } = customData;
+  const { isOCSAttachedDevices, ocsState, dispatch } = customData;
   const diskName = obj.path;
+  const status = ocsState[diskName]?.status;
   return (
     <TableRow id={obj.deviceID} index={index} trKey={key} style={style}>
       <TableData className={tableColumnClasses[0]}>{obj.path}</TableData>
@@ -122,7 +136,10 @@ const diskRow: RowFunction<DiskMetadata, OCSMetadata> = ({
         {humanizeBinaryBytes(obj.size).string || '-'}
       </TableData>
       <TableData className={tableColumnClasses[5]}>{obj.fstype || '-'}</TableData>
-      {isOCSAttachedDevices && <OCSKebabOptions diskName={diskName} diskOsdMap={diskOsdMap} />}
+      {isOCSAttachedDevices && (
+        <OCSKebabOptions diskName={diskName} ocsState={ocsState} dispatch={dispatch} />
+      )}
+      {isOCSAttachedDevices && <OCSStatus status={status} className={tableColumnClasses[1]} />}
     </TableRow>
   );
 };
@@ -133,8 +150,9 @@ const DisksList: React.FC<TableProps> = (props) => {
 };
 
 const DisksListPage: React.FC<{ obj: NodeKind }> = (props) => {
-  const isOCSAttachedDevices = useFlag(OCS_ATTACHED_DEVICES_FLAG);
   const nodeName = props.obj.metadata.name;
+  const isOCSAttachedDevices = useFlag(OCS_ATTACHED_DEVICES_FLAG);
+  const [ocsState, dispatch] = useOCStateWatch(isOCSAttachedDevices, nodeName);
   const propName = `lvdr-${nodeName}`;
 
   return (
@@ -156,8 +174,9 @@ const DisksListPage: React.FC<{ obj: NodeKind }> = (props) => {
         },
       ]}
       customData={{
-        diskOsdMap: new Map() /* TBD(Afreen) Will be changed to actual state with this https://issues.redhat.com/browse/RHSTOR-1194  */,
         isOCSAttachedDevices,
+        ocsState,
+        dispatch,
       }}
     />
   );
@@ -165,11 +184,14 @@ const DisksListPage: React.FC<{ obj: NodeKind }> = (props) => {
 
 export default DisksListPage;
 
-type DiskMetadata = LocalVolumeDiscoveryResult['status']['discoveredDevices'];
-type OCSMetadata = {
+export type OCSMetadata = {
+  ocsState: OCSState;
   isOCSAttachedDevices: boolean;
-  diskOsdMap: Map<string, string>;
+  ocsStateError: any;
+  dispatch: React.Dispatch<OCSStateAction>;
 };
+
+type DiskMetadata = LocalVolumeDiscoveryResult['status']['discoveredDevices'];
 
 type LocalVolumeDiscoveryResult = K8sResourceCommon & {
   spec: {

@@ -14,7 +14,7 @@ import { TemplateInstanceKind } from '@console/internal/module/k8s';
 import { ActionType, OCSState, initialState, reducer } from './state-reducer';
 import { PrometheusResult } from '@console/internal/components/graphs';
 
-export const useOCStateWatch = (watch: boolean, nodeName: string) => {
+export const useOCStateWatch = (nodeName: string) => {
   const [ocsState, dispatch] = React.useReducer(reducer, initialState);
   const [diskresponse] = usePrometheusPoll({
     endpoint: PrometheusEndpoint.QUERY,
@@ -36,42 +36,41 @@ export const useOCStateWatch = (watch: boolean, nodeName: string) => {
     namespace: CEPH_STORAGE_NAMESPACE,
   });
 
-  if (watch) {
-    const diskResults: PrometheusResult[] = diskresponse?.data?.result || [];
-    const resiliencyResults: string = resiliencyResponse?.data.result?.[0]?.value[1];
+  const diskResults: PrometheusResult[] = diskresponse?.data?.result || [];
+  const resiliencyResults: string = resiliencyResponse?.data.result?.[0]?.value[1];
 
-    const isRebalancing: boolean = resiliencyResults !== '1';
-    const newDiskOsdMap: OCSState['diskOsdMap'] = diskResults.reduce((map, { metric }) => {
-      map[metric.device] = {
-        osd: metric.ceph_daemon,
-        status: ocsState.diskOsdMap[metric.device],
-      };
-      return map;
-    }, {});
+  const isRebalancing: boolean = resiliencyResults !== '1';
+  const newDiskOsdMap: OCSState['diskOsdMap'] = diskResults.reduce((map, { metric }) => {
+    map[metric.device] = {
+      osd: metric.ceph_daemon,
+      status: ocsState.diskOsdMap[metric.device],
+    };
+    return map;
+  }, {});
 
-    dispatch({ type: ActionType.SET_IS_REBALANCED, payload: isRebalancing });
-    dispatch({ type: ActionType.SET_DISK_OSD_MAP, payload: newDiskOsdMap });
+  dispatch({ type: ActionType.SET_IS_REBALANCED, payload: isRebalancing });
+  dispatch({ type: ActionType.SET_DISK_OSD_MAP, payload: newDiskOsdMap });
 
-    if (ocsState.replacingDisk && templateLoaded && !templateLoadError) {
-      const status = templateData.status.conditions?.[0].type;
-      switch (status) {
-        case 'Not Ready':
-          dispatch({
-            type: ActionType.SET_OCS_DISK_STATUS,
-            payload: { diskName: ocsState.replacingDisk, status: 'Preparing to replace' },
-          });
-          break;
-        case 'Ready':
-          dispatch({
-            type: ActionType.SET_OCS_DISK_STATUS,
-            payload: { diskName: ocsState.replacingDisk, status: 'Replacement Ready' },
-          });
-          dispatch({ type: ActionType.SET_IS_REPLACED_DISK, payload: '' });
-          break;
-        default:
-          return '';
-      }
+  if (ocsState.replacingDisk && templateLoaded && !templateLoadError) {
+    const status = templateData.status.conditions?.[0].type;
+    switch (status) {
+      case 'Not Ready':
+        dispatch({
+          type: ActionType.SET_OCS_DISK_STATUS,
+          payload: { diskName: ocsState.replacingDisk, status: 'Preparing to replace' },
+        });
+        break;
+      case 'Ready':
+        dispatch({
+          type: ActionType.SET_OCS_DISK_STATUS,
+          payload: { diskName: ocsState.replacingDisk, status: 'Replacement Ready' },
+        });
+        dispatch({ type: ActionType.SET_IS_REPLACED_DISK, payload: '' });
+        break;
+      default:
+        return '';
     }
   }
+
   return [ocsState, dispatch];
 };

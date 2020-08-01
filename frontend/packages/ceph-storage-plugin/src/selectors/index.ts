@@ -3,6 +3,7 @@ import { Alert } from '@console/internal/components/monitoring/types';
 import { K8sResourceKind } from '@console/internal/module/k8s';
 import { FirehoseResult, convertToBaseValue } from '@console/internal/components/utils';
 import { cephStorageProvisioners } from '@console/shared/src/utils';
+import { LocalVolumeDiscoveryResultKind } from '@console/local-storage-operator-plugin/src/components/disks-list/disks-list-page';
 import { OCS_OPERATOR } from '../constants';
 
 export const cephStorageLabel = 'cluster.ocs.openshift.io/openshift-storage';
@@ -11,6 +12,21 @@ const enum status {
   BOUND = 'Bound',
   AVAILABLE = 'Available',
 }
+
+export const getDisksCount = (
+  lvdrData: LocalVolumeDiscoveryResultKind[],
+  cephNodes: K8sResourceKind[],
+) => {
+  const nodeNames = new Set<string>(cephNodes.map((node) => node.metadata.name));
+  return lvdrData.reduce((count, lvdr) => {
+    if (nodeNames.has(lvdr.spec.nodeName)) {
+      const disksCount = lvdr.status.discoveredDevices.length;
+      return count + disksCount;
+    }
+    return count;
+  }, 0);
+};
+
 export const filterCephAlerts = (alerts: Alert[]): Alert[] =>
   alerts.filter((alert) => _.get(alert, 'annotations.storage_type') === 'ceph');
 

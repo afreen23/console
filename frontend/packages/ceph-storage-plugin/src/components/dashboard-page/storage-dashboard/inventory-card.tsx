@@ -14,21 +14,27 @@ import {
   getPVCStatusGroups,
   getPVStatusGroups,
 } from '@console/shared/src/components/dashboard/inventory-card/utils';
-import { K8sResourceKind } from '@console/internal/module/k8s';
+import { K8sResourceKind, referenceForModel } from '@console/internal/module/k8s';
 import {
   NodeModel,
   PersistentVolumeClaimModel,
   PersistentVolumeModel,
   StorageClassModel,
 } from '@console/internal/models';
-import { ResourceInventoryItem } from '@console/shared/src/components/dashboard/inventory-card/InventoryItem';
+import {
+  ResourceInventoryItem,
+  InventoryItem,
+} from '@console/shared/src/components/dashboard/inventory-card/InventoryItem';
 import {
   getCephNodes,
   getCephPVs,
   getCephPVCs,
+  getDisksCount,
   getCephSC,
   cephStorageLabel,
 } from '../../../selectors';
+import { LocalVolumeDiscoveryResult } from '@console/local-storage-operator-plugin/src/models';
+import { LocalVolumeDiscoveryResultKind } from '@console/local-storage-operator-plugin/src/components/disks-list/disks-list-page';
 
 const k8sResources: FirehoseResource[] = [
   {
@@ -50,6 +56,11 @@ const k8sResources: FirehoseResource[] = [
     isList: true,
     kind: StorageClassModel.kind,
     prop: 'sc',
+  },
+  {
+    isList: true,
+    kind: referenceForModel(LocalVolumeDiscoveryResult),
+    prop: 'lvdr',
   },
 ];
 
@@ -82,6 +93,12 @@ const InventoryCard: React.FC<DashboardItemProps> = ({
   const filteredSCNames = filteredCephSC.map((sc) => _.get(sc, 'metadata.name'));
   const ocsNodesHref = `/search?kind=${NodeModel.kind}&q=${cephStorageLabel}`;
 
+  const lvdrLoaded = resources.lvdr?.loaded;
+  const lvdrData = (resources.lvdr?.data as LocalVolumeDiscoveryResultKind[]) || [];
+  const lvdrLoadError = resources.pvs?.loadError;
+
+  const cephNodes = getCephNodes(nodesData);
+
   return (
     <DashboardCard>
       <DashboardCardHeader>
@@ -92,7 +109,7 @@ const InventoryCard: React.FC<DashboardItemProps> = ({
           isLoading={!nodesLoaded}
           error={!!nodesLoadError}
           kind={NodeModel}
-          resources={getCephNodes(nodesData)}
+          resources={cephNodes}
           mapper={getNodeStatusGroups}
           basePath={ocsNodesHref}
         />
@@ -113,6 +130,13 @@ const InventoryCard: React.FC<DashboardItemProps> = ({
           resources={getCephPVs(pvsData)}
           mapper={getPVStatusGroups}
           showLink={false}
+        />
+        <InventoryItem
+          isLoading={!lvdrLoaded}
+          error={!!lvdrLoadError}
+          title="Disk"
+          titlePlural="Disks"
+          count={getDisksCount(lvdrData, cephNodes)}
         />
       </DashboardCardBody>
     </DashboardCard>

@@ -21,6 +21,7 @@ import { DATA_RESILIENCY_QUERY, StorageDashboardQuery } from '../../../../consta
 import { cephClusterResource } from '../../../../constants/resources';
 import { filterCephAlerts } from '../../../../selectors';
 import { getCephHealthState, getDataResiliencyState } from './utils';
+import DashboardCardLink from '@console/shared/src/components/dashboard/dashboard-card/DashboardCardLink';
 
 const resiliencyProgressQuery = DATA_RESILIENCY_QUERY[StorageDashboardQuery.RESILIENCY_PROGRESS];
 
@@ -75,6 +76,7 @@ export const StatusCard: React.FC<DashboardItemProps> = ({
     <DashboardCard gradient>
       <DashboardCardHeader>
         <DashboardCardTitle>Status</DashboardCardTitle>
+        <DashboardCardLink to="">View alerts</DashboardCardLink>
       </DashboardCardHeader>
       <DashboardCardBody>
         <HealthBody>

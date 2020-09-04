@@ -61,13 +61,44 @@ const plugin: Plugin<ConsumedExtensions> = [
   {
     type: 'Page/Route',
     properties: {
+      exact: true,
+      path: `/k8s/ns/:ns/${referenceForModel(
+        ClusterServiceVersionModel,
+      )}/:appName/${referenceForModel(models.NooBaaBucketClassModel)}/~new`,
+      loader: () =>
+        import('./components/bucket-class/create-bc' /* webpackChunkName: "create-bc" */).then(
+          (m) => m.default,
+        ),
+    },
+    flags: {
+      required: [NOOBAA_FLAG],
+    },
+  },
+  {
+    type: 'Page/Route',
+    properties: {
       path: `/k8s/ns/:ns/${ClusterServiceVersionModel.plural}/:appName/${referenceForModel(
         models.NooBaaSystemModel,
       )}/noobaa/`,
       loader: () =>
-        import('./components/noobaa-operator/noobaa-page' /* webpackChunkName: "create-bc" */).then(
-          (m) => m.default,
-        ),
+        import(
+          './components/noobaa-operator/noobaa-page' /* webpackChunkName: "noobaa-page" */
+        ).then((m) => m.default),
+    },
+    flags: {
+      required: [NOOBAA_FLAG],
+    },
+  },
+  {
+    type: 'Page/Route',
+    properties: {
+      path: `/k8s/ns/:ns/${referenceForModel(
+        ClusterServiceVersionModel,
+      )}/:appName/${referenceForModel(models.NooBaaSystemModel)}/noobaa/`,
+      loader: () =>
+        import(
+          './components/noobaa-operator/noobaa-page' /* webpackChunkName: "noobaa-page" */
+        ).then((m) => m.default),
     },
     flags: {
       required: [NOOBAA_FLAG],
@@ -79,6 +110,25 @@ const plugin: Plugin<ConsumedExtensions> = [
       exact: true,
       path: [
         `/k8s/ns/:ns/${ClusterServiceVersionModel.plural}/:appName/${referenceForModel(
+          models.NooBaaBackingStoreModel,
+        )}/~new`,
+        `/k8s/ns/:ns/${referenceForModel(models.NooBaaBackingStoreModel)}/~new`,
+      ],
+      loader: () =>
+        import(
+          './components/create-backingstore-page/create-bs-page' /* webpackChunkName: "create-bs" */
+        ).then((m) => m.default),
+    },
+    flags: {
+      required: [NOOBAA_FLAG],
+    },
+  },
+  {
+    type: 'Page/Route',
+    properties: {
+      exact: true,
+      path: [
+        `/k8s/ns/:ns/${referenceForModel(ClusterServiceVersionModel)}/:appName/${referenceForModel(
           models.NooBaaBackingStoreModel,
         )}/~new`,
         `/k8s/ns/:ns/${referenceForModel(models.NooBaaBackingStoreModel)}/~new`,

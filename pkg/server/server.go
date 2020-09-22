@@ -112,6 +112,7 @@ type Server struct {
 	InactivityTimeout    int
 	// A client with the correct TLS setup for communicating with the API server.
 	K8sClient                        *http.Client
+	PrometheusProxyConfig            *proxy.Config
 	ThanosProxyConfig                *proxy.Config
 	ThanosTenancyProxyConfig         *proxy.Config
 	ThanosTenancyProxyForRulesConfig *proxy.Config
@@ -286,6 +287,8 @@ func (s *Server) HTTPHandler() http.Handler {
 			tenancyRulesSourcePath      = prometheusTenancyProxyEndpoint + "/api/v1/rules"
 			tenancyTargetAPIPath        = prometheusTenancyProxyEndpoint + "/api/"
 
+			prometheusProxy = proxy.NewProxy(s.PrometheusProxyConfig)
+
 			thanosProxy                = proxy.NewProxy(s.ThanosProxyConfig)
 			thanosTenancyProxy         = proxy.NewProxy(s.ThanosTenancyProxyConfig)
 			thanosTenancyForRulesProxy = proxy.NewProxy(s.ThanosTenancyProxyForRulesConfig)
@@ -320,7 +323,7 @@ func (s *Server) HTTPHandler() http.Handler {
 			proxy.SingleJoiningSlash(s.BaseURL.Path, targetAPIPath),
 			authHandlerWithUser(func(user *auth.User, w http.ResponseWriter, r *http.Request) {
 				r.Header.Set("Authorization", fmt.Sprintf("Bearer %s", user.Token))
-				thanosProxy.ServeHTTP(w, r)
+				prometheusProxy.ServeHTTP(w, r)
 			})),
 		)
 

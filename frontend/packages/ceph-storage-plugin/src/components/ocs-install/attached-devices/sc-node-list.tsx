@@ -9,6 +9,7 @@ import {
 } from '@console/shared';
 import { humanizeCpuCores, ResourceLink } from '@console/internal/components/utils/';
 import { Table } from '@console/internal/components/factory';
+import { NodeKind } from '@console/internal/module/k8s';
 import { createMapForHostNames } from '@console/local-storage-operator-plugin/src/utils';
 import { getConvertedUnits } from '../../../utils/install';
 import { getColumns } from '../node-list';
@@ -17,11 +18,16 @@ import '../ocs-install.scss';
 
 const getRows: GetRows = ({ componentProps, customData }) => {
   const { data } = componentProps;
-  const { nodes, setNodes, filteredNodes } = customData;
+  const { nodes, setNodes, filteredNodes, isHostNameSame } = customData;
+  let filteredData: NodeKind[] = [];
 
   const nodeList = filteredNodes ?? data.map(getName);
-  const hostNames = createMapForHostNames(data);
-  const filteredData = data.filter((node) => nodeList.includes(hostNames[getName(node)]));
+  if (isHostNameSame) {
+    filteredData = data.filter((node) => nodeList.includes(getName(node)));
+  } else {
+    const hostNames = createMapForHostNames(data);
+    filteredData = data.filter((node) => nodeList.includes(hostNames[getName(node)]));
+  }
 
   const rows = filteredData.map((node) => {
     const roles = getNodeRoles(node).sort();

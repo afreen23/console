@@ -19,6 +19,7 @@ export type GetRows = (
       filteredNodes: string[];
       setNodes: React.Dispatch<React.SetStateAction<NodeKind[]>>;
       nodes: NodeKind[];
+      isHostNameSame?: boolean;
     };
   },
   visibleRows?: Set<string>,

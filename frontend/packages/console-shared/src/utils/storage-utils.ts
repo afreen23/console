@@ -7,7 +7,7 @@ export const cephStorageProvisioners = [
   'rbd.csi.ceph.com',
 ];
 
-const objectStorageProvisioners = [
+export const objectStorageProvisioners = [
   'openshift-storage.noobaa.io/obc',
   'openshift-storage.ceph.rook.io/bucket',
 ];

@@ -25,6 +25,7 @@ export const dropdownUnits = {
 };
 export const CEPH_INTERNAL_CR_NAME = 'ocs-storagecluster-cephcluster';
 export const CEPH_EXTERNAL_CR_NAME = 'ocs-external-storagecluster-cephcluster';
+export const ZONE_LABEL = 'topology.kubernetes.io/zone';
 
 export enum OCS_PROVISIONER {
   BLOCK = 'openshift-storage.rbd.csi.ceph.com',

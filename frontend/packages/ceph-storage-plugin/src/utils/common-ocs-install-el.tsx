@@ -1,5 +1,6 @@
 import * as React from 'react';
-import { Alert, FormGroup, Switch } from '@patternfly/react-core';
+import * as cx from 'classnames';
+import { Alert, FormGroup, Switch, AlertProps, AlertVariant } from '@patternfly/react-core';
 import { ListPage } from '@console/internal/components/factory';
 import { NodeModel } from '@console/internal/models';
 import { FieldLevelHelp } from '@console/internal/components/utils';
@@ -8,6 +9,26 @@ import { TechPreviewBadge } from '@console/shared';
 import { OCSStorageClassDropdown } from '../components/modals/storage-class-dropdown';
 import { storageClassTooltip } from '../constants/ocs-install';
 import '../components/ocs-install/ocs-install.scss';
+
+export const VALIDATIONS = {
+  MINIMAL: {
+    variant: AlertVariant.warning,
+    title: (
+      <div className="ceph-minimal-deployment-alert__header">
+        A minimal cluster deployment will be performed.
+        <TechPreviewBadge />
+      </div>
+    ),
+    text:
+      'The selected nodes do not match the OCS storage cluster recommended requirements of an aggregated 42 CPUs and 102 GiB of RAM. If the selection cannot be modified, a minimal cluster will be deployed.',
+  },
+};
+
+export const Validation: React.FC<AlertProps> = ({ className, variant, title, children }) => (
+  <Alert className={cx('co-alert', className)} variant={variant} title={title} isInline>
+    {children}
+  </Alert>
+);
 
 export const OCSAlert = () => (
   <Alert
@@ -45,7 +66,7 @@ export const SelectNodesSection: React.FC<SelectNodesSectionProps> = ({
 }) => (
   <>
     <FormGroup fieldId="select-nodes">
-      <p>
+      <p id="select-nodes">
         {children} It is recommended to start with at least 14 CPUs and 34 GiB per node.
         <div>
           The selected nodes will be labeled with{' '}
@@ -54,7 +75,6 @@ export const SelectNodesSection: React.FC<SelectNodesSectionProps> = ({
           remaining nodes will be used by OpenShift as scheduling targets for OCS scaling.
         </div>
       </p>
-
       <ListPage
         kind={NodeModel.kind}
         showTitle={false}

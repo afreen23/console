@@ -12,7 +12,7 @@ import {
 } from '@console/internal/components/utils';
 import { HOSTNAME_LABEL_KEY } from '@console/local-storage-operator-plugin/src/constants';
 import { getNodeCPUCapacity, getNodeAllocatableMemory } from '@console/shared';
-import { ocsTaint, NO_PROVISIONER, AVAILABLE } from '../constants';
+import { ocsTaint, NO_PROVISIONER, AVAILABLE, ZONE_LABEL, MINIMUM_NODES } from '../constants';
 import { Discoveries } from '../components/ocs-install/attached-devices/create-sc/state';
 
 export const hasTaints = (node: NodeKind) => {
@@ -57,20 +57,29 @@ export const getAssociatedNodes = (pvs: K8sResourceKind[]): string[] => {
   return Array.from(nodes);
 };
 
-export const shouldDeployAsMinimal = (nodes: NodeKind[]) => {
-  const { totalCPU, totalMemory } = nodes.reduce(
-    (acc, curr) => {
-      const cpus = humanizeCpuCores(Number(getNodeCPUCapacity(curr))).value;
-      const memoryRaw = getNodeAllocatableMemory(curr);
-      const memory = humanizeBinaryBytes(convertToBaseValue(memoryRaw)).value;
-      acc.totalCPU += cpus;
-      acc.totalMemory += memory;
-      return acc;
+export const getNodeInfo = (nodes: NodeKind[]) =>
+  nodes.reduce(
+    (data, node) => {
+      const cpus = humanizeCpuCores(Number(getNodeCPUCapacity(node))).value;
+      const memoryRaw = getNodeAllocatableMemory(node);
+      const memory = convertToBaseValue(memoryRaw);
+      const zone = node.metadata.labels?.[ZONE_LABEL];
+      data.cpu += cpus;
+      data.memory += memory;
+      if (zone) data.zone++;
+      return data;
     },
     {
-      totalCPU: 0,
-      totalMemory: 0,
+      cpu: 0,
+      memory: 0,
+      zone: 0,
     },
   );
-  return totalCPU < 30 || totalMemory < 72;
+
+export const shouldDeployAsMinimal = (cpu: number, memory: number, nodesCount: number): boolean => {
+  if (nodesCount >= MINIMUM_NODES) {
+    const humanizedMem = humanizeBinaryBytes(memory, null, 'GiB').value;
+    return cpu < 30 || humanizedMem < 72;
+  }
+  return false;
 };

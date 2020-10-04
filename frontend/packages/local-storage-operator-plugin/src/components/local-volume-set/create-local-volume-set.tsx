@@ -17,7 +17,7 @@ import { LocalVolumeSetModel } from '../../models';
 import { LocalVolumeSetHeader, LocalVolumeSetInner } from './local-volume-set-inner';
 import { reducer, initialState } from './state';
 import { nodeResource } from '../../constants/resources';
-import { hasTaints, createMapForHostNames } from '../../utils';
+import { hasNoTaints, createMapForHostNames } from '../../utils';
 import { getLocalVolumeSetRequestData } from './local-volume-set-request-data';
 
 import './create-local-volume-set.scss';
@@ -36,7 +36,9 @@ const CreateLocalVolumeSet: React.FC = withHandlePromise<
     if ((nodeLoadError || nodeData.length === 0) && nodeLoaded) {
       dispatch({ type: 'setNodeNamesForLVS', value: [] });
     } else if (nodeLoaded) {
-      const allNodeNames = nodeData.filter((node) => !hasTaints(node)).map((node) => getName(node));
+      const allNodeNames = nodeData
+        .filter((node) => hasNoTaints(node))
+        .map((node) => getName(node));
       const hostNames = createMapForHostNames(nodeData);
       dispatch({ type: 'setNodeNamesForLVS', value: allNodeNames });
       dispatch({ type: 'setHostNamesMapForLVS', value: hostNames });

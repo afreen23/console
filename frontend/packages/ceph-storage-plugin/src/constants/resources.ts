@@ -7,7 +7,7 @@ import { SubscriptionModel } from '@console/operator-lifecycle-manager';
 import { LocalVolumeDiscoveryResult } from '@console/local-storage-operator-plugin/src/models';
 import { LOCAL_STORAGE_NAMESPACE } from '@console/local-storage-operator-plugin/src/constants';
 import { CephClusterModel, CephBlockPoolModel } from '../models';
-import { CEPH_STORAGE_NAMESPACE } from '.';
+import { CEPH_STORAGE_NAMESPACE } from './common';
 import { CAPACITY_USAGE_QUERIES, StorageDashboardQuery } from './queries';
 
 export const cephClusterResource: FirehoseResource = {

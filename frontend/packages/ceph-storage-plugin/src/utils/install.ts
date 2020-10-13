@@ -12,8 +12,14 @@ import {
 } from '@console/internal/components/utils';
 import { HOSTNAME_LABEL_KEY } from '@console/local-storage-operator-plugin/src/constants';
 import { getNodeCPUCapacity, getNodeAllocatableMemory } from '@console/shared';
-import { ocsTaint, NO_PROVISIONER, AVAILABLE, ZONE_LABEL, MINIMUM_NODES } from '../constants';
-import { Discoveries } from '../components/ocs-install/attached-devices/create-sc/state';
+import {
+  ocsTaint,
+  NO_PROVISIONER,
+  AVAILABLE,
+  ZONE_LABEL,
+  MINIMUM_NODES,
+} from '../constants/common';
+import { Discoveries } from '../components/create-/attached-devices-mode/create-sc/state';
 
 export const hasTaints = (node: NodeKind) => {
   return !_.isEmpty(node.spec?.taints);

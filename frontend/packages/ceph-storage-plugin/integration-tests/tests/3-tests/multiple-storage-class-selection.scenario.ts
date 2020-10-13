@@ -4,7 +4,7 @@ import { K8sResourceKind } from '@console/internal/module/k8s';
 import { appHost } from '@console/internal-integration-tests/protractor.conf';
 import { click } from '@console/shared/src/test-utils/utils';
 import { DeviceSet } from '../../../src/types';
-import { OCS_INTERNAL_CR_NAME } from '../../../src/constants';
+import { OCS_INTERNAL_CR_NAME } from '../../../src/constants/common';
 import { getCurrentDeviceSetIndex } from '../../../src/utils/add-capacity';
 import { testEbsSC, testNoProvisionerSC } from '../../mocks/storage-class';
 import {

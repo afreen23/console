@@ -12,16 +12,16 @@ import { k8sPatch, StorageClassResourceKind } from '@console/internal/module/k8s
 import { getName, getRequestedPVCSize } from '@console/shared';
 import { OCSServiceModel } from '../../../models';
 import { getCurrentDeviceSetIndex } from '../../../utils/add-capacity';
-import { OSD_CAPACITY_SIZES } from '../../../utils/osd-size-dropdown';
-import { NO_PROVISIONER, OCS_DEVICE_SET_REPLICA } from '../../../constants';
+import { OSD_CAPACITY_SIZES } from '../../storage-cluster-install/osd-size-dropdown';
+import { NO_PROVISIONER, OCS_DEVICE_SET_REPLICA } from '../../../constants/common';
 import {
   requestedCapacityTooltip,
   storageClassTooltip,
   defaultRequestSize,
 } from '../../../constants/ocs-install';
 import { OCSStorageClassDropdown } from '../storage-class-dropdown';
-import { PVsAvailableCapacity } from '../../ocs-install/pvs-available-capacity';
-import { createDeviceSet } from '../../ocs-install/ocs-request-data';
+import { PVsAvailableCapacity } from '../../create-/pvs-available-capacity';
+import { createDeviceSet } from '../../create-/ocs-request-data';
 import { cephCapacityResource } from '../../../constants/resources';
 import { DeviceSet } from '../../../types';
 import './_add-capacity-modal.scss';

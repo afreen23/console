@@ -34,8 +34,8 @@ import {
 
 import { CephClusterKind, StoragePoolKind } from '../../../types';
 import { CephBlockPoolModel } from '../../../models';
-import { CEPH_STORAGE_NAMESPACE, OCS_DEVICE_REPLICA } from '../../../constants/index';
-import { PROGRESS_STATUS } from '../../../utils/storage-pool';
+import { CEPH_STORAGE_NAMESPACE, OCS_DEVICE_REPLICA } from '../../../constants/common';
+import { PROGRESS_STATUS } from '../../storage-class-form/storage-pool';
 import { SECOND } from '../../../../integration-tests/utils/consts';
 import {
   POOL_STATE,

@@ -43,7 +43,7 @@ import {
 } from '../../utils/helpers';
 import { ClusterMetadata } from '../../mocks/independent-external-cluster-data';
 import { testNoProvisionerSC } from '../../mocks/storage-class';
-import { MINIMUM_NODES } from '../../../src/constants';
+import { MINIMUM_NODES } from '../../../src/constants/common';
 import { goToInstalledOperators } from '../../views/add-capacity.view';
 
 const Installer = new InstallCluster();

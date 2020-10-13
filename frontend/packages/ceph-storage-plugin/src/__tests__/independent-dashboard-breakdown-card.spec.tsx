@@ -6,10 +6,10 @@ import DashboardCardHeader from '@console/shared/src/components/dashboard/dashbo
 import DashboardCardBody from '@console/shared/src/components/dashboard/dashboard-card/DashboardCardBody';
 import DashboardCardTitle from '@console/shared/src/components/dashboard/dashboard-card/DashboardCardTitle';
 import { Select } from '@patternfly/react-core';
-import { BreakdownCard } from '../components/independent-dashboard-page/breakdown-card';
+import { BreakdownCard } from '../components/dashboards/external-dashboard-page/breakdown-card';
 import { dashboardData } from '../__mocks__/independent-mode-dashboard-data';
-import { BreakdownCardBody } from '../components/dashboard-page/storage-dashboard/breakdown-card/breakdown-body';
-import { getSelectOptions } from '../components/dashboard-page/storage-dashboard/breakdown-card/breakdown-dropdown';
+import { BreakdownCardBody } from '../components/dashboards/breakdown-card/breakdown-body';
+import { getSelectOptions } from '../components/dashboards/breakdown-card/breakdown-dropdown';
 import { breakdownIndependentQueryMap } from '../constants/queries';
 
 describe('BreakdownCard', () => {

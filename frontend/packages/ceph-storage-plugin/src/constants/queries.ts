@@ -1,6 +1,6 @@
 import * as _ from 'lodash';
 import { ProjectModel, PodModel, StorageClassModel } from '@console/internal/models';
-import { STORAGE_CLASSES, PROJECTS, PODS } from '.';
+import { STORAGE_CLASSES, PROJECTS, PODS } from './common';
 
 export enum StorageDashboardQuery {
   CEPH_STATUS_QUERY = 'CEPH_STATUS_QUERY',

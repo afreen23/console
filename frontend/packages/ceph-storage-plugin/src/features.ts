@@ -18,7 +18,7 @@ import {
   RGW_PROVISIONER,
   SECOND,
   OCS_OPERATOR,
-} from './constants';
+} from './constants/common';
 import { StorageClusterKind } from './types';
 
 export const OCS_INDEPENDENT_FLAG = 'OCS_INDEPENDENT';

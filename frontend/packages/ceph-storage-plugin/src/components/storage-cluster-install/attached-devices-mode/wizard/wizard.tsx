@@ -38,7 +38,7 @@ import { nodesDiscoveriesResource } from '../../../../constants/resources';
 import { getTotalDeviceCapacity } from '../../../../utils/install';
 import { AVAILABLE, CreateStepsSC, MINIMUM_NODES } from '../../../../constants/common';
 import { CreateOCS } from '../create-internal-cluster';
-import '../attached-devices.scss';
+import '../install.scss';
 
 const makeAutoDiscoveryCall = (
   onNext: OnNextClick,

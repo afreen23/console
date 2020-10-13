@@ -14,7 +14,7 @@ import { CreateOCS } from './create-internal-cluster';
 import { LSOSubscriptionResource } from '../../../constants/resources';
 import { filterSCWithNoProv } from '../../../utils/install';
 import CreateSC from './wizard/wizard';
-import './attached-devices.scss';
+import './install.scss';
 
 export const CreateAttachedDevicesCluster: React.FC<CreateAttachedDevicesClusterProps> = ({
   match,

@@ -11,7 +11,7 @@ import { DiskListModal } from './disk-list';
 import { State, Action, Discoveries } from '../state';
 import { getTotalDeviceCapacity } from '../../../../../utils/install';
 import AttachedDevicesNodeTable from '../../node-list-table';
-import '../../attached-devices.scss';
+import '../../install.scss';
 
 export const DiscoveryDonutChart: React.FC<DiscoveryDonutChartProps> = ({ state, dispatch }) => {
   const [availableCapacityStr, setAvailableCapacityStr] = React.useState('');

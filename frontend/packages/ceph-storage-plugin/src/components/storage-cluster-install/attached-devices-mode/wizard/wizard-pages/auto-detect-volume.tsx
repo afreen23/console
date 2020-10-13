@@ -5,7 +5,7 @@ import {
   AutoDetectVolumeHeader,
 } from '@console/local-storage-operator-plugin/src/components/auto-detect-volume/auto-detect-volume-inner';
 import { State, Action } from '../state';
-import '../../attached-devices.scss';
+import '../../install.scss';
 
 export const AutoDetectVolume: React.FC<AutoDetectVolumeProps> = ({ state, dispatch }) => (
   <>

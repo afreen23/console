@@ -16,7 +16,7 @@ import {
   diskModeDropdownItems,
   allNodesSelectorTxt,
 } from '../../../../../constants/common';
-import '../../attached-devices.scss';
+import '../../install.scss';
 
 const makeLocalVolumeSetCall = (state: State, dispatch: React.Dispatch<Action>) => {
   dispatch({ type: 'setIsLoading', value: true });

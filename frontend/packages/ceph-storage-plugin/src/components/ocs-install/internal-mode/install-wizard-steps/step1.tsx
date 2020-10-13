@@ -124,7 +124,7 @@ export const StepOne: React.FC<StepOneProps> = ({ state, dispatch }) => {
             <TextContent>
               <Text data-test-id="nodes-selected">
                 {pluralize(nodesCount, 'node')} selected ({cpu} CPU and{' '}
-                {humanizeBinaryBytes(memory).string} on &nbsp;
+                {humanizeBinaryBytes(memory).string} on
                 {pluralize(zone, 'zone')})
               </Text>
             </TextContent>

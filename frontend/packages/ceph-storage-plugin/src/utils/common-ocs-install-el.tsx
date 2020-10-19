@@ -15,14 +15,14 @@ export type Validation = {
   title: React.ReactNode;
   text: string;
   variant?: keyof typeof AlertVariant;
-  link?: string;
-  linkText?: string;
+  children?: React.ReactNode;
 };
 
 enum ValidationType {
   'MINIMAL' = 'MINIMAL',
   'STORAGECLASS' = 'STORAGECLASS',
   'ALLREQUIREDFIELDS' = 'ALLREQUIREDFIELDS',
+  'MINIMUMNODES' = 'MINIMUMNODES',
 }
 
 export const VALIDATIONS: { [key in ValidationType]: Validation } = {
@@ -41,8 +41,7 @@ export const VALIDATIONS: { [key in ValidationType]: Validation } = {
     variant: AlertVariant.danger,
     title: 'Select a storage class to continue',
     text: `This is a required field. ${storageClassTooltip}`,
-    link: '/k8s/cluster/storageclasses/~new/form',
-    linkText: 'Create new storage class',
+    children: <Link to="/k8s/cluster/storageclasses/~new/form">Create new storage class</Link>,
   },
   [ValidationType.ALLREQUIREDFIELDS]: {
     variant: AlertVariant.danger,
@@ -50,17 +49,23 @@ export const VALIDATIONS: { [key in ValidationType]: Validation } = {
     text:
       'In order to create the storage cluster, you must set the storage class, select at least 3 nodes (preferably in 3 different zones) and meet the minimum and recommended requirement',
   },
+  [ValidationType.MINIMUMNODES]: {
+    variant: AlertVariant.danger,
+    title: 'Minimum Node Requirement',
+    text:
+      'The OCS Storage cluster require a minimum of 3 nodes for the initial deployment. Please choose a different storage class or go to create a new volume set that matches the minimum node requirement.',
+  },
 };
 
 export const ValidationMessage: React.FC<{
   className?: string;
   validation: Validation;
 }> = ({ className, validation }) => {
-  const { variant = AlertVariant.info, title, text, link, linkText } = validation;
+  const { variant = AlertVariant.info, title, text, children } = validation;
   return (
     <Alert className={cx('co-alert', className)} variant={variant} title={title} isInline>
       <p>{text}</p>
-      {link && linkText && <Link to={link}>{linkText}</Link>}
+      {children}
     </Alert>
   );
 };

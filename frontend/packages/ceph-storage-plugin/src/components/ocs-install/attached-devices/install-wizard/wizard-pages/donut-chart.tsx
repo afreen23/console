@@ -10,7 +10,7 @@ import { getNodes } from '@console/local-storage-operator-plugin/src/utils';
 import { DiskListModal } from './disk-list';
 import { State, Action, Discoveries } from '../state';
 import { getTotalDeviceCapacity } from '../../../../../utils/install';
-import AttachedDevicesNodeTable from '../../sc-node-list';
+import AttachedDevicesNodeTable from '../../node-table';
 import '../../attached-devices.scss';
 
 export const DiscoveryDonutChart: React.FC<DiscoveryDonutChartProps> = ({ state, dispatch }) => {

@@ -13,7 +13,7 @@ import {
 import { HOSTNAME_LABEL_KEY } from '@console/local-storage-operator-plugin/src/constants';
 import { getNodeCPUCapacity, getNodeAllocatableMemory } from '@console/shared';
 import { ocsTaint, NO_PROVISIONER, AVAILABLE, MINIMUM_NODES, ZONE_LABELS } from '../constants';
-import { Discoveries } from '../components/ocs-install/attached-devices/create-sc/state';
+import { Discoveries } from '../components/ocs-install/attached-devices/install-wizard/state';
 
 export const hasNoTaints = (node: NodeKind) => {
   return _.isEmpty(node.spec?.taints);

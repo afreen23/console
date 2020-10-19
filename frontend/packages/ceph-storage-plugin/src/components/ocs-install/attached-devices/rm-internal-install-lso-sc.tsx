@@ -28,7 +28,7 @@ import {
   OCS_DEVICE_SET_REPLICA,
 } from '../../../constants';
 import { OCSServiceModel } from '../../../models';
-import AttachedDevicesNodeTable from './sc-node-list';
+import AttachedDevicesNodeTable from './node-table';
 import { PVsAvailableCapacity } from '../pvs-available-capacity';
 import {
   OCS_CONVERGED_FLAG,
@@ -163,7 +163,7 @@ export const CreateOCS = withHandlePromise<CreateOCSProps & HandlePromiseProps>(
 
   return (
     <>
-      <OCSAlert />
+      <OCSAlert /> {/* @TODO: */}
       <Form className="co-m-pane__body-group">
         <StorageClassSection handleStorageClass={handleStorageClass} filterSC={onlyNoProvSC}>
           <PVsAvailableCapacity
@@ -197,7 +197,7 @@ export const CreateOCS = withHandlePromise<CreateOCSProps & HandlePromiseProps>(
               <Button
                 component="a"
                 variant="link"
-                onClick={goToCreateSCUI}
+                onClick={goToCreateSCUI} // @TODO:
                 className="ceph-ocs-install__create-new-sc-btn"
               >
                 Create new volume set instance
@@ -212,7 +212,7 @@ export const CreateOCS = withHandlePromise<CreateOCSProps & HandlePromiseProps>(
               type="button"
               variant="primary"
               onClick={submit}
-              isDisabled={(filteredNodes?.length ?? 0) < MINIMUM_NODES}
+              isDisabled={(filteredNodes?.length ?? 0) < MINIMUM_NODES} // @TODO:
             >
               Create
             </Button>

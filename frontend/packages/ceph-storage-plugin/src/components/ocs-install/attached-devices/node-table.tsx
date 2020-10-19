@@ -8,11 +8,11 @@ import {
   getNodeAllocatableMemory,
 } from '@console/shared';
 import { humanizeCpuCores, ResourceLink } from '@console/internal/components/utils/';
-import { Table } from '@console/internal/components/factory';
+import { Table, TableProps } from '@console/internal/components/factory';
 import { NodeKind } from '@console/internal/module/k8s';
 import { getConvertedUnits } from '../../../utils/install';
 import { getColumns } from '../node-list';
-import { GetRows, NodeTableProps } from '../types';
+import { GetRows } from '../types';
 import '../ocs-install.scss';
 
 const getRows: GetRows = ({ componentProps, customData }) => {
@@ -58,23 +58,29 @@ const getRows: GetRows = ({ componentProps, customData }) => {
   });
 
   if (setNodes && !_.isEqual(filteredData, nodes)) {
+    // @TODO: remove this -
     setNodes(filteredData);
   }
 
   return rows;
 };
 
-const AttachedDevicesNodeTable: React.FC<NodeTableProps> = (props) => (
-  <div className="ceph-node-list__max-height ceph-ocs-install__node-list">
-    <Table
-      aria-label="Node Table"
-      data-test-id="attached-devices-nodes-table"
-      {...props}
-      Rows={getRows}
-      Header={getColumns}
-      virtualize={false}
-    />
-  </div>
-);
+const AttachedDevicesNodeTable: React.FC<TableProps> = (props) => {
+  const { filteredNodes } = props.customData;
+
+  return (
+    <div className="ceph-node-list__max-height ceph-ocs-install__node-list">
+      <Table
+        {...props}
+        aria-label="Node Table"
+        data-test-id="attached-devices-nodes-table"
+        data={filteredNodes.length ? props.data : []}
+        Rows={getRows}
+        Header={getColumns}
+        virtualize={false}
+      />
+    </div>
+  );
+};
 
 export default AttachedDevicesNodeTable;

@@ -24,7 +24,6 @@ import {
   RequireCreatePermission,
 } from '../utils';
 import { FilterToolbar } from '../filter-toolbar';
-import { OSDSizeDropdown } from '@console/ceph-storage-plugin/src/utils/osd-size-dropdown';
 
 /** @type {React.SFC<{disabled?: boolean, label?: string, onChange: (value: string) => void;, defaultValue?: string, value?: string, placeholder?: string, autoFocus?: boolean, onFocus?:any, name?:string, id?: string, onKeyDown?: any, parentClassName?: string }}>} */
 export const TextFilter = (props) => {

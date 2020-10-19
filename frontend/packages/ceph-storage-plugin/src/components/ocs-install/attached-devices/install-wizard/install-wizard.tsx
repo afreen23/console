@@ -34,10 +34,13 @@ import {
 import { initialState, reducer, State, Action, Discoveries, OnNextClick } from './state';
 import { AutoDetectVolume } from './wizard-pages/auto-detect-volume';
 import { CreateLocalVolumeSet } from './wizard-pages/create-local-volume-set';
+import { StorageAndNodes } from './wizard-pages/storage-and-nodes';
+import { Configure } from './wizard-pages/configure';
+import { ReviewAndCreate } from './wizard-pages/review-and-create';
 import { nodesDiscoveriesResource } from '../../../../constants/resources';
 import { getTotalDeviceCapacity } from '../../../../utils/install';
 import { AVAILABLE, CreateStepsSC, MINIMUM_NODES } from '../../../../constants';
-import { CreateOCS } from '../install-lso-sc';
+
 import '../attached-devices.scss';
 
 const makeAutoDiscoveryCall = (
@@ -96,12 +99,15 @@ const makeAutoDiscoveryCall = (
     });
 };
 
-const CreateSC: React.FC<CreateSCProps> = ({ match }) => {
+export const AttachedDevicesClusterWizard: React.FC<CreateSCProps> = ({ match }) => {
   const [state, dispatch] = React.useReducer(reducer, initialState);
   const [discoveriesData, discoveriesLoaded, discoveriesLoadError] = useK8sWatchResource<
     K8sResourceKind[]
   >(nodesDiscoveriesResource);
   const [showInfoAlert, setShowInfoAlert] = React.useState(true);
+  const [inProgress, setInProgress] = React.useState(false);
+  const [errorMessage, setErrorMessage] = React.useState('');
+  const enableCreateStorageClass = true;
 
   React.useEffect(() => {
     if (discoveriesLoaded && !discoveriesLoadError && discoveriesData.length) {
@@ -155,17 +161,31 @@ const CreateSC: React.FC<CreateSCProps> = ({ match }) => {
     {
       id: CreateStepsSC.DISCOVER,
       name: 'Discover Disks',
+      canJumpTo: enableCreateStorageClass,
       component: <AutoDetectVolume state={state} dispatch={dispatch} />,
     },
     {
       id: CreateStepsSC.STORAGECLASS,
       name: 'Create Storage Class',
+      canJumpTo: enableCreateStorageClass,
       component: <CreateLocalVolumeSet dispatch={dispatch} state={state} />,
     },
     {
-      id: CreateStepsSC.STORAGECLUSTER,
-      name: 'Create Storage Cluster',
-      component: <CreateOCS match={match} />,
+      id: CreateStepsSC.STORAGEANDNODES,
+      name: 'Storage and Nodes',
+      component: <StorageAndNodes dispatch={dispatch} state={state} />,
+    },
+    {
+      id: CreateStepsSC.CONFIGURE,
+      name: 'Configure',
+      component: <Configure dispatch={dispatch} state={state} />,
+    },
+    {
+      id: CreateStepsSC.REVIEWANDCREATE,
+      name: 'Review and Create',
+      component: (
+        <ReviewAndCreate errorMessage={errorMessage} inProgress={inProgress} state={state} />
+      ),
     },
   ];
 
@@ -269,5 +289,3 @@ const CreateSC: React.FC<CreateSCProps> = ({ match }) => {
 type CreateSCProps = {
   match: RouterMatch<{ appName: string; ns: string }>;
 };
-
-export default CreateSC;

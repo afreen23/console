@@ -41,7 +41,7 @@ import {
 import { State, Action } from '../state';
 import AttachedDevicesNodeTable from '../../sc-node-list';
 import { PVsAvailableCapacity } from '../../../pvs-available-capacity';
-import { getSCAvailablePVs } from '../../../../../selectors';
+import { getDeviceSetSpec, getSCAvailablePVs } from '../../../../../selectors';
 import { nodeResource, pvResource } from '../../../../../constants/resources';
 import { GUARDED_FEATURES } from '../../../../../features';
 
@@ -91,13 +91,16 @@ export const StorageAndNodes: React.FC<StorageAndNodesProps> = ({ state, dispatc
   const zonesCount: number = zones.size;
 
   const hasStretchClusterChecked = isArbiterSupported && stretchClusterChecked;
+  const hasFlexibleScalingEnabled = isFlexibleScalingSupported && enableFlexibleScaling;
+
+  const { replica } = getDeviceSetSpec(hasFlexibleScalingEnabled, hasStretchClusterChecked);
 
   const validations: ValidationType[] = validate(
     scName,
     enableMinimal,
     nodes,
     hasStretchClusterChecked,
-    isFlexibleScalingSupported && enableFlexibleScaling,
+    hasFlexibleScalingEnabled,
   );
 
   if (!pvLoadError && pvData.length && pvLoaded) {
@@ -166,9 +169,7 @@ export const StorageAndNodes: React.FC<StorageAndNodesProps> = ({ state, dispatc
               hideClassName="ocs-install-wizard__storage-class-label"
             />
             <PVsAvailableCapacity /* @TODO(refactor): Pv data can be passed directly to this component */
-              replica={
-                hasStretchClusterChecked ? OCS_DEVICE_SET_ARBITER_REPLICA : OCS_DEVICE_SET_REPLICA
-              }
+              replica={replica}
               data-test-id="ceph-ocs-install-pvs-available-capacity"
               storageClass={storageClass}
             />

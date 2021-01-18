@@ -14,11 +14,7 @@ import { getName, getRequestedPVCSize } from '@console/shared';
 import { OCSServiceModel } from '../../../models';
 import { getCurrentDeviceSetIndex } from '../../../utils/add-capacity';
 import { OSD_CAPACITY_SIZES } from '../../../utils/osd-size-dropdown';
-import {
-  NO_PROVISIONER,
-  OCS_DEVICE_SET_ARBITER_REPLICA,
-  OCS_DEVICE_SET_REPLICA,
-} from '../../../constants';
+import { NO_PROVISIONER } from '../../../constants';
 import {
   requestedCapacityTooltip,
   storageClassTooltip,
@@ -28,6 +24,7 @@ import { OCSStorageClassDropdown } from '../storage-class-dropdown';
 import { PVsAvailableCapacity } from '../../ocs-install/pvs-available-capacity';
 import { createDeviceSet } from '../../ocs-install/ocs-request-data';
 import { cephCapacityResource } from '../../../constants/resources';
+import { getDeviceSetSpec } from '../../../selectors';
 import { DeviceSet } from '../../../types';
 import './_add-capacity-modal.scss';
 
@@ -54,9 +51,10 @@ export const AddCapacityModal = (props: AddCapacityModalProps) => {
   const isNoProvionerSC: boolean = storageClass?.provisioner === NO_PROVISIONER;
   const selectedSCName: string = getName(storageClass);
   const deviceSetIndex: number = getCurrentDeviceSetIndex(deviceSets, selectedSCName);
-  const hasFlexibleScaling = ocsConfig?.spec?.flexibleScaling;
-  const isArbiterEnabled: boolean = ocsConfig?.spec?.arbiter?.enable;
-  const replica = isArbiterEnabled ? OCS_DEVICE_SET_ARBITER_REPLICA : OCS_DEVICE_SET_REPLICA;
+  const { replica, count, portable = !isNoProvionerSC } = getDeviceSetSpec(
+    ocsConfig?.spec?.flexibleScaling,
+    ocsConfig?.spec?.arbiter?.enable,
+  );
   const name = getName(ocsConfig);
 
   let currentCapacity: React.ReactNode;
@@ -88,28 +86,14 @@ export const AddCapacityModal = (props: AddCapacityModalProps) => {
       value: null,
     };
     const osdSize = isNoProvionerSC ? defaultRequestSize.BAREMETAL : osdSizeWithUnit;
-    let portable = !isNoProvionerSC;
-    let deviceSetReplica = replica;
-    let deviceSetCount = isArbiterEnabled ? 2 : 1;
-    if (hasFlexibleScaling) {
-      portable = false;
-      deviceSetReplica = 1;
-      deviceSetCount = 3;
-    }
     if (deviceSetIndex === -1) {
       patch.op = 'add';
       patch.path = `/spec/storageDeviceSets/-`;
-      patch.value = createDeviceSet(
-        selectedSCName,
-        osdSize,
-        portable,
-        deviceSetReplica,
-        deviceSetCount,
-      );
+      patch.value = createDeviceSet(selectedSCName, osdSize, portable, replica, count);
     } else {
       patch.op = 'replace';
       patch.path = `/spec/storageDeviceSets/${deviceSetIndex}/count`;
-      patch.value = deviceSets[deviceSetIndex].count + deviceSetCount;
+      patch.value = deviceSets[deviceSetIndex].count + count;
     }
 
     if (!selectedSCName) {
@@ -132,7 +116,7 @@ export const AddCapacityModal = (props: AddCapacityModalProps) => {
     <form onSubmit={submit} className="modal-content modal-content--no-inner-scroll">
       <ModalTitle>{t('ceph-storage-plugin~Add Capacity')}</ModalTitle>
       <ModalBody>
-        <Trans t={t} ns="ceph-storage-plugin" values={{ name }}>
+        <Trans t={t} ns="ceph-storage-plugin">
           Adding capacity for <strong>{{ name }}</strong>, may increase your expenses.
         </Trans>
         <div className="ceph-add-capacity__modal">

@@ -3,7 +3,7 @@ import { Alert } from '@console/internal/components/monitoring/types';
 import { K8sResourceKind } from '@console/internal/module/k8s';
 import { FirehoseResult, convertToBaseValue } from '@console/internal/components/utils';
 import { cephStorageProvisioners } from '@console/shared/src/utils';
-import { OCS_OPERATOR } from '../constants';
+import { CLUSTER_REPLICA, OCS_OPERATOR } from '../constants';
 
 export const cephStorageLabel = 'cluster.ocs.openshift.io/openshift-storage';
 
@@ -72,3 +72,16 @@ export const calcPVsCapacity = (pvs: K8sResourceKind[]): number =>
 
 export const getSCAvailablePVs = (pvsData: K8sResourceKind[], sc: string): K8sResourceKind[] =>
   pvsData.filter((pv) => getPVStorageClass(pv) === sc && pv.status.phase === status.AVAILABLE);
+
+export const getDeviceSetSpec = (
+  isFlexibleScaling: boolean,
+  isArbiter?: boolean,
+): { replica: number; count: number; portable?: boolean } => {
+  if (isFlexibleScaling) {
+    return { replica: CLUSTER_REPLICA.FLEXIBLE_SCALING, count: 3, portable: false };
+  }
+  if (isArbiter) {
+    return { replica: CLUSTER_REPLICA.ARBITER, count: 2 };
+  }
+  return { replica: CLUSTER_REPLICA.DEFAULT, count: 1 };
+};

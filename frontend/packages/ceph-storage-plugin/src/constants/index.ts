@@ -58,3 +58,9 @@ export enum CLUSTER_STATUS {
   READY = 'Ready',
   PROGRESSING = 'Progressing',
 }
+
+export enum CLUSTER_REPLICA {
+  ARBITER = 4,
+  FLEXIBLE_SCALING = 1,
+  DEFAULT = 3,
+}

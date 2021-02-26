@@ -6,6 +6,7 @@ import {
   SecretKind,
 } from '@console/internal/module/k8s';
 import { TableProps } from '@console/internal/components/factory';
+import { DiskMetadata } from 'packages/local-storage-operator-plugin/src/components/disks-list/types';
 
 type NodeTableRow = {
   cells: IRow['cells'];
@@ -202,3 +203,7 @@ export type ResourceConstraints = {
     memory: string;
   };
 };
+
+export type DiscoveredDisk = {
+  node: string;
+} & DiskMetadata;

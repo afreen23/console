@@ -1,6 +1,6 @@
 import * as _ from 'lodash';
 import { NodeKind, MatchExpression } from '@console/internal/module/k8s';
-import { HostNamesMap } from '../components/auto-detect-volume/types';
+import { HostNamesMap } from '../components/local-volume-discovery/types';
 import { getName } from '@console/shared';
 import { HOSTNAME_LABEL_KEY, LABEL_OPERATOR, ZONE_LABELS } from '../constants';
 
@@ -16,7 +16,10 @@ export const getNodes = (
 ): string[] => (showNodes ? selectedNodes : allNodes);
 
 export const getNodeSelectorTermsIndices = (
-  nodeSelectorTerms: { matchExpressions: MatchExpression[]; matchFields: MatchExpression[] }[] = [],
+  nodeSelectorTerms: {
+    matchExpressions: MatchExpression[];
+    matchFields?: MatchExpression[];
+  }[] = [],
 ) => {
   let [selectorIndex, expIndex] = [-1, -1];
 
@@ -44,3 +47,10 @@ export const getHostNames = (nodes: string[], hostNamesMap: HostNamesMap) => {
     return [...acc, hostNamesMap[node]];
   }, []);
 };
+
+export const getNodesByHostNameLabel = (nodes: NodeKind[]): Set<string> =>
+  nodes.reduce(
+    (names: Set<string>, node: NodeKind) =>
+      names.add(node.metadata?.labels?.['kubernetes.io/hostname']),
+    new Set<string>(),
+  );

@@ -39,23 +39,21 @@ export const LocalVolumeDiscoveryBody: React.FC<LocalVolumeDiscoveryBodyProps> =
             name="nodes-selection"
             id="auto-detect-volume-radio-all-nodes"
             className="lso-lvd-body__all-nodes-radio--padding"
-            value="allNodes"
             onChange={setShowSelectNodes}
             description={t(
               'lso-plugin~Selecting all nodes will discover for available disks storage on all nodes.',
             )}
-            checked={!showSelectNodes}
+            isChecked={!showSelectNodes}
           />
           <Radio
             label={t('lso-plugin~Select nodes')}
             name="nodes-selection"
             id="auto-detect-volume-radio-select-nodes"
-            value="selectedNodes"
             onChange={setShowSelectNodes}
             description={t(
               'lso-plugin~Selecting nodes allows you to limit the discovery for available disks to specific nodes.',
             )}
-            checked={showSelectNodes}
+            isChecked={showSelectNodes}
           />
         </div>
       </FormGroup>

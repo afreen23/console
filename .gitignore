@@ -18,4 +18,5 @@ cypress-a11y-report.json
 /frontend/@types/console/generated
 /frontend/gui_test_screenshots
 /frontend/package-lock.json
-/frontend/po-files
+/frontend/po-file
+/frontend/@types/gql

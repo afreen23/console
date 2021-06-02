@@ -109,7 +109,7 @@ export const LocalVolumeSetBody: React.FC<LocalVolumeSetBodyProps> = ({
             value="allNodes"
             onChange={toggleShowNodesList}
             description={allNodesHelpTxt}
-            checked={!state.lvsIsSelectNodes}
+            isChecked={!state.lvsIsSelectNodes}
           />
           <Radio
             label={t('lso-plugin~Select nodes')}
@@ -120,7 +120,7 @@ export const LocalVolumeSetBody: React.FC<LocalVolumeSetBodyProps> = ({
             description={t(
               'lso-plugin~Selecting all nodes will use the available disks that match the selected filters only on selected nodes.',
             )}
-            checked={state.lvsIsSelectNodes}
+            isChecked={state.lvsIsSelectNodes}
           />
         </div>
       </FormGroup>

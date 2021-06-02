@@ -95,8 +95,24 @@ export const SelectedCapacity: React.FC<SelectedCapacityProps> = ({ ns, state, d
   >(lvdResultResource);
   const [showNodeList, setShowNodeList] = React.useState(false);
   const [showDiskList, setShowDiskList] = React.useState(false);
-
+  let chartDisks: DiscoveredDisk[] = [];
   let filteredDisks: DiscoveredDisk[] = [];
+
+  React.useEffect(() => {
+    if (!lvdResultsLoadError && lvdResultsLoaded && allLvsNodes.length === lvdResults.length) {
+      setIsLoadingDonutChart(false);
+    }
+  }, [allLvsNodes.length, lvdResults.length, lvdResultsLoadError, lvdResultsLoaded]);
+
+  React.useEffect(() => {
+    const chartNodes: Set<string> = chartDisks.reduce(
+      (nodes: Set<string>, disk: DiscoveredDisk) => nodes.add(disk.node),
+      new Set(),
+    );
+    if (!_.isEqual(chartNodes, state.chartNodes)) {
+      dispatch({ type: 'setChartNodes', value: chartNodes });
+    }
+  }, [chartDisks, dispatch, state.chartNodes]);
 
   const minSize: number = state.minDiskSize
     ? Number(convertToBaseValue(`${state.minDiskSize} ${state.diskSizeUnit}`))
@@ -107,7 +123,6 @@ export const SelectedCapacity: React.FC<SelectedCapacityProps> = ({ ns, state, d
 
   const allDiscoveredDisks: DiscoveredDisk[] = React.useMemo(() => {
     if (!lvdResultsLoadError && lvdResultsLoaded && allLvsNodes.length === lvdResults.length) {
-      setIsLoadingDonutChart(false);
       return createDiscoveredDiskData(lvdResults);
     }
     return [];
@@ -123,17 +138,9 @@ export const SelectedCapacity: React.FC<SelectedCapacityProps> = ({ ns, state, d
     );
   }
 
-  const chartDisks = selectedLvsNodes.length
+  chartDisks = selectedLvsNodes.length
     ? filteredDisks.filter((disk: DiscoveredDisk) => selectedLvsNodes.includes(disk.node))
     : filteredDisks;
-  const chartNodes: Set<string> = chartDisks.reduce(
-    (nodes: Set<string>, disk: DiscoveredDisk) => nodes.add(disk.node),
-    new Set(),
-  );
-
-  if (!_.isEqual(chartNodes, state.chartNodes)) {
-    dispatch({ type: 'setChartNodes', value: chartNodes });
-  }
 
   const totalCapacity = getTotalCapacity(allDiscoveredDisks);
   const selectedCapacity = getTotalCapacity(chartDisks);
@@ -155,13 +162,13 @@ export const SelectedCapacity: React.FC<SelectedCapacityProps> = ({ ns, state, d
       <div className="ceph-ocs-install__stats">
         <Button
           variant="link"
-          isDisabled={!chartNodes.size}
+          isDisabled={!state.chartNodes.size}
           onClick={() => setShowNodeList(true)}
           className="ceph-ocs-install__node-list-btn"
         >
           {t('ceph-storage-plugin~{{nodes, number}} Node', {
-            nodes: chartNodes.size,
-            count: chartNodes.size,
+            nodes: state.chartNodes.size,
+            count: state.chartNodes.size,
           })}
         </Button>
         <div className="ceph-ocs-install_stats--divider" />
@@ -208,7 +215,7 @@ export const SelectedCapacity: React.FC<SelectedCapacityProps> = ({ ns, state, d
       <NodeListModal
         showNodeList={showNodeList}
         onCancel={() => setShowNodeList(false)}
-        filteredNodes={[...chartNodes]}
+        filteredNodes={[...state.chartNodes]}
       />
     </div>
   );

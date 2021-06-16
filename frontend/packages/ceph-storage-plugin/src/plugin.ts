@@ -141,9 +141,9 @@ const plugin: Plugin<ConsumedExtensions> = [
       exact: true,
       path: `/k8s/ns/:ns/${ClusterServiceVersionModel.plural}/:appName/${apiObjectRef}/~new`,
       loader: () =>
-        import('./components/ocs-install/install-page' /* webpackChunkName: "install-page" */).then(
-          (m) => m.default,
-        ),
+        import(
+          './components/create-storage-system/wizard' /* webpackChunkName: "install-page" */
+        ).then((m) => m.default),
     },
   },
   {
